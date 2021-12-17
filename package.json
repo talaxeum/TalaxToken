@@ -1,0 +1,29 @@
+{
+  "name": "talaxtoken",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evan533/TalaxToken.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/evan533/TalaxToken/issues"
+  },
+  "homepage": "https://github.com/evan533/TalaxToken#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.4.0",
+    "@truffle/hdwallet-provider": "^2.0.0",
+    "chai": "^4.3.4",
+    "truffle-assertions": "^0.9.2"
+  }
+}
