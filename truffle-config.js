@@ -21,7 +21,7 @@
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 
 const fs = require("fs");
-const mnemonic = fs.readFileSync(".secret").toString().trim();
+const mnemonic = fs.readFileSync(".secret_ganache").toString().trim();
 
 module.exports = {
 	/**
@@ -43,7 +43,7 @@ module.exports = {
 		//
 		development: {
 			host: "127.0.0.1", 	// Localhost (default: none)
-			port: 8545, 		// Standard BSC port (default: none)
+			port: 7545, 		// Standard BSC port (default: none)
 			network_id: "*", 	// Any network (default: none)
 		},
 		testnet: {
@@ -106,13 +106,13 @@ module.exports = {
 			// version: "0.5.16", 		// A version or constraint - Ex. "^0.5.0"
 			version: "0.8.10", 		// Fetch exact version from solc-bin (default: truffle's version)
 			// docker: true,       		// Use "0.5.1" you've installed locally with docker (default: false)
-			// settings: {          	// See the solidity docs for advice about optimization and evmVersion
-			//  optimizer: {
-			//    enabled: false,
-			//    runs: 200
-			//  },
+			settings: {          	// See the solidity docs for advice about optimization and evmVersion
+			 optimizer: {
+			   enabled: true,
+			   runs: 200
+			 },
 			//  evmVersion: "byzantium"
-			// }
+			}
 		},
 	},
 

@@ -23,6 +23,7 @@ contract Stakable {
 		uint256 since;
 		// This claimable field is new and used to tell how big of a reward is currently available
 		uint256 claimable;
+		uint256 rewardAPY;
 		uint256 releaseTime;
 	}
 	/**
@@ -54,7 +55,6 @@ contract Stakable {
 	 */
 	mapping(address => uint256) internal stakes;
 
-	uint256 internal rewardAPY; // Change this rewardRate, default = 0.1%
 	/**
 	 * @notice Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable
 	 */
@@ -65,10 +65,6 @@ contract Stakable {
 		uint256 timestamp,
 		uint256 releaseTime
 	);
-
-	function _changeRewardRate(uint256 rewardRate_) internal {
-		rewardAPY = rewardRate_;
-	}
 
 	/**
 	 * @notice _addStakeholder takes care of adding a stakeholder to the stakeholders array
@@ -90,7 +86,11 @@ contract Stakable {
 	 * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
 	 * StakeID
 	 */
-	function _stake(uint256 _amount, uint256 _stakePeriod) internal {
+	function _stake(
+		uint256 _amount,
+		uint256 _stakePeriod,
+		uint256 _rewardRate
+	) internal {
 		// Simple check so that user does not stake 0
 		require(_amount > 0, "Cannot stake nothing");
 
@@ -109,10 +109,23 @@ contract Stakable {
 		// Use the index to push a new Stake
 		// push a newly created Stake with the current block timestamp.
 		stakeholders[index].address_stakes.push(
-			Stake(msg.sender, _amount, timestamp, 0, (_stakePeriod + timestamp))
+			Stake(
+				msg.sender,
+				_amount,
+				timestamp,
+				0,
+				_rewardRate,
+				(_stakePeriod + timestamp)
+			)
 		);
 		// Emit an event that the stake has occured
-		emit Staked(msg.sender, _amount, index, timestamp, (_stakePeriod + timestamp));
+		emit Staked(
+			msg.sender,
+			_amount,
+			index,
+			timestamp,
+			(_stakePeriod + timestamp)
+		);
 	}
 
 	function calculateStakeReward(Stake memory _current_stake)
@@ -128,8 +141,9 @@ contract Stakable {
 		// hours = Seconds / 3600 (seconds /3600) 3600 is an variable in Solidity names hours
 		// we then multiply each token by the hours staked , then divide by the rewardPerHour rate
 		return
-			(((block.timestamp - _current_stake.since) / 365 days) *
-				_current_stake.amount) * (rewardAPY / 100);
+			_current_stake.amount *
+			((_current_stake.rewardAPY / 100) *
+				((_current_stake.since - block.timestamp) / 365 days));
 	}
 
 	function calculateStakeDuration(Stake memory _current_stake)
@@ -137,7 +151,7 @@ contract Stakable {
 		view
 		returns (uint256)
 	{
-		return ((block.timestamp - _current_stake.since) / 365 days);
+		return ((block.timestamp - _current_stake.since) / 30 days);
 	}
 
 	/**
@@ -149,7 +163,7 @@ contract Stakable {
 	 */
 	function _withdrawStake(uint256 amount, uint256 index)
 		internal
-		returns (uint256,uint256)
+		returns (uint256, uint256)
 	{
 		// Grab user_index which is the index to use to grab the Stake[]
 		uint256 user_index = stakes[msg.sender];
@@ -186,7 +200,10 @@ contract Stakable {
 		return (amount, reward);
 	}
 
-	function _withdrawAllStake(uint256 index) internal returns (uint256, uint256) {
+	function _withdrawAllStake(uint256 index)
+		internal
+		returns (uint256, uint256)
+	{
 		// Grab user_index which is the index to use to grab the Stake[]
 		uint256 user_index = stakes[msg.sender];
 		Stake memory current_stake = stakeholders[user_index].address_stakes[
@@ -213,8 +230,8 @@ contract Stakable {
 		return (amount, reward);
 	}
 
-	function hasStake(address _staker)
-		public
+	function _hasStake(address _staker)
+		internal
 		view
 		returns (StakingSummary memory)
 	{
@@ -223,12 +240,14 @@ contract Stakable {
 			0,
 			stakeholders[stakes[_staker]].address_stakes
 		);
+		require(
+			summary.stakes.length != 0,
+			"This address does not have any stakes"
+		);
 
 		for (uint256 s = 0; s < summary.stakes.length; s += 1) {
 			uint256 availableReward = calculateStakeReward(summary.stakes[s]);
-			summary.stakes[s].claimable =
-				availableReward +
-				summary.stakes[s].amount;
+			summary.stakes[s].claimable = availableReward;
 			totalStakeAmount = totalStakeAmount + summary.stakes[s].amount;
 		}
 

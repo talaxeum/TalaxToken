@@ -3,7 +3,7 @@ bytecode.txt
 
 .prettierrc
 metamask.secret
-.secret
+.secret*
 node_modules/
 build/
 .DS_Store

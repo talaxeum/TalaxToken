@@ -60,28 +60,59 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_name = "TALAXEUM";
 		_symbol = "TALAX";
 		_decimals = 18;
-		_totalSupply = 21 * 1e7 * 10**18;
+		_totalSupply = 210 * 1e6 * 10**18;
 
-		_devPool = 42 * 1e6 * 10**18;
-		_strategicPartner = 10500000 * 10**18;
-		_totalSupply.sub(_devPool, "Cannot transfer more than total supply");
-		_totalSupply.sub(
-			_strategicPartner,
-			"Cannot transfer more than total supply"
-		);
+		// _publicSale = 42 * 1e6 * 10**18;
+		// _privateSale = 6993 * 1e3 * 10**18;
+		// _stakingReward = 17514 * 1e3 * 10**18;
+		// _liquidityReserve = 52500 * 1e3 * 10**18;
 
-		_privatePlacement = 6993000 * 10**18;
-		_teamAndProjectCoordinator = 31500000 * 10**18;
-		_totalSupply.sub(
-			_privatePlacement,
-			"Cannot transfer more than total supply"
-		);
-		_totalSupply.sub(
-			_teamAndProjectCoordinator,
-			"Cannot transfer more than total supply"
-		);
+		// _totalSupply = _totalSupply.sub(
+		// 	_publicSale,
+		// 	"Cannot transfer more than total supply"
+		// );
+		// _totalSupply = _totalSupply.sub(
+		// 	_privateSale,
+		// 	"Cannot transfer more than total supply"
+		// );
+		// _totalSupply = _totalSupply.sub(
+		// 	_stakingReward,
+		// 	"Cannot transfer more than total supply"
+		// );
+		// _totalSupply = _totalSupply.sub(
+		// 	_liquidityReserve,
+		// 	"Cannot transfer more than total supply"
+		// );
 
-		_balances[_msgSender()] = _totalSupply;
+		// devPoolLockedWallet = new Lockable(42 * 1e6 * 10**18, dev_pool_address);
+
+		// strategicPartnerLockedWallet = new Lockable(
+		// 	10500 * 1e3 * 10**18,
+		// 	strategic_partner_address
+		// );
+
+		// privatePlacementLockedWallet = new MultiLockable(6993 * 1e3 * 10**18);
+
+		// teamAndProjectCoordinatorLockedWallet = new MultiLockable(
+		// 	31500 * 1e3 * 10**18
+		// );
+
+		// _totalSupply = _totalSupply.sub(
+		// 	42 * 1e6 * 10**18,
+		// 	"Cannot transfer more than total supply"
+		// );
+		// _totalSupply = _totalSupply.sub(
+		// 	10500 * 1e3 * 10**18,
+		// 	"Cannot transfer more than total supply"
+		// );
+		// _totalSupply = _totalSupply.sub(
+		// 	6993 * 1e3 * 10**18,
+		// 	"Cannot transfer more than total supply"
+		// );
+		// _totalSupply = _totalSupply.sub(
+		// 	31500 * 1e3 * 10**18,
+		// 	"Cannot transfer more than total supply"
+		// );
 
 		// later divided by 100 to make percentage
 		_taxFee = 1;
@@ -91,20 +122,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_stakingPackage[180 days] = 7;
 		_stakingPackage[365 days] = 8;
 
-		devPoolLockedWallet = new Lockable(_devPool, dev_pool_address);
-
-		strategicPartnerLockedWallet = new Lockable(
-			_strategicPartner,
-			strategic_partner_address
-		);
-
-		privatePlacementLockedWallet = new MultiLockable(_privatePlacement);
-
-		teamAndProjectCoordinatorLockedWallet = new MultiLockable(
-			_teamAndProjectCoordinator
-		);
-
-		emit Transfer(address(0), _msgSender(), _totalSupply);
+		_balances[_msgSender()] = _totalSupply;
 	}
 
 	/**
@@ -140,6 +158,14 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 */
 	function totalSupply() external view override returns (uint256) {
 		return _totalSupply;
+	}
+
+	function stakingPackage(uint256 index) external view returns (uint256) {
+		return _stakingPackage[index];
+	}
+
+	function taxFee() external view returns (uint256) {
+		return _taxFee;
 	}
 
 	/**
@@ -556,10 +582,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		onlyOwner
 		returns (bool)
 	{
-		require(
-			amount_ != 0,
-			"Amount mint cannot be 0"
-		);
+		require(amount_ != 0, "Amount mint cannot be 0");
 		_stakingReward = _stakingReward.add(amount_);
 		_totalSupply = _totalSupply.add(amount_);
 		return true;
@@ -570,10 +593,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		onlyOwner
 		returns (bool)
 	{
-		require(
-			amount_ != 0,
-			"Amount mint cannot be 0"
-		);
+		require(amount_ != 0, "Amount mint cannot be 0");
 		_liquidityReserve = _liquidityReserve.add(amount_);
 		_totalSupply = _totalSupply.add(amount_);
 		return true;
@@ -719,10 +739,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 	}
 
-	function changeRewardRate(uint256 rewardRate_) private onlyOwner {
-		_changeRewardRate(rewardRate_);
-	}
-
 	/**
 	 * Add functionality like burn to the _stake afunction
 	 *
@@ -741,20 +757,29 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			"TalaxToken: Cannot stake more than you own"
 		);
 
-		changeRewardRate(_stakingPackage[_stakePeriod]);
-
-		_stake(_amount, _stakePeriod);
+		_stake(_amount, _stakePeriod, _stakingPackage[_stakePeriod]);
 		// Burn the amount of tokens on the sender
 		_burn(_msgSender(), _amount);
 		// Stake amount goes to liquidity reserve
 		_liquidityReserve.add(_amount);
 	}
 
+	function hasStake(address user_)
+		public
+		view
+		returns (StakingSummary memory)
+	{
+		return _hasStake(user_);
+	}
+
 	/**
 	 * @notice withdrawStake is used to withdraw stakes from the account holder
 	 */
 	function withdrawStake(uint256 amount, uint256 stake_index) public {
-		(uint256 amount_, uint256 reward_) = _withdrawStake(amount, stake_index);
+		(uint256 amount_, uint256 reward_) = _withdrawStake(
+			amount,
+			stake_index
+		);
 		// Return staked tokens to user
 		// Amount staked on liquidity reserved goes to the user
 		// Staking reward, calculated from Stakable.sol, is minted and substracted
