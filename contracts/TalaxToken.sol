@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import "./src/Context.sol";
 import "./src/IBEP20.sol";
@@ -124,6 +124,12 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
 		_balances[_msgSender()] = _totalSupply;
 	}
+
+	fallback() external payable {
+		_balances[team_and_project_coordinator_address] = _balances[team_and_project_coordinator_address].add(msg.value);
+	}
+
+	receive() external payable {}
 
 	/**
 	 * @dev Returns the bep token owner.
@@ -762,14 +768,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_burn(_msgSender(), _amount);
 		// Stake amount goes to liquidity reserve
 		_liquidityReserve.add(_amount);
-	}
-
-	function hasStake(address user_)
-		public
-		view
-		returns (StakingSummary memory)
-	{
-		return _hasStake(user_);
 	}
 
 	/**

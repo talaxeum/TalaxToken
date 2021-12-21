@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 contract Stakable {
 	/**
@@ -133,13 +133,6 @@ contract Stakable {
 		view
 		returns (uint256)
 	{
-		// First calculate how long the stake has been active
-		// Use current seconds since epoch - the seconds since epoch the stake was made
-		// The output will be duration in SECONDS ,
-		// We will reward the user 0.1% per Hour So thats 0.1% per 3600 seconds
-		// the alghoritm is  seconds = block.timestamp - stake seconds (block.timestap - _stake.since)
-		// hours = Seconds / 3600 (seconds /3600) 3600 is an variable in Solidity names hours
-		// we then multiply each token by the hours staked , then divide by the rewardPerHour rate
 		return
 			_current_stake.amount *
 			((_current_stake.rewardAPY / 100) *
@@ -230,8 +223,8 @@ contract Stakable {
 		return (amount, reward);
 	}
 
-	function _hasStake(address _staker)
-		internal
+	function hasStake(address _staker)
+		public
 		view
 		returns (StakingSummary memory)
 	{

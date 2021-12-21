@@ -1,8 +1,8 @@
+const TalaxToken = artifacts.require("TalaxToken");
 const { assert } = require("chai");
 const truffleAssert = require("truffle-assertions");
 const helper = require("./helpers/truffleTestHelpers");
 
-const TalaxToken = artifacts.require("TalaxToken");
 
 /*
  * uncomment accounts to access the test accounts made available by the
