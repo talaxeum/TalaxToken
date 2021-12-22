@@ -106,14 +106,14 @@ module.exports = {
 			// version: "0.5.16", 		// A version or constraint - Ex. "^0.5.0"
 			version: "0.8.11", // Fetch exact version from solc-bin (default: truffle's version)
 			// docker: true,       		// Use "0.5.1" you've installed locally with docker (default: false)
-			// settings: {
-			// 	// See the solidity docs for advice about optimization and evmVersion
-			// 	optimizer: {
-			// 		enabled: true,
-			// 		runs: 200,
-			// 	},
-			// 	//  evmVersion: "byzantium"
-			// },
+			settings: {
+				// See the solidity docs for advice about optimization and evmVersion
+				optimizer: {
+					enabled: true,
+					runs: 200,
+				},
+				//  evmVersion: "byzantium"
+			},
 		},
 	},
 

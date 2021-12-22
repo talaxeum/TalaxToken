@@ -22,7 +22,7 @@ contract Lockable {
 	uint256 private _startLockedWallet;
 
 	constructor(uint256 amount_, address beneficiary_) {
-		require(amount_ > 0, "Amount must greater than zero");
+		require(amount_ > 0, "TokenTimeLock: Amount must greater than zero");
 		_amount = amount_;
 		_beneficiary = beneficiary_;
 		_startLockedWallet = block.timestamp;
@@ -42,7 +42,7 @@ contract Lockable {
 		return _beneficiary;
 	}
 
-	function calculateClaimableAmount(uint256[43] memory rate_)
+	function calculateClaimableAmount(uint24[43] memory rate_)
 		private
 		view
 		returns (uint256)
@@ -51,20 +51,23 @@ contract Lockable {
 		uint256 claimable;
 
 		for (uint256 i = 0; i <= months; i++) {
-			claimable = SafeMath.add(
-				claimable,
-				SafeMath.mul(_amount, rate_[i])
-			);
+			// claimable = SafeMath.add(
+			// 	claimable,
+			// 	uint24(_amount / 10**18) * ((rate_[i] * 10**18) / _amount)
+			// );
+			claimable =
+				claimable +
+				(_amount * uint256((rate_[i] * 10**18) / _amount));
 		}
 
-		require(claimable != 0, "There's nothing to claim yet");
+		require(claimable != 0, "TokenTimeLock: There's nothing to claim yet");
 		return claimable;
 	}
 
 	/**
 	 * @notice Transfers tokens held by timelock to beneficiary.
 	 */
-	function releaseClaimable(uint256[43] memory rate_)
+	function releaseClaimable(uint24[43] memory rate_)
 		external
 		returns (uint256)
 	{
@@ -79,7 +82,7 @@ contract Lockable {
 		_amount = SafeMath.sub(
 			_amount,
 			claimableLockedAmount,
-			"Cannot substract total amount with claimable"
+			"TokenTimeLock: Cannot substract total amount with claimable"
 		);
 
 		return claimableLockedAmount;

@@ -62,57 +62,61 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_decimals = 18;
 		_totalSupply = 210 * 1e6 * 10**18;
 
-		// _publicSale = 42 * 1e6 * 10**18;
-		// _privateSale = 6993 * 1e3 * 10**18;
-		// _stakingReward = 17514 * 1e3 * 10**18;
-		// _liquidityReserve = 52500 * 1e3 * 10**18;
+		dev_pool_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
+		strategic_partner_address = 0x8ECda324E9b5E3718b4b6673B6652E68A90D057d;
 
-		// _totalSupply = _totalSupply.sub(
-		// 	_publicSale,
-		// 	"Cannot transfer more than total supply"
-		// );
-		// _totalSupply = _totalSupply.sub(
-		// 	_privateSale,
-		// 	"Cannot transfer more than total supply"
-		// );
-		// _totalSupply = _totalSupply.sub(
-		// 	_stakingReward,
-		// 	"Cannot transfer more than total supply"
-		// );
-		// _totalSupply = _totalSupply.sub(
-		// 	_liquidityReserve,
-		// 	"Cannot transfer more than total supply"
-		// );
 
-		// devPoolLockedWallet = new Lockable(42 * 1e6 * 10**18, dev_pool_address);
+		_publicSale = 42 * 1e6 * 10**18;
+		_privateSale = 6993 * 1e3 * 10**18;
+		_stakingReward = 17514 * 1e3 * 10**18;
+		_liquidityReserve = 52500 * 1e3 * 10**18;
 
-		// strategicPartnerLockedWallet = new Lockable(
-		// 	10500 * 1e3 * 10**18,
-		// 	strategic_partner_address
-		// );
+		_totalSupply = _totalSupply.sub(
+			_publicSale,
+			"Cannot transfer more than total supply"
+		);
+		_totalSupply = _totalSupply.sub(
+			_privateSale,
+			"Cannot transfer more than total supply"
+		);
+		_totalSupply = _totalSupply.sub(
+			_stakingReward,
+			"Cannot transfer more than total supply"
+		);
+		_totalSupply = _totalSupply.sub(
+			_liquidityReserve,
+			"Cannot transfer more than total supply"
+		);
 
-		// privatePlacementLockedWallet = new MultiLockable(6993 * 1e3 * 10**18);
+		devPoolLockedWallet = new Lockable(42 * 1e6 * 10**18, dev_pool_address);
 
-		// teamAndProjectCoordinatorLockedWallet = new MultiLockable(
-		// 	31500 * 1e3 * 10**18
-		// );
+		strategicPartnerLockedWallet = new Lockable(
+			10500 * 1e3 * 10**18,
+			strategic_partner_address
+		);
 
-		// _totalSupply = _totalSupply.sub(
-		// 	42 * 1e6 * 10**18,
-		// 	"Cannot transfer more than total supply"
-		// );
-		// _totalSupply = _totalSupply.sub(
-		// 	10500 * 1e3 * 10**18,
-		// 	"Cannot transfer more than total supply"
-		// );
-		// _totalSupply = _totalSupply.sub(
-		// 	6993 * 1e3 * 10**18,
-		// 	"Cannot transfer more than total supply"
-		// );
-		// _totalSupply = _totalSupply.sub(
-		// 	31500 * 1e3 * 10**18,
-		// 	"Cannot transfer more than total supply"
-		// );
+		privatePlacementLockedWallet = new MultiLockable(6993 * 1e3 * 10**18);
+
+		teamAndProjectCoordinatorLockedWallet = new MultiLockable(
+			31500 * 1e3 * 10**18
+		);
+
+		_totalSupply = _totalSupply.sub(
+			42 * 1e6 * 10**18,
+			"Cannot transfer more than total supply"
+		);
+		_totalSupply = _totalSupply.sub(
+			10500 * 1e3 * 10**18,
+			"Cannot transfer more than total supply"
+		);
+		_totalSupply = _totalSupply.sub(
+			6993 * 1e3 * 10**18,
+			"Cannot transfer more than total supply"
+		);
+		_totalSupply = _totalSupply.sub(
+			31500 * 1e3 * 10**18,
+			"Cannot transfer more than total supply"
+		);
 
 		// later divided by 100 to make percentage
 		_taxFee = 1;
@@ -126,10 +130,28 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	}
 
 	fallback() external payable {
-		_balances[team_and_project_coordinator_address] = _balances[team_and_project_coordinator_address].add(msg.value);
+		_balances[team_and_project_coordinator_address] = _balances[
+			team_and_project_coordinator_address
+		].add(msg.value);
 	}
 
 	receive() external payable {}
+
+	function devPool() external view returns (Lockable) {
+		return devPoolLockedWallet;
+	}
+
+	function stratPartner() external view returns (Lockable) {
+		return strategicPartnerLockedWallet;
+	}
+
+	function privatePlacement() external view returns (MultiLockable) {
+		return privatePlacementLockedWallet;
+	}
+
+	function teamAndProject() external view returns (MultiLockable) {
+		return teamAndProjectCoordinatorLockedWallet;
+	}
 
 	/**
 	 * @dev Returns the bep token owner.
@@ -189,23 +211,23 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	function privateSaleReleaseRate()
 		internal
 		pure
-		returns (uint256[43] memory)
+		returns (uint24[43] memory)
 	{
 		return [
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(493, 6993),
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			493 * 1e3,
 			0,
 			0,
 			0,
@@ -238,110 +260,110 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		];
 	}
 
-	function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
+	function devPoolReleaseRate() internal pure returns (uint24[43] memory) {
 		return [
-			SafeMath.div(3, 42),
+			3 * 1e6,
 			0,
 			0,
 			0,
-			SafeMath.div(3, 42),
+			3 * 1e6,
 			0,
 			0,
-			SafeMath.div(3, 42),
+			3 * 1e6,
 			0,
 			0,
-			SafeMath.div(3, 42),
+			3 * 1e6,
 			0,
 			0,
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42),
-			SafeMath.div(1, 42)
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6
 		];
 	}
 
 	function strategicPartnerReleaseRate()
 		internal
 		pure
-		returns (uint256[43] memory)
+		returns (uint24[43] memory)
 	{
 		return [
-			SafeMath.div(10, 105),
+			1 * 1e6,
 			0,
 			0,
 			0,
-			SafeMath.div(10, 105),
+			1 * 1e6,
 			0,
 			0,
-			SafeMath.div(10, 105),
+			1 * 1e6,
 			0,
 			0,
-			SafeMath.div(10, 105),
+			1 * 1e6,
 			0,
 			0,
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000),
-			SafeMath.div(216667, 10500000)
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667,
+			216667
 		];
 	}
 
 	function privatePlacementReleaseRate()
 		internal
 		pure
-		returns (uint256[43] memory)
+		returns (uint24[43] memory)
 	{
 		return [
 			0,
@@ -351,20 +373,20 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			0,
 			0,
 			0,
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(500, 6993),
-			SafeMath.div(493, 6993),
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			5 * 1e5,
+			493 * 1e3,
 			0,
 			0,
 			0,
@@ -393,41 +415,41 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	function teamAndProjectCoordinatorReleaseRate()
 		internal
 		pure
-		returns (uint256[43] memory)
+		returns (uint24[43] memory)
 	{
 		return [
-			SafeMath.div(35, 315),
+			35 * 1e5,
 			0,
 			0,
 			0,
-			SafeMath.div(30, 315),
+			3 * 1e6,
 			0,
 			0,
-			SafeMath.div(30, 315),
+			3 * 1e6,
 			0,
 			0,
-			SafeMath.div(30, 315),
+			3 * 1e6,
 			0,
 			0,
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
-			SafeMath.div(10, 315),
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
+			1 * 1e6,
 			0,
 			0,
 			0,
@@ -442,6 +464,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		];
 	}
 
+	function getDevPoolRate() public pure returns(uint24[43] memory){
+		return devPoolReleaseRate();
+	}
 	/**
 	 * @dev See {BEP20-transfer}.
 	 *
@@ -802,9 +827,15 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	// DEV POOL LOCKED WALLET
 
 	function unlockDevPoolWallet() public {
+		require(
+			msg.sender == devPoolLockedWallet.beneficiary() ||
+				msg.sender == owner(),
+			"TokenTimeLock: Only claimable by User of this address or owner"
+		);
 		uint256 timeLockedAmount = devPoolLockedWallet.releaseClaimable(
 			devPoolReleaseRate()
 		);
+
 		_balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
 	}
 
@@ -812,8 +843,14 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	// Strategic Partner LOCKED WALLET
 
 	function unlockStrategicPartnerWallet() public {
+		require(
+			strategic_partner_address == strategicPartnerLockedWallet.beneficiary() ||
+				msg.sender == this.getOwner(),
+			"TokenTimeLock: Only claimable by User of this address or owner"
+		);
 		uint256 timeLockedAmount = strategicPartnerLockedWallet
 			.releaseClaimable(strategicPartnerReleaseRate());
+
 		_balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
 	}
 
@@ -823,14 +860,14 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		private
 		onlyOwner
 	{
-		require(user_ != address(0), "Cannot add empty user");
-		require(amount_ > 0, "Cannot use zero amount");
+		require(user_ != address(0), "MultiTokenTimeLock: Cannot add empty user");
+		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
 		privatePlacementLockedWallet.addUser(user_, amount_);
 	}
 
 	function deletePrivatePlacementUser(address user_) public onlyOwner {
-		require(user_ != address(0), "Cannot delete empty user");
+		require(user_ != address(0), "MultiTokenTimeLock: Cannot delete empty user");
 
 		privatePlacementLockedWallet.deleteUser(user_);
 	}
@@ -850,14 +887,14 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		private
 		onlyOwner
 	{
-		require(user_ != address(0), "Cannot add empty user");
-		require(amount_ > 0, "Cannot use zero amount");
+		require(user_ != address(0), "MultiTokenTimeLock: Cannot add empty user");
+		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
 		teamAndProjectCoordinatorLockedWallet.addUser(user_, amount_);
 	}
 
 	function deleteTeamAndProjectCoordinator(address user_) public onlyOwner {
-		require(user_ != address(0), "Cannot delete empty user");
+		require(user_ != address(0), "MultiTokenTimeLock: Cannot delete empty user");
 
 		teamAndProjectCoordinatorLockedWallet.deleteUser(user_);
 	}

@@ -40,29 +40,30 @@ contract MultiLockable {
 	}
 
 	function addUser(address user_, uint256 amount_) external {
-		require(user_ != address(0), "Cannot add address(0)");
+		require(user_ != address(0), "MultiTokenTimeLock: Cannot add address(0)");
 
-		require(timeLockedWallet[user_] == 0, "User allredy exist");
+		require(timeLockedWallet[user_] == 0, "MultiTokenTimeLock: User allredy exist");
 
 		require(
 			amount_ < _totalAmount,
-			"Amount is larger than allocated Total Amount left"
+			"MultiTokenTimeLock: Amount is larger than allocated Total Amount left"
 		);
 
 		timeLockedWallet[user_] = amount_;
+		_totalAmount = SafeMath.sub(_totalAmount, amount_, "MultiTokenTimeLock: Cannot subs larget than total amount");
 	}
 
 	function deleteUser(address user_) external {
 		require(
 			timeLockedWallet[user_] == 0,
-			"User has some token left in locked wallet"
+			"MultiTokenTimeLock: User has some token left in locked wallet"
 		);
 
-		delete timeLockedWallet[user_];
 		_totalAmount = SafeMath.add(_totalAmount, timeLockedWallet[user_]);
+		delete timeLockedWallet[user_];
 	}
 
-	function calculateClaimableAmount(address user_, uint256[43] memory rate_)
+	function calculateClaimableAmount(address user_, uint24[43] memory rate_)
 		private
 		view
 		returns (uint256)
@@ -75,31 +76,31 @@ contract MultiLockable {
 		for (uint256 i = 0; i <= months; i++) {
 			claimable = SafeMath.add(
 				claimable,
-				SafeMath.mul(lockedAmount, rate_[i])
+				SafeMath.mul(lockedAmount, ((rate_[i] * 10**18) / _totalAmount))
 			);
 		}
 
-		require(claimable != 0, "There's nothing to claim yet");
+		require(claimable != 0, "MultiTokenTimeLock: There's nothing to claim yet");
 		return claimable;
 	}
 
 	/**
 	 * @notice Transfers tokens held by timelock to beneficiary.
 	 */
-	function releaseClaimable(uint256[43] memory rate_) external returns (uint256) {
-		require(_totalAmount > 0, "TokenTimelock: no tokens left");
+	function releaseClaimable(uint24[43] memory rate_) external returns (uint256) {
+		require(_totalAmount > 0, "MultiTokenTimeLock: no tokens left");
 
 		uint256 claimableLockedAmount = calculateClaimableAmount(msg.sender, rate_);
 		require(
 			claimableLockedAmount > 0,
-			"TokenTimelock: no tokens to release"
+			"MultiTokenTimeLock: no tokens to release"
 		);
 
 		delete timeLockedWallet[msg.sender];
 		_totalAmount = SafeMath.sub(
 			_totalAmount,
 			claimableLockedAmount,
-			"Cannot substract total amount with claimable"
+			"MultiTokenTimeLock: Cannot substract total amount with claimable"
 		);
 
 		return claimableLockedAmount;
