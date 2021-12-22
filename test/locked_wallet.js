@@ -27,6 +27,9 @@ contract("TalaxToken", async (accounts) => {
 		talax = await TalaxToken.deployed();
 		owner = accounts[3];
 
+		let balance = await talax.balanceOf(owner);
+		console.log(balance.toString());
+
 		try {
 			await talax.unlockDevPoolWallet({ from: owner });
 		} catch (error) {
@@ -39,6 +42,8 @@ contract("TalaxToken", async (accounts) => {
 		}
 
 		balance = await talax.balanceOf(owner);
+		console.log(balance.toString());
+
 	});
 
 	it("wrong owner claim", async () => {
@@ -60,14 +65,22 @@ contract("TalaxToken", async (accounts) => {
 	it("claim after the designated time", async () => {
 		talax = await TalaxToken.deployed();
 		owner = accounts[3]
-		
-		await helper.advanceTimeAndBlock(3600 * 24 * 30);
+
+		let month = await talax.devPoolMonth();
+		console.log(month.toString());
 
 		let balance = await talax.balanceOf(owner);
 		console.log(balance.toString());
 
+		await helper.advanceTimeAndBlock(3600 * 24 * 120);
+		
 		await talax.unlockDevPoolWallet({from:owner});
+		
+		month = await talax.devPoolMonth();
+		console.log(month.toString());
+
 		balance = await talax.balanceOf(owner);
 		console.log(balance.toString());
+
 	});
 });
