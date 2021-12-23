@@ -28,7 +28,8 @@ contract("TalaxToken", async (accounts) => {
 		talax = await TalaxToken.deployed();
 
 		let balance = await talax.balanceOf(accounts[0]);
-		console.log(balance.toString());
+		let lockedAmount = await talax.privatePlacementAmount(accounts[0]);
+		console.log(balance.toString(), lockedAmount.toString());
 
 		try {
 			await helper.advanceTimeAndBlock(3600 * 24 * 120);
@@ -57,46 +58,52 @@ contract("TalaxToken", async (accounts) => {
 		);
 	});
 
-	it("try to claim before the designated time", async () => {
-		talax = await TalaxToken.deployed();
-		let owner = accounts[4];
+	// it("try to claim before the designated time", async () => {
+	// 	talax = await TalaxToken.deployed();
+	// 	let owner = accounts[4];
 
-		let balance = await talax.balanceOf(owner);
-		console.log(balance.toString());
+	// 	let balance = await talax.balanceOf(owner);
+	// 	console.log(balance.toString());
 
-		try {
-			await helper.advanceTimeAndBlock(3600 * 24 * 10);
-			await talax.releasePrivatePlacement({ from: owner });
-		} catch (error) {
-			console.log(error.reason);
-			assert.equal(
-				error.reason,
-				"MultiTokenTimeLock: There's nothing to claim yet",
-				"Failed to notice zero amount of locked wallet"
-			);
-		}
+	// 	try {
+	// 		await helper.advanceTimeAndBlock(3600 * 24 * 10);
+	// 		await talax.releasePrivatePlacement({ from: owner });
+	// 	} catch (error) {
+	// 		console.log(error.reason);
+	// 		assert.equal(
+	// 			error.reason,
+	// 			"MultiTokenTimeLock: There's nothing to claim yet",
+	// 			"Failed to notice zero amount of locked wallet"
+	// 		);
+	// 	}
 
-		balance = await talax.balanceOf(owner);
-		console.log(balance.toString());
-	});
+	// 	balance = await talax.balanceOf(owner);
+	// 	console.log(balance.toString());
+	// });
 
-	it("try to claim locked wallet", async () => {
-		talax = await TalaxToken.deployed();
-		let owner = accounts[4];
+	// it("try to claim locked wallet", async () => {
+	// 	talax = await TalaxToken.deployed();
+	// 	let owner = accounts[4];
 
-		amount = await talax.privatePlacementAmount(owner);
-		month = await talax.privatePlacementMonth(owner);
-		console.log("First", amount.toString(), month.toString());
+	// 	amount = await talax.privatePlacementAmount(owner);
+	// 	month = await talax.privatePlacementMonth(owner);
+	// 	console.log("First", amount.toString(), month.toString());
 
-        console.log(await talax.privatePlacementRate());
-		await helper.advanceTimeAndBlock(3600 * 24 * 210);
-		await talax.releasePrivatePlacement({ from: owner });
+	// 	console.log(await talax.privatePlacementRate());
+	// 	rate = await talax.privatePlacementRate();
+	// 	console.log(rate.length);
+	// 	for(i = 0; i < rate.length; i++){
+	// 		console.log((new BigNumber(rate[i])).toFixed())
+	// 	}
 
-		amount = await talax.privatePlacementAmount(owner);
-		month = await talax.privatePlacementMonth(owner);
-		console.log("Second", amount.toString(), month.toString());
+	// 	await helper.advanceTimeAndBlock(3600 * 24 * 210);
+	// 	await talax.releasePrivatePlacement({ from: owner });
 
-		balance = await talax.balanceOf(owner);
-		console.log(balance.toString());
-	});
+	// 	amount = await talax.privatePlacementAmount(owner);
+	// 	month = await talax.privatePlacementMonth(owner);
+	// 	console.log("Second", amount.toString(), month.toString());
+
+	// 	balance = await talax.balanceOf(owner);
+	// 	console.log(balance.toString());
+	// });
 });

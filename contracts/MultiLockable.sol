@@ -92,8 +92,6 @@ contract MultiLockable {
 		private
 		returns (uint256)
 	{
-		uint256 lockedAmount = timeLockedWallet[user_].amount;
-
 		uint256 months = (block.timestamp -
 			timeLockedWallet[user_].startLockedWallet) / 30 days;
 		uint256 claimable;
@@ -106,7 +104,7 @@ contract MultiLockable {
 			claimable = SafeMath.add(
 				claimable,
 				SafeMath.div(
-					SafeMath.mul(lockedAmount, rate_[i]),
+					SafeMath.mul(timeLockedWallet[user_].amount, rate_[i]),
 					1e16,
 					"Cannot divide 0"
 				)
@@ -124,14 +122,14 @@ contract MultiLockable {
 	/**
 	 * @notice Transfers tokens held by timelock to beneficiary.
 	 */
-	function releaseClaimable(uint256[43] memory rate_)
+	function releaseClaimable(uint256[43] memory rate_, address user_)
 		external
 		returns (uint256)
 	{
 		require(_totalAmount > 0, "MultiTokenTimeLock: no tokens left");
 
 		uint256 claimableLockedAmount = calculateClaimableAmount(
-			msg.sender,
+			user_,
 			rate_
 		);
 		require(
@@ -139,20 +137,17 @@ contract MultiLockable {
 			"MultiTokenTimeLock: no tokens to release"
 		);
 
-		timeLockedWallet[msg.sender].amount = SafeMath.sub(
-			timeLockedWallet[msg.sender].amount,
+		timeLockedWallet[user_].amount = SafeMath.sub(
+			timeLockedWallet[user_].amount,
 			claimableLockedAmount,
 			"MultiTokenTimeLock: Cannot do this operation"
 		);
 
-		if (timeLockedWallet[msg.sender].amount == 0) {
-			delete timeLockedWallet[msg.sender];
+		if (timeLockedWallet[user_].amount == 0) {
+			delete timeLockedWallet[user_];
 		}
 
-		_totalAmount = SafeMath.add(
-			_totalAmount,
-			claimableLockedAmount
-		);
+		_totalAmount = SafeMath.add(_totalAmount, claimableLockedAmount);
 
 		return claimableLockedAmount;
 	}
