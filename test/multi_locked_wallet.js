@@ -121,7 +121,7 @@ contract("TalaxToken", async accounts => {
 		month = await talax.privatePlacementMonth({ from: owner });
 		duration = await talax.privatePlacementDuration({ from: owner });
 		console.log("Second", amount.toString(), month.toString(), duration.toString());
-		assert.equal(month, 7, "Month should be 8");
+		assert.equal(month, 8, "Month should be 8");
 
 		balance = await talax.balanceOf(owner);
 		console.log(balance.toString());

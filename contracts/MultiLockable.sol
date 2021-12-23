@@ -87,7 +87,7 @@ contract MultiLockable {
 			}else{
 				userLockedWallets.push();
 			}
-			
+
 			// Calculate the index of the last item in the array by Len-1
 			uint256 userIndex = userLockedWallets.length - 1;
 			// Assign the address to the new index
@@ -123,8 +123,8 @@ contract MultiLockable {
 
 	function calculateClaimableAmount(
 		uint256[43] memory rate_,
-		userLockedInfo memory current_info
-	) internal view returns (uint256) {
+		userLockedInfo storage current_info
+	) internal returns (uint256) {
 		uint256 months = (block.timestamp - current_info.startLockedWallet) /
 			30 days;
 		uint256 claimable;
@@ -161,7 +161,7 @@ contract MultiLockable {
 
 		require(getUserIndex(user_) != 0, "MultiTokenTimeLock: User doesn't exist");
 
-		userLockedInfo memory current_info = userLockedWallets[
+		userLockedInfo storage current_info = userLockedWallets[
 			getUserIndex(user_)
 		];
 
@@ -180,9 +180,9 @@ contract MultiLockable {
 			"MultiTokenTimeLock: Cannot do this operation"
 		);
 
-		if (current_info.amount == 0) {
-			delete current_info;
-		}
+		// if (current_info.amount == 0) {
+		// 	delete current_info;
+		// }
 
 		_totalAmount = SafeMath.add(_totalAmount, claimableLockedAmount);
 
