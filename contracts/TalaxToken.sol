@@ -865,23 +865,21 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
 	////////////////////////////////////////////////
 	// Private Placement LOCKED WALLET
-	function privatePlacementAmount(address user_)
-		public
-		view
-		returns (uint256)
-	{
-		return (
-			privatePlacementLockedWallet._hasLockedAmount(user_)
-		);
+
+	function privatePlacementAmount() public view returns (uint256) {
+		return privatePlacementLockedWallet._getAmount(msg.sender);
 	}
-	function privatePlacementMonth(address user_)
-		public
-		view
-		returns (uint256)
-	{
-		return (
-			privatePlacementLockedWallet._hasLockedMonth(user_)
-		);
+
+	function privatePlacementIndex() public view returns (uint256) {
+		return privatePlacementLockedWallet._getIndex(msg.sender);
+	}
+
+	function privatePlacementMonth() public view returns (uint256) {
+		return privatePlacementLockedWallet._getMonth(msg.sender);
+	}
+
+	function privatePlacementDuration() public view returns (uint256) {
+		return privatePlacementLockedWallet._getDuration(msg.sender);
 	}
 
 	function addPrivatePlacementUser(address user_, uint256 amount_)
@@ -894,7 +892,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
-		privatePlacementLockedWallet.addUser(user_, amount_);
+		privatePlacementLockedWallet._lockWallet(amount_, user_);
 	}
 
 	function deletePrivatePlacementUser(address user_) public onlyOwner {
@@ -927,7 +925,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
-		teamAndProjectCoordinatorLockedWallet.addUser(user_, amount_);
+		teamAndProjectCoordinatorLockedWallet._lockWallet(amount_, user_);
 	}
 
 	function deleteTeamAndProjectCoordinator(address user_) public onlyOwner {
@@ -941,7 +939,10 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
 	function releaseTeamAndProjectCoordinator() public {
 		uint256 releasedClaimableLockedAmount = teamAndProjectCoordinatorLockedWallet
-				.releaseClaimable(teamAndProjectCoordinatorReleaseRate(), msg.sender);
+				.releaseClaimable(
+					teamAndProjectCoordinatorReleaseRate(),
+					msg.sender
+				);
 
 		_balances[_msgSender()] = _balances[_msgSender()].add(
 			releasedClaimableLockedAmount

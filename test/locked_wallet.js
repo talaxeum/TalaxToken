@@ -77,7 +77,8 @@ contract("TalaxToken", async (accounts) => {
 		await talax.unlockDevPoolWallet({from:owner});
 		
 		month = await talax.devPoolMonth();
-		console.log(month.toString());
+		latestClaim = await talax.devPoolLatestClaim();
+		console.log(month.toString(), latestClaim.toString());
 
 		balance = await talax.balanceOf(owner);
 		console.log(balance.toString());
