@@ -77,6 +77,11 @@ contract MultiLockable {
 			"MultiTokenTimeLock: Amount is larger than allocated Total Amount left"
 		);
 
+		require(
+			userLockedWallets[index].amount == 0,
+			"MultiTokenTimeLock: User already exist"
+		);
+
 		if (index == 0) {
 			// This stakeholder stakes for the first time
 			// We need to add him to the stakeHolders and also map it into the Index of the stakes

@@ -9,7 +9,7 @@ const helper = require("./helpers/truffleTestHelpers");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 
-contract("Stakable", async (accounts) => {
+contract("Stakable", async accounts => {
 	it("Staking 100x2", async () => {
 		talax = await TalaxToken.deployed();
 
@@ -29,13 +29,19 @@ contract("Stakable", async (accounts) => {
 
 		// Stake the amount, notice the FROM parameter which specifes what the msg.sender address will be
 
-		stakeID = await talax.stake(stake_amount, 2.592e6, {
+		stakeID = await talax.stake(stake_amount, 2592 * 1e3, {
 			from: owner,
 		});
 		// Stake again on owner because we want hasStake test to assert summary
-		stakeID = await talax.stake(stake_amount, 2.592e6, {
+		stakeID = await talax.stake(stake_amount, 2592 * 1e3, {
 			from: owner,
 		});
+
+		stake = await talax.stakeSummary(owner);
+		// amountStake = await talax.stakeAmount(stake);
+		// apyStake = await talax.stakeAPY(stake);
+		// sinceStake = await talax.stakeSince(stake);
+		console.log(stake.toString());
 
 		summary = await talax.hasStake(owner);
 		console.log(summary.toString());
@@ -80,8 +86,8 @@ contract("Stakable", async (accounts) => {
 			from: accounts[1],
 		});
 
-		summary = await talax.hasStake(accounts[1]);
-		console.log(summary.toString());
+		// summary = await talax.hasStake(accounts[1]);
+		// console.log(summary.toString());
 
 		truffleAssert.eventEmitted(
 			stakeID,
@@ -108,6 +114,7 @@ contract("Stakable", async (accounts) => {
 
 		// Try withdrawing 200 from first stake
 		try {
+			await helper.advanceTimeAndBlock(3600 * 24 * 30);
 			await talax.withdrawStake(200, 0, { from: owner });
 		} catch (error) {
 			console.log(error.reason);
@@ -119,16 +126,16 @@ contract("Stakable", async (accounts) => {
 		}
 	});
 
-	it("withdraw 50 from stake test", async () => {
-		talax = await TalaxToken.deployed();
+	// it("withdraw 50 from stake test", async () => {
+	// 	talax = await TalaxToken.deployed();
 
-		try{
-			summary = await talax.hasStake(accounts[0]);
-			console.log(summary.toString());
-		} catch(error){
-			console.log(error);
-		}
-	});
+	// 	try{
+	// 		summary = await talax.hasStake(accounts[0]);
+	// 		console.log(summary.toString());
+	// 	} catch(error){
+	// 		console.log(error);
+	// 	}
+	// });
 
 	it("withdraw 50 from stake", async () => {
 		talax = await TalaxToken.deployed();
@@ -136,8 +143,8 @@ contract("Stakable", async (accounts) => {
 		let owner = accounts[0];
 		let withdraw_amount = 50;
 
-		let summary = await talax.hasStake(owner);
-		console.log(summary.toString());
+		// let summary = await talax.hasStake(owner);
+		// console.log(summary.toString());
 		await talax.withdrawStake(withdraw_amount, 0, { from: owner });
 		summary = await talax.hasStake(owner);
 
@@ -157,22 +164,22 @@ contract("Stakable", async (accounts) => {
 		);
 	});
 
-	// it("remove stake if empty", async () => {
-	// 	talax = await TalaxToken.deployed();
+	it("remove stake if empty", async () => {
+		talax = await TalaxToken.deployed();
 
-	// 	let owner = accounts[0];
-	// 	let withdraw_amount = 50;
+		let owner = accounts[0];
+		let withdraw_amount = 50;
 
-	// 	await talax.withdrawStake(withdraw_amount, 0, { from: owner });
-	// 	let summary = await talax.hasStake(owner);
-	// 	// console.log(summary);
+		await talax.withdrawStake(withdraw_amount, 0, { from: owner });
+		// let summary = await talax.hasStake(owner);
+		// console.log(summary);
 
-	// 	assert.equal(
-	// 		summary.stakes[0].user,
-	// 		"0x0000000000000000000000000000000000000000",
-	// 		"Failed to remove stake when it was empty"
-	// 	);
-	// });
+		assert.equal(
+			summary.stakes[0].user,
+			"0x0000000000000000000000000000000000000000",
+			"Failed to remove stake when it was empty"
+		);
+	});
 
 	// it("calculate claimable staking amount", async () => {
 	// 	talax = await TalaxToken.deployed();
@@ -193,23 +200,23 @@ contract("Stakable", async (accounts) => {
 	// 		"Reward should be 0.416 after staking 100 for 30 days"
 	// 	);
 
-	// await talax.stake(1000, { from: owner });
-	// await helper.advanceTimeAndBlock(3600 * 20);
+	// 	await talax.stake(1000, { from: owner });
+	// 	await helper.advanceTimeAndBlock(3600 * 20);
 
-	// summary = await talax.hasStake(owner);
-	// stake = summary.stakes[1];
-	// let newStake = summary.stakes[2];
+	// 	summary = await talax.hasStake(owner);
+	// 	stake = summary.stakes[1];
+	// 	let newStake = summary.stakes[2];
 
-	// assert.equal(
-	// 	stake.claimable,
-	// 	100 * 0.04,
-	// 	"Reward should be 4 after staking for 40 hours"
-	// );
-	// assert.equal(
-	// 	newStake.claimable,
-	// 	1000 * 0.02,
-	// 	"Reward should be 20 after staking 20 hours"
-	// );
+	// 	assert.equal(
+	// 		stake.claimable,
+	// 		100 * 0.04,
+	// 		"Reward should be 4 after staking for 40 hours"
+	// 	);
+	// 	assert.equal(
+	// 		newStake.claimable,
+	// 		1000 * 0.02,
+	// 		"Reward should be 20 after staking 20 hours"
+	// 	);
 	// });
 
 	// it("reward stakes", async () => {

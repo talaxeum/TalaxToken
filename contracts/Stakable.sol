@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "./src/SafeMath.sol";
+
 contract Stakable {
 	/**
 	 * @notice Constructor since this contract is not ment to be used without inheritance
@@ -93,6 +95,7 @@ contract Stakable {
 	) internal {
 		// Simple check so that user does not stake 0
 		require(_amount > 0, "Cannot stake nothing");
+		// require(_amount > 1e18, "Minimum stake is 1 TALAX");
 
 		// Mappings in solidity creates all values, but empty, so we can just check the address
 		uint256 index = stakes[msg.sender];
@@ -128,16 +131,76 @@ contract Stakable {
 		);
 	}
 
+	function getMonth(uint256 since_) internal view returns (uint256) {
+		require(since_ > 0, "Error timestamp 0");
+		return
+			SafeMath.div(
+				((block.timestamp - since_) * 1e24),
+				365 days,
+				"Error cannot divide timestamp"
+			);
+	}
+
 	function calculateStakeReward(Stake memory _current_stake)
 		internal
 		view
 		returns (uint256)
 	{
+		require(_current_stake.amount > 0, "This user doesn't have any stakes");
+
+		// return SafeMath.div(
+		// 		SafeMath.mul(
+		// 			_current_stake.amount, 
+		// 			SafeMath.mul(
+		// 				_current_stake.rewardAPY, 
+		// 				getMonth(_current_stake.since))), 
+		// 		1e26, "Error divide staking");
+
 		return
-			_current_stake.amount *
-			((_current_stake.rewardAPY / 100) *
-				((_current_stake.since - block.timestamp) / 365 days));
+			(_current_stake.amount *
+				(_current_stake.rewardAPY * getMonth(_current_stake.since))) / 1e26;
 	}
+
+	function stakeSummary(address user_)
+		public
+		view
+		returns (StakingSummary memory)
+	{
+		StakingSummary memory summary = StakingSummary(
+			0,
+			stakeholders[stakes[user_]].address_stakes
+		);
+
+		return summary;
+	}
+
+	// function stakeAmount(address user_)
+	// 	public
+	// 	pure
+	// 	returns (uint256)
+	// {
+	// 	StakingSummary memory summary = StakingSummary(
+	// 		0,
+	// 		stakeholders[stakes[user_]].address_stakes
+	// 	);
+	// 	return _current_stake.amount;
+	// }
+
+	// function stakeAPY(Stake memory _current_stake)
+	// 	public
+	// 	pure
+	// 	returns (uint256)
+	// {
+	// 	return _current_stake.rewardAPY;
+	// }
+
+	// function stakeSince(Stake memory _current_stake)
+	// 	public
+	// 	pure
+	// 	returns (uint256)
+	// {
+	// 	return _current_stake.since;
+	// }
 
 	function calculateStakeDuration(Stake memory _current_stake)
 		internal
@@ -164,7 +227,7 @@ contract Stakable {
 			index
 		];
 		require(
-			current_stake.releaseTime >= block.timestamp,
+			current_stake.releaseTime <= block.timestamp,
 			"Staking: Cannot withdraw before the release time"
 		);
 		require(
@@ -179,7 +242,7 @@ contract Stakable {
 		// If stake is empty, 0, then remove it from the array of stakes
 		if (current_stake.amount == 0) {
 			delete stakeholders[user_index].address_stakes[index];
-			stakeholders[user_index].address_stakes.pop();
+			// stakeholders[user_index].address_stakes.pop();
 		} else {
 			// If not empty then replace the value of it
 			stakeholders[user_index]
@@ -229,6 +292,7 @@ contract Stakable {
 		returns (StakingSummary memory)
 	{
 		uint256 totalStakeAmount;
+
 		StakingSummary memory summary = StakingSummary(
 			0,
 			stakeholders[stakes[_staker]].address_stakes
