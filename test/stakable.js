@@ -12,7 +12,8 @@ const helper = require("./helpers/truffleTestHelpers");
 contract("Stakable", async accounts => {
 	it("Staking 100x2", async () => {
 		talax = await TalaxToken.deployed();
-
+		supply = await talax.totalSupply();
+		console.log(supply.toString());
 		// Stake 100 is used to stake 100 tokens twice and see that stake is added correctly and money burned
 		let owner = accounts[0];
 		// Set owner, user and a stake_amount
