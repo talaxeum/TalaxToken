@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-// OpenZeppelin Contracts v4.4.0 (token/ERC20/utils/TokenTimelock.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.11;
 
 import "./src/SafeMath.sol";
 
@@ -35,9 +34,6 @@ contract MultiLockable {
 		_startLocked = block.timestamp;
 	}
 
-	/**
-	 * @return the token being held.
-	 */
 	function _getIndex(address user_) external view returns(uint256){
 		return getUserIndex(user_);
 	}
@@ -67,6 +63,8 @@ contract MultiLockable {
 
 	function _lockWallet(uint256 amount_, address user_) external {
 		uint256 index = users[user_];
+		require(amount_ > 0, "MultiTokenTimeLock: amount is zero");
+
 		require(
 			user_ != address(0),
 			"MultiTokenTimeLock: Cannot add address(0)"
@@ -77,10 +75,9 @@ contract MultiLockable {
 			"MultiTokenTimeLock: Amount is larger than allocated Total Amount left"
 		);
 
-		require(
-			userLockedWallets[index].amount == 0,
-			"MultiTokenTimeLock: User already exist"
-		);
+		if (index != 0){
+			require(false, "MultiTokenTimeLock: User already exists!");
+		}
 
 		if (index == 0) {
 			// This stakeholder stakes for the first time

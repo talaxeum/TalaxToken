@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.11;
 
 import "./src/Context.sol";
 import "./src/IBEP20.sol";
@@ -45,11 +45,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	address dev_pool_address;
 	address team_and_project_coordinator_address;
 
-	// address private_placement_address;
-	// address strategic_partner_address;
-
-	// mapping(address => Lockable) public _lockedWallet;
-
 	Lockable public devPoolLockedWallet;
 	Lockable public teamAndProjectCoordinatorLockedWallet;
 
@@ -63,10 +58,12 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_decimals = 18;
 		_totalSupply = 210 * 1e6 * 10**18;
 
+		// public_sale_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
+		// staking_reward_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
+		// liquidity_reserve_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
 		// dev_pool_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
-		// team_and_project_coordinator_address = 0x8ECda324E9b5E3718b4b6673B6652E68A90D057d;
-		// private_sale_address = 0x8ECda324E9b5E3718b4b6673B6652E68A90D057d;
-
+		// team_and_project_coordinator_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
+		// private_sale_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
 
 		_privateSale = 6993 * 1e3 * 10**18;
 		_publicSale = 42 * 1e6 * 10**18;
@@ -88,10 +85,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			_stakingReward,
 			"Cannot transfer more than total supply"
 		);
-		// _totalSupply = _totalSupply.sub(
-		// 	_liquidityReserve,
-		// 	"Cannot transfer more than total supply"
-		// );
 
 		devPoolLockedWallet = new Lockable(42 * 1e6 * 10**18, dev_pool_address);
 		teamAndProjectCoordinatorLockedWallet = new Lockable(
@@ -99,27 +92,28 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			team_and_project_coordinator_address
 		);
 
-		// privateSaleLockedWallet = new MultiLockable(6993 * 1e3 * 10**18);
 		privatePlacementLockedWallet = new MultiLockable(6993 * 1e3 * 10**18);
 		strategicPartnerLockedWallet = new MultiLockable(10500 * 1e3 * 10**18);
 
+		// Locked Wallet
+		// Dev Pool
 		_totalSupply = _totalSupply.sub(
 			42 * 1e6 * 10**18,
 			"Cannot transfer more than total supply"
 		);
+		// Team and Project Coordinator
 		_totalSupply = _totalSupply.sub(
 			31500 * 1e3 * 10**18,
 			"Cannot transfer more than total supply"
 		);
 
-		// _totalSupply = _totalSupply.sub(
-		// 	6993 * 1e3 * 10**18,
-		// 	"Cannot transfer more than total supply"
-		// );
+		// MultiLocked Wallet
+		// Private Placement
 		_totalSupply = _totalSupply.sub(
 			6993 * 1e3 * 10**18,
 			"Cannot transfer more than total supply"
 		);
+		// Strategic Partner
 		_totalSupply = _totalSupply.sub(
 			10500 * 1e3 * 10**18,
 			"Cannot transfer more than total supply"
@@ -128,6 +122,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		// later divided by 100 to make percentage
 		_taxFee = 1;
 
+		// in percentage
 		_stakingPackage[30 days] = 5;
 		_stakingPackage[90 days] = 6;
 		_stakingPackage[180 days] = 7;
@@ -144,17 +139,18 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
 	receive() external payable {}
 
-	function devPoolRate() public pure returns (uint256[43] memory) {
-		return devPoolReleaseRate();
-	}
+	event ChangeTax(address indexed who, uint256 amount);
 
-	function privatePlacementRate() public pure returns (uint256[43] memory) {
-		return privatePlacementReleaseRate();
-	}
+	event AddPrivatePlacement(address indexed from, address indexed who);
+	event DeletePrivatePlacement(address indexed from, address indexed who);
 
-	function devPoolMonth() public view returns (uint256) {
-		return devPoolLockedWallet._latestClaimMonth();
-	}
+	event AddStrategicPartner(address indexed from, address indexed who);
+	event DeleteStrategicPartner(address indexed from, address indexed who);
+
+	event ChangePublicSaleAddress(address indexed from, address indexed to);
+	event ChangeLiquidityReserveAddress(address indexed from, address indexed to);
+	event ChangeDevPoolAddress(address indexed from, address indexed to);
+
 
 	function devPool() external view returns (Lockable) {
 		return devPoolLockedWallet;
@@ -225,58 +221,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		returns (uint256)
 	{
 		return _balances[account];
-	}
-
-	function privateSaleReleaseRate()
-		internal
-		pure
-		returns (uint256[43] memory)
-	{
-		return [
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(493 * 1e16, 6993),
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0
-		];
 	}
 
 	function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
@@ -570,7 +514,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 * - `spender` cannot be the zero address.
 	 */
 	function increaseAllowance(address spender, uint256 addedValue)
-		public
+		external
 		returns (bool)
 	{
 		_approve(
@@ -596,7 +540,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 * `subtractedValue`.
 	 */
 	function decreaseAllowance(address spender, uint256 subtractedValue)
-		public
+		external
 		returns (bool)
 	{
 		_approve(
@@ -611,7 +555,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	}
 
 	function burnStakingReward(uint256 amount_)
-		public
+		external
 		onlyOwner
 		returns (bool)
 	{
@@ -621,17 +565,21 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 		_stakingReward = _stakingReward.sub(amount_);
 		_totalSupply = _totalSupply.sub(amount_);
+		emit Transfer(staking_reward_address, address(0), amount_);
+
 		return true;
 	}
 
 	function mintStakingReward(uint256 amount_)
-		public
+		external
 		onlyOwner
 		returns (bool)
 	{
 		require(amount_ != 0, "Amount mint cannot be 0");
 		_stakingReward = _stakingReward.add(amount_);
 		_totalSupply = _totalSupply.add(amount_);
+		emit Transfer(address(0), staking_reward_address, amount_);
+
 		return true;
 	}
 
@@ -643,6 +591,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		require(amount_ != 0, "Amount mint cannot be 0");
 		_liquidityReserve = _liquidityReserve.add(amount_);
 		_totalSupply = _totalSupply.add(amount_);
+		emit Transfer(address(0), liquidity_reserve_address, amount_);
+
 		return true;
 	}
 
@@ -654,18 +604,55 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 *
 	 * - `msg.sender` must be the token owner
 	 */
-	function mint(uint256 amount) public onlyOwner returns (bool) {
+	function mint(uint256 amount) external onlyOwner returns (bool) {
 		_mint(_msgSender(), amount);
 		return true;
 	}
 
-	function changeTaxFee(uint16 taxFee_) public onlyOwner returns (bool) {
+	function changeTaxFee(uint16 taxFee_) external onlyOwner returns (bool) {
 		_changeTaxFee(taxFee_);
 		return true;
 	}
 
+	function changePublicSaleAddress(address new_) public onlyOwner {
+		_balances[new_] = _balances[public_sale_address];
+		emit Transfer(public_sale_address, new_, _balances[public_sale_address]);
+		delete _balances[public_sale_address];
+		_changePublicSaleAddress(new_);
+	}
+
+	function changeLiquidityReserveAddress(address new_) public onlyOwner {
+		_balances[new_] = _balances[liquidity_reserve_address];
+		emit Transfer(liquidity_reserve_address, new_, _balances[liquidity_reserve_address]);
+		delete _balances[liquidity_reserve_address];
+		_changePublicSaleAddress(new_);
+	}
+
+	function changeDevPoolAddress(address new_) public onlyOwner {
+		_balances[new_] = _balances[dev_pool_address];
+		emit Transfer(dev_pool_address, new_, _balances[dev_pool_address]);
+		delete _balances[dev_pool_address];
+		_changeDevPoolAddress(new_);
+	}
+
 	function _changeTaxFee(uint16 taxFee_) internal {
 		_taxFee = taxFee_;
+		emit ChangeTax(msg.sender, taxFee_);
+	}
+
+	function _changePublicSaleAddress(address new_) internal {
+		public_sale_address = new_;
+		emit ChangePublicSaleAddress(public_sale_address, new_);
+	}
+
+	function _changeLiquidityReserveAddress(address new_) internal {
+		liquidity_reserve_address =  new_;
+		emit ChangeLiquidityReserveAddress(liquidity_reserve_address, new_);
+	}
+
+	function _changeDevPoolAddress(address new_) internal {
+		dev_pool_address = new_;
+		emit ChangeDevPoolAddress(dev_pool_address, new_);
 	}
 
 	/**
@@ -700,8 +687,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			taxedAmount,
 			"BEP20: transfer amount exceeds balance"
 		);
-		_balances[recipient] = _balances[recipient].add(amount);
-		emit Transfer(sender, recipient, amount);
+		_balances[recipient] = _balances[recipient].add(taxedAmount);
+		emit Transfer(sender, recipient, taxedAmount);
 	}
 
 	/** @dev Creates `amount` tokens and assigns them to `account`, increasing
@@ -769,28 +756,10 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	}
 
 	/**
-	 * @dev Destroys `amount` tokens from `account`.`amount` is then deducted
-	 * from the caller's allowance.
-	 *
-	 * See {_burn} and {_approve}.
-	 */
-	function _burnFrom(address account, uint256 amount) internal {
-		_burn(account, amount);
-		_approve(
-			account,
-			_msgSender(),
-			_allowances[account][_msgSender()].sub(
-				amount,
-				"BEP20: burn amount exceeds allowance"
-			)
-		);
-	}
-
-	/**
 	 * Add functionality like burn to the _stake afunction
 	 *
 	 */
-	function stake(uint256 _amount, uint256 _stakePeriod) public {
+	function stake(uint256 _amount, uint256 _stakePeriod) external {
 		// Make sure staker actually is good for it
 		require(
 			_stakePeriod == 30 days ||
@@ -814,7 +783,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	/**
 	 * @notice withdrawStake is used to withdraw stakes from the account holder
 	 */
-	function withdrawStake(uint256 amount, uint256 stake_index) public {
+	function withdrawStake(uint256 amount, uint256 stake_index) external {
 		(uint256 amount_, uint256 reward_) = _withdrawStake(
 			amount,
 			stake_index
@@ -828,7 +797,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_mint(_msgSender(), amount_ + reward_);
 	}
 
-	function withdrawAllStake(uint256 stake_index) public {
+	function withdrawAllStake(uint256 stake_index) external {
 		(uint256 amount_, uint256 reward_) = _withdrawAllStake(stake_index);
 		// Return staked tokens to user
 		// Amount staked on liquidity reserved goes to the user
@@ -842,7 +811,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// DEV POOL LOCKED WALLET
 
-	function unlockDevPoolWallet() public {
+	function unlockDevPoolWallet() external {
 		require(
 			msg.sender == devPoolLockedWallet.beneficiary() ||
 				msg.sender == owner(),
@@ -858,7 +827,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// Strategic Partner LOCKED WALLET
 
-	function unlockTeamAndProjectCoordinatorWallet() public {
+	function unlockTeamAndProjectCoordinatorWallet() external {
 		require(
 			team_and_project_coordinator_address ==
 				teamAndProjectCoordinatorLockedWallet.beneficiary() ||
@@ -874,24 +843,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// Private Placement LOCKED WALLET
 
-	function privatePlacementAmount() public view returns (uint256) {
-		return privatePlacementLockedWallet._getAmount(msg.sender);
-	}
-
-	function privatePlacementIndex() public view returns (uint256) {
-		return privatePlacementLockedWallet._getIndex(msg.sender);
-	}
-
-	function privatePlacementMonth() public view returns (uint256) {
-		return privatePlacementLockedWallet._getMonth(msg.sender);
-	}
-
-	function privatePlacementDuration() public view returns (uint256) {
-		return privatePlacementLockedWallet._getDuration(msg.sender);
-	}
-
 	function addPrivatePlacementUser(address user_, uint256 amount_)
-		public
+		external
 		onlyOwner
 	{
 		require(
@@ -901,18 +854,20 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
 		privatePlacementLockedWallet._lockWallet(amount_, user_);
+		emit AddPrivatePlacement(msg.sender, user_);
 	}
 
-	function deletePrivatePlacementUser(address user_) public onlyOwner {
+	function deletePrivatePlacementUser(address user_) external onlyOwner {
 		require(
 			user_ != address(0),
 			"MultiTokenTimeLock: Cannot delete empty user"
 		);
 
 		privatePlacementLockedWallet.deleteUser(user_);
+		emit DeletePrivatePlacement(msg.sender, user_);
 	}
 
-	function releasePrivatePlacement() public {
+	function releasePrivatePlacement() external {
 		uint256 releasedClaimableLockedAmount = privatePlacementLockedWallet
 			.releaseClaimable(privatePlacementReleaseRate(), msg.sender);
 
@@ -924,7 +879,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// Team and Project Coordinator LOCKED WALLET
 	function addStrategicPartnerUser(address user_, uint256 amount_)
-		private
+		external
 		onlyOwner
 	{
 		require(
@@ -934,18 +889,20 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
 		strategicPartnerLockedWallet._lockWallet(amount_, user_);
+		emit AddStrategicPartner(msg.sender, user_);
 	}
 
-	function deleteStrategicPartner(address user_) public onlyOwner {
+	function deleteStrategicPartnerUser(address user_) external onlyOwner {
 		require(
 			user_ != address(0),
 			"MultiTokenTimeLock: Cannot delete empty user"
 		);
 
 		strategicPartnerLockedWallet.deleteUser(user_);
+		emit DeleteStrategicPartner(msg.sender, user_);
 	}
 
-	function releaseStrategicPartner() public {
+	function releaseStrategicPartner() external onlyOwner {
 		uint256 releasedClaimableLockedAmount = strategicPartnerLockedWallet
 			.releaseClaimable(strategicPartnerReleaseRate(), msg.sender);
 

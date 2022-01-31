@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-// OpenZeppelin Contracts v4.4.0 (token/ERC20/utils/TokenTimelock.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.11;
 
 import "./src/SafeMath.sol";
 
@@ -28,8 +27,6 @@ contract Lockable {
 		_amount = amount_;
 		_beneficiary = beneficiary_;
 		_startLockedWallet = block.timestamp;
-
-		_latestClaimMonth = 0;
 	}
 
 	/**

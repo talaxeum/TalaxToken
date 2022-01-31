@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.11;
 
 import "./src/SafeMath.sol";
 
@@ -141,7 +141,7 @@ contract Stakable {
 			);
 	}
 
-	function calculateStakeReward(Stake memory _current_stake)
+	function calculateStakeReward(Stake memory _current_stake, uint256 _amount)
 		internal
 		view
 		returns (uint256)
@@ -150,15 +150,16 @@ contract Stakable {
 
 		// return SafeMath.div(
 		// 		SafeMath.mul(
-		// 			_current_stake.amount, 
+		// 			_current_stake.amount,
 		// 			SafeMath.mul(
-		// 				_current_stake.rewardAPY, 
-		// 				getMonth(_current_stake.since))), 
+		// 				_current_stake.rewardAPY,
+		// 				getMonth(_current_stake.since))),
 		// 		1e26, "Error divide staking");
 
 		return
-			(_current_stake.amount *
-				(_current_stake.rewardAPY * getMonth(_current_stake.since))) / 1e26;
+			(_amount *
+				(_current_stake.rewardAPY * getMonth(_current_stake.since))) /
+			1e26;
 	}
 
 	function stakeSummary(address user_)
@@ -236,7 +237,7 @@ contract Stakable {
 		);
 
 		// Calculate available Reward first before we start modifying data
-		uint256 reward = calculateStakeReward(current_stake);
+		uint256 reward = calculateStakeReward(current_stake, amount);
 		// Remove by subtracting the money unstaked
 		current_stake.amount = current_stake.amount - amount;
 		// If stake is empty, 0, then remove it from the array of stakes
@@ -270,18 +271,17 @@ contract Stakable {
 			"Staking: Cannot withdraw before the release time"
 		);
 		require(
-			current_stake.amount == 0,
+			current_stake.amount > 0,
 			"Staking: Cannot withdraw, you don't have any stakes"
 		);
 
 		// Calculate available Reward first before we start modifying data
-		uint256 reward = calculateStakeReward(current_stake);
 		uint256 amount = current_stake.amount;
+		uint256 reward = calculateStakeReward(current_stake,amount);
 		// Remove by subtracting the money unstaked
 		current_stake.amount = 0;
 		// If stake is empty, 0, then remove it from the array of stakes
 		delete stakeholders[user_index].address_stakes[index];
-		stakeholders[user_index].address_stakes.pop();
 
 		return (amount, reward);
 	}
@@ -303,7 +303,7 @@ contract Stakable {
 		);
 
 		for (uint256 s = 0; s < summary.stakes.length; s += 1) {
-			uint256 availableReward = calculateStakeReward(summary.stakes[s]);
+			uint256 availableReward = calculateStakeReward(summary.stakes[s], summary.stakes[s].amount);
 			summary.stakes[s].claimable = availableReward;
 			totalStakeAmount = totalStakeAmount + summary.stakes[s].amount;
 		}
