@@ -148,14 +148,6 @@ contract Stakable {
 	{
 		require(_current_stake.amount > 0, "This user doesn't have any stakes");
 
-		// return SafeMath.div(
-		// 		SafeMath.mul(
-		// 			_current_stake.amount,
-		// 			SafeMath.mul(
-		// 				_current_stake.rewardAPY,
-		// 				getMonth(_current_stake.since))),
-		// 		1e26, "Error divide staking");
-
 		return
 			(_amount *
 				(_current_stake.rewardAPY * getMonth(_current_stake.since))) /
@@ -174,34 +166,6 @@ contract Stakable {
 
 		return summary;
 	}
-
-	// function stakeAmount(address user_)
-	// 	public
-	// 	pure
-	// 	returns (uint256)
-	// {
-	// 	StakingSummary memory summary = StakingSummary(
-	// 		0,
-	// 		stakeholders[stakes[user_]].address_stakes
-	// 	);
-	// 	return _current_stake.amount;
-	// }
-
-	// function stakeAPY(Stake memory _current_stake)
-	// 	public
-	// 	pure
-	// 	returns (uint256)
-	// {
-	// 	return _current_stake.rewardAPY;
-	// }
-
-	// function stakeSince(Stake memory _current_stake)
-	// 	public
-	// 	pure
-	// 	returns (uint256)
-	// {
-	// 	return _current_stake.since;
-	// }
 
 	function calculateStakeDuration(Stake memory _current_stake)
 		internal

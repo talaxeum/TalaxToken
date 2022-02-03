@@ -1,18 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-
 pragma solidity 0.8.11;
 
 import "./src/SafeMath.sol";
 
-/**
- * @dev A token holder contract that will allow a beneficiary to extract the
- * tokens after a given release time.
- *
- * Useful for simple vesting schedules like "advisors get all of their tokens
- * after 1 year".
- */
 contract Lockable {
-	// ERC20 basic token contract being held
 	uint256 private _amount;
 
 	// beneficiary of tokens after they are released

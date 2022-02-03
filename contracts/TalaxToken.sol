@@ -58,12 +58,12 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_decimals = 18;
 		_totalSupply = 210 * 1e6 * 10**18;
 
-		// public_sale_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
-		// staking_reward_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
-		// liquidity_reserve_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
-		// dev_pool_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
-		// team_and_project_coordinator_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
-		// private_sale_address = 0x933C099dD8CaFd2Ba03D8a76A6DE8f1BaDf77851;
+		// public_sale_address = [ADDRESS];
+		// private_sale_address = [ADDRESS];
+		// staking_reward_address = [ADDRESS];
+		// liquidity_reserve_address = [ADDRESS];
+		// dev_pool_address = [ADDRESS];
+		// team_and_project_coordinator_address = [ADDRESS];
 
 		_privateSale = 6993 * 1e3 * 10**18;
 		_publicSale = 42 * 1e6 * 10**18;
@@ -223,6 +223,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		return _balances[account];
 	}
 
+	/**
+	 * @dev this is the release rate for partial token release
+	 */
 	function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
 		return [
 			SafeMath.div(3 * 1e16, 42),
@@ -609,52 +612,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		return true;
 	}
 
-	function changeTaxFee(uint16 taxFee_) external onlyOwner returns (bool) {
-		_changeTaxFee(taxFee_);
-		return true;
-	}
-
-	function changePublicSaleAddress(address new_) public onlyOwner {
-		_balances[new_] = _balances[public_sale_address];
-		emit Transfer(public_sale_address, new_, _balances[public_sale_address]);
-		delete _balances[public_sale_address];
-		_changePublicSaleAddress(new_);
-	}
-
-	function changeLiquidityReserveAddress(address new_) public onlyOwner {
-		_balances[new_] = _balances[liquidity_reserve_address];
-		emit Transfer(liquidity_reserve_address, new_, _balances[liquidity_reserve_address]);
-		delete _balances[liquidity_reserve_address];
-		_changePublicSaleAddress(new_);
-	}
-
-	function changeDevPoolAddress(address new_) public onlyOwner {
-		_balances[new_] = _balances[dev_pool_address];
-		emit Transfer(dev_pool_address, new_, _balances[dev_pool_address]);
-		delete _balances[dev_pool_address];
-		_changeDevPoolAddress(new_);
-	}
-
-	function _changeTaxFee(uint16 taxFee_) internal {
-		_taxFee = taxFee_;
-		emit ChangeTax(msg.sender, taxFee_);
-	}
-
-	function _changePublicSaleAddress(address new_) internal {
-		public_sale_address = new_;
-		emit ChangePublicSaleAddress(public_sale_address, new_);
-	}
-
-	function _changeLiquidityReserveAddress(address new_) internal {
-		liquidity_reserve_address =  new_;
-		emit ChangeLiquidityReserveAddress(liquidity_reserve_address, new_);
-	}
-
-	function _changeDevPoolAddress(address new_) internal {
-		dev_pool_address = new_;
-		emit ChangeDevPoolAddress(dev_pool_address, new_);
-	}
-
 	/**
 	 * @dev Moves tokens `amount` from `sender` to `recipient`.
 	 *
@@ -755,6 +712,55 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		emit Approval(owner, spender, amount);
 	}
 
+	function _changeTaxFee(uint16 taxFee_) internal {
+		_taxFee = taxFee_;
+		emit ChangeTax(msg.sender, taxFee_);
+	}
+
+	function _changePublicSaleAddress(address new_) internal {
+		public_sale_address = new_;
+		emit ChangePublicSaleAddress(public_sale_address, new_);
+	}
+
+	function _changeLiquidityReserveAddress(address new_) internal {
+		liquidity_reserve_address =  new_;
+		emit ChangeLiquidityReserveAddress(liquidity_reserve_address, new_);
+	}
+
+	function _changeDevPoolAddress(address new_) internal {
+		dev_pool_address = new_;
+		emit ChangeDevPoolAddress(dev_pool_address, new_);
+	}
+
+	function changeTaxFee(uint16 taxFee_) external onlyOwner returns (bool) {
+		_changeTaxFee(taxFee_);
+		return true;
+	}
+
+	/**
+	 * @dev Transfer all the balance of an address, delete the old address, and change to new address
+	 */
+	function changePublicSaleAddress(address new_) public onlyOwner {
+		_balances[new_] = _balances[public_sale_address];
+		emit Transfer(public_sale_address, new_, _balances[public_sale_address]);
+		delete _balances[public_sale_address];
+		_changePublicSaleAddress(new_);
+	}
+
+	function changeLiquidityReserveAddress(address new_) public onlyOwner {
+		_balances[new_] = _balances[liquidity_reserve_address];
+		emit Transfer(liquidity_reserve_address, new_, _balances[liquidity_reserve_address]);
+		delete _balances[liquidity_reserve_address];
+		_changePublicSaleAddress(new_);
+	}
+
+	function changeDevPoolAddress(address new_) public onlyOwner {
+		_balances[new_] = _balances[dev_pool_address];
+		emit Transfer(dev_pool_address, new_, _balances[dev_pool_address]);
+		delete _balances[dev_pool_address];
+		_changeDevPoolAddress(new_);
+	}
+
 	/**
 	 * Add functionality like burn to the _stake afunction
 	 *
@@ -808,9 +814,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_mint(_msgSender(), amount_ + reward_);
 	}
 
-	////////////////////////////////////////////////
-	// DEV POOL LOCKED WALLET
-
+	/**
+	 * @dev LockedWallet: Dev Pool Locked Wallet
+	 */
 	function unlockDevPoolWallet() external {
 		require(
 			msg.sender == devPoolLockedWallet.beneficiary() ||
@@ -824,9 +830,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
 	}
 
-	////////////////////////////////////////////////
-	// Strategic Partner LOCKED WALLET
-
+	/**
+	 * @dev LockedWallet: Team And Project Coordinator Locked Wallet
+	 */
 	function unlockTeamAndProjectCoordinatorWallet() external {
 		require(
 			team_and_project_coordinator_address ==
@@ -840,9 +846,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
 	}
 
-	////////////////////////////////////////////////
-	// Private Placement LOCKED WALLET
-
+	/**
+	 * @dev MultiLockedWallet: PrivatePlacement Locked Wallet
+	 */
 	function addPrivatePlacementUser(address user_, uint256 amount_)
 		external
 		onlyOwner
@@ -876,8 +882,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 	}
 
-	////////////////////////////////////////////////
-	// Team and Project Coordinator LOCKED WALLET
+	/**
+	 * @dev MultiLockedWallet: Strategic Partner Locked Wallet
+	 */
 	function addStrategicPartnerUser(address user_, uint256 amount_)
 		external
 		onlyOwner

@@ -1,16 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
-
 pragma solidity 0.8.11;
 
 import "./src/SafeMath.sol";
 
-/**
- * @dev A token holder contract that will allow a beneficiary to extract the
- * tokens after a given release time.
- *
- * Useful for simple vesting schedules like "advisors get all of their tokens
- * after 1 year".
- */
 contract MultiLockable {
 	struct userLockedInfo {
 		address user;
@@ -18,7 +10,7 @@ contract MultiLockable {
 		uint256 latestClaim;
 		uint256 startLockedWallet;
 	}
-	// ERC20 basic token contract being held
+
 	userLockedInfo[] internal userLockedWallets;
 	mapping(address => uint256) private users;
 
@@ -81,7 +73,7 @@ contract MultiLockable {
 
 		if (index == 0) {
 			// This stakeholder stakes for the first time
-			// We need to add him to the stakeHolders and also map it into the Index of the stakes
+			// We need to add him/her to the stakeHolders and also map it into the Index of the stakes
 			// The index returned will be the index of the stakeholder in the stakeholders array
 			if (userLockedWallets.length == 0){
 				userLockedWallets.push();
@@ -120,12 +112,11 @@ contract MultiLockable {
 			_totalAmount,
 			userLockedWallets[getUserIndex(user_)].amount
 		);
+
 		delete userLockedWallets[getUserIndex(user_)];
 	}
 
-	function calculateClaimableAmount(
-		uint256[43] memory rate_,
-		userLockedInfo storage current_info
+	function calculateClaimableAmount(uint256[43] memory rate_, userLockedInfo storage current_info
 	) internal returns (uint256) {
 		uint256 months = (block.timestamp - current_info.startLockedWallet) /
 			30 days;
@@ -137,7 +128,7 @@ contract MultiLockable {
 				SafeMath.div(
 					SafeMath.mul(current_info.amount, rate_[i]),
 					1e16,
-					"Cannot divide 0"
+					"SafeMath: Process cannot be done"
 				)
 			);
 		}
