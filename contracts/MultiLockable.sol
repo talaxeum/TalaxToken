@@ -26,34 +26,39 @@ contract MultiLockable {
 		_startLocked = block.timestamp;
 	}
 
-	function _getIndex(address user_) external view returns(uint256){
-		return getUserIndex(user_);
-	}
-
-	function _getAmount(address user_) external view returns (uint256) {
-		return userLockedWallets[getUserIndex(user_)].amount;
-	}
-
-	function _getMonth(address user_) external view returns (uint256) {
-		return userLockedWallets[getUserIndex(user_)].latestClaim;
-	}
-
-	function _getDuration(address user_) external view returns (uint256) {
-		return
-			(block.timestamp -
-				userLockedWallets[getUserIndex(user_)].startLockedWallet) /
-			30 days;
-	}
-
-	function getTestDuration() external view returns (uint256) {
-		return (block.timestamp - _startLocked) / 30 days;
-	}
-
-	function getUserIndex(address user_) internal view returns (uint256) {
+	/**
+	 * @dev Find the index of an address [Internal function]
+	 */
+	function _getUserIndex(address user_) internal view returns (uint256) {
 		return users[user_];
 	}
 
-	function _lockWallet(uint256 amount_, address user_) external {
+	/**
+	 * @dev Helper functions
+	 */
+	function getIndex(address user_) external view returns(uint256){
+		return _getUserIndex(user_);
+	}
+
+	function getAmount(address user_) external view returns (uint256) {
+		return userLockedWallets[_getUserIndex(user_)].amount;
+	}
+
+	function getMonth(address user_) external view returns (uint256) {
+		return userLockedWallets[_getUserIndex(user_)].latestClaim;
+	}
+
+	function getDuration(address user_) external view returns (uint256) {
+		return
+			(block.timestamp -
+				userLockedWallets[_getUserIndex(user_)].startLockedWallet) /
+			30 days;
+	}
+
+	/**
+	 * @dev Main functions
+	 */
+	function lockWallet(uint256 amount_, address user_) external {
 		uint256 index = users[user_];
 		require(amount_ > 0, "MultiTokenTimeLock: amount is zero");
 
@@ -110,10 +115,10 @@ contract MultiLockable {
 
 		_totalAmount = SafeMath.add(
 			_totalAmount,
-			userLockedWallets[getUserIndex(user_)].amount
+			userLockedWallets[_getUserIndex(user_)].amount
 		);
 
-		delete userLockedWallets[getUserIndex(user_)];
+		delete userLockedWallets[_getUserIndex(user_)];
 	}
 
 	function calculateClaimableAmount(uint256[43] memory rate_, userLockedInfo storage current_info
@@ -152,10 +157,10 @@ contract MultiLockable {
 	{
 		require(_totalAmount > 0, "MultiTokenTimeLock: no tokens left");
 
-		require(getUserIndex(user_) != 0, "MultiTokenTimeLock: User doesn't exist");
+		require(_getUserIndex(user_) != 0, "MultiTokenTimeLock: User doesn't exist");
 
 		userLockedInfo storage current_info = userLockedWallets[
-			getUserIndex(user_)
+			_getUserIndex(user_)
 		];
 
 		uint256 claimableLockedAmount = calculateClaimableAmount(

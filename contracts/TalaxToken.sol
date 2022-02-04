@@ -859,7 +859,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
-		privatePlacementLockedWallet._lockWallet(amount_, user_);
+		privatePlacementLockedWallet.lockWallet(amount_, user_);
 		emit AddPrivatePlacement(msg.sender, user_);
 	}
 
@@ -895,7 +895,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
-		strategicPartnerLockedWallet._lockWallet(amount_, user_);
+		strategicPartnerLockedWallet.lockWallet(amount_, user_);
 		emit AddStrategicPartner(msg.sender, user_);
 	}
 

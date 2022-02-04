@@ -21,21 +21,23 @@ contract Lockable {
 	}
 
 	/**
-	 * @return the token being held.
+	 * @dev Helper functions
 	 */
 	function amount() external view returns (uint256) {
 		return _amount;
 	}
 
-	/**
-	 * @return the beneficiary of the tokens.
-	 */
 	function beneficiary() external view returns (address) {
 		return _beneficiary;
 	}
 
-	function calculateClaimableAmount(uint256[43] memory rate_)
-		private
+
+	/**
+	 * @dev 	Main Functions
+	 * @return 	Claimable amount from Locked Wallet
+	 */
+	function _calculateClaimableAmount(uint256[43] memory rate_)
+		internal
 		returns (uint256)
 	{
 		uint256 months = (block.timestamp - _startLockedWallet) / 30 days;
@@ -67,7 +69,8 @@ contract Lockable {
 	{
 		require(_amount > 0, "TokenTimelock: no tokens left");
 
-		uint256 claimableLockedAmount = calculateClaimableAmount(rate_);
+		uint256 claimableLockedAmount = _calculateClaimableAmount(rate_);
+		
 		require(
 			claimableLockedAmount > 0,
 			"TokenTimelock: no tokens to release"
