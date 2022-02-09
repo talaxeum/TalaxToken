@@ -9,15 +9,27 @@ const helper = require("./helpers/truffleTestHelpers");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 
-contract("Stakable", async accounts => {
+/**
+ * ? TEST CASES
+ * * Staking 100x2
+ * * Cannot Stake more than owned Token
+ * * New Stakeholders should have increased index
+ * * Can't withdraw amount bigger than current stake index
+ * * Withdraw 5 * 1e3 from stake index
+ * ! Remove stake if empty
+ * ! Calculate claimable amount from stake index
+ * ! Calculate rewards from stake index
+*/
+
+contract("Stakable", async (accounts) => {
 	it("Staking 100x2", async () => {
 		talax = await TalaxToken.deployed();
 		supply = await talax.totalSupply();
-		console.log(supply.toString());
+		// console.log(supply.toString());
 		// Stake 100 is used to stake 100 tokens twice and see that stake is added correctly and money burned
 		let owner = accounts[0];
 		// Set owner, user and a stake_amount
-		let stake_amount = 100;
+		let stake_amount = 10 * 1e3;
 		// Add som tokens on account 1 asweel
 		await talax.increaseAllowance(accounts[1], 2000, { from: owner });
 		await talax.transfer(accounts[1], 1000, {
@@ -42,10 +54,10 @@ contract("Stakable", async accounts => {
 		// amountStake = await talax.stakeAmount(stake);
 		// apyStake = await talax.stakeAPY(stake);
 		// sinceStake = await talax.stakeSince(stake);
-		console.log(stake.toString());
+		// console.log(stake.toString());
 
 		summary = await talax.hasStake(owner);
-		console.log(summary.toString());
+		// console.log(summary.toString());
 		// Assert on the emittedevent using truffleassert
 		// This will capture the event and inside the event callback we can use assert on the values returned
 		truffleAssert.eventEmitted(
@@ -108,7 +120,7 @@ contract("Stakable", async accounts => {
 		);
 	});
 
-	it("can't withdraw bigger amount than current stake", async () => {
+	it("can't withdraw bigger amount than current stake index", async () => {
 		talax = await TalaxToken.deployed();
 
 		let owner = accounts[0];
@@ -116,9 +128,9 @@ contract("Stakable", async accounts => {
 		// Try withdrawing 200 from first stake
 		try {
 			await helper.advanceTimeAndBlock(3600 * 24 * 30);
-			await talax.withdrawStake(200, 0, { from: owner });
+			await talax.withdrawStake(20 * 1e3, 0, { from: owner });
 		} catch (error) {
-			console.log(error.reason);
+			// console.log(error.reason);
 			assert.equal(
 				error.reason,
 				"Staking: Cannot withdraw more than you have staked",
@@ -138,29 +150,30 @@ contract("Stakable", async accounts => {
 	// 	}
 	// });
 
-	it("withdraw 50 from stake", async () => {
+	it("withdraw 5 from stake", async () => {
 		talax = await TalaxToken.deployed();
 
 		let owner = accounts[0];
-		let withdraw_amount = 50;
+		let withdraw_amount = 5 * 1e3;
 
-		// let summary = await talax.hasStake(owner);
+		let summary = await talax.hasStake(owner);
 		// console.log(summary.toString());
-		await talax.withdrawStake(withdraw_amount, 0, { from: owner });
-		summary = await talax.hasStake(owner);
 
+		await talax.withdrawStake(withdraw_amount, 0, { from: owner });
+
+		summary = await talax.hasStake(owner);
 		// console.log(summary);
 
 		assert.equal(
 			summary.total_amount,
-			200 - withdraw_amount,
-			"The total staking amount should be 150"
+			20 * 1e3 - withdraw_amount,
+			"The total staking amount should be 15"
 		);
 		let stake_amount = summary.stakes[0].amount;
 
 		assert.equal(
 			stake_amount,
-			100 - withdraw_amount,
+			10 * 1e3 - withdraw_amount,
 			"Wrong amount in first stake after withdrawal"
 		);
 	});
@@ -169,11 +182,16 @@ contract("Stakable", async accounts => {
 		talax = await TalaxToken.deployed();
 
 		let owner = accounts[0];
-		let withdraw_amount = 50;
 
-		await talax.withdrawStake(withdraw_amount, 0, { from: owner });
-		// let summary = await talax.hasStake(owner);
-		// console.log(summary);
+		await helper.advanceTimeAndBlock(3600 * 24 * 32);
+
+		let summary = await talax.hasStake(owner);
+		console.log(summary);
+
+		await talax.withdrawAllStake(0, { from: owner });
+
+		summary = await talax.hasStake(owner);
+		console.log(summary);
 
 		assert.equal(
 			summary.stakes[0].user,

@@ -16,10 +16,10 @@ contract("TalaxToken", async (accounts) => {
 		stratPartner = await talax.stratPartner();
 		privatePlacement = await talax.privatePlacement();
 		teamAndProject = await talax.teamAndProject();
-		console.log(devPool);
-		console.log(stratPartner);
-		console.log(privatePlacement);
-		console.log(teamAndProject);
+		// console.log(devPool);
+		// console.log(stratPartner);
+		// console.log(privatePlacement);
+		// console.log(teamAndProject);
 		// assert.equal(0, supply, "Supply should be 210 Million Talax");
 	});
 
@@ -28,12 +28,12 @@ contract("TalaxToken", async (accounts) => {
 		owner = accounts[3];
 
 		let balance = await talax.balanceOf(owner);
-		console.log(balance.toString());
+		// console.log(balance.toString());
 
 		try {
 			await talax.unlockDevPoolWallet({ from: owner });
 		} catch (error) {
-			console.log(error.reason);
+			// console.log(error.reason);
 			assert.equal(
 				error.reason,
 				"TokenTimeLock: There's nothing to claim yet",
@@ -42,7 +42,7 @@ contract("TalaxToken", async (accounts) => {
 		}
 
 		balance = await talax.balanceOf(owner);
-		console.log(balance.toString());
+		// console.log(balance.toString());
 
 	});
 
@@ -53,7 +53,7 @@ contract("TalaxToken", async (accounts) => {
 		try {
 			await talax.unlockDevPoolWallet({ from: owner });
 		} catch (error) {
-			console.log(error.reason);
+			// console.log(error.reason);
 			assert.equal(
 				error.reason,
 				"TokenTimeLock: Only claimable by User of this address or owner",
@@ -67,10 +67,10 @@ contract("TalaxToken", async (accounts) => {
 		owner = accounts[3]
 
 		let month = await talax.devPoolMonth();
-		console.log(month.toString());
+		// console.log(month.toString());
 
 		let balance = await talax.balanceOf(owner);
-		console.log(balance.toString());
+		// console.log(balance.toString());
 
 		await helper.advanceTimeAndBlock(3600 * 24 * 120);
 		
@@ -78,10 +78,10 @@ contract("TalaxToken", async (accounts) => {
 		
 		month = await talax.devPoolMonth();
 		latestClaim = await talax.devPoolLatestClaim();
-		console.log(month.toString(), latestClaim.toString());
+		// console.log(month.toString(), latestClaim.toString());
 
 		balance = await talax.balanceOf(owner);
-		console.log(balance.toString());
+		// console.log(balance.toString());
 
 	});
 });

@@ -146,7 +146,10 @@ contract Stakable {
 		view
 		returns (uint256)
 	{
-		require(_current_stake.amount > 0, "This user doesn't have any stakes");
+		require(
+			_current_stake.amount > 0,
+			"This user doesn't have any stakes in this Index"
+		);
 
 		return
 			(_amount *
@@ -214,8 +217,8 @@ contract Stakable {
 				.address_stakes[index]
 				.amount = current_stake.amount;
 			// Reset timer of stake
-			stakeholders[user_index].address_stakes[index].since = block
-				.timestamp;
+			// stakeholders[user_index].address_stakes[index].since = block
+			// 	.timestamp;
 		}
 
 		return (amount, reward);
@@ -236,12 +239,12 @@ contract Stakable {
 		);
 		require(
 			current_stake.amount > 0,
-			"Staking: Cannot withdraw, you don't have any stakes"
+			"Staking: Cannot withdraw, you don't have any stake in this Index"
 		);
 
 		// Calculate available Reward first before we start modifying data
 		uint256 amount = current_stake.amount;
-		uint256 reward = calculateStakeReward(current_stake,amount);
+		uint256 reward = calculateStakeReward(current_stake, amount);
 		// Remove by subtracting the money unstaked
 		current_stake.amount = 0;
 		// If stake is empty, 0, then remove it from the array of stakes
@@ -267,7 +270,10 @@ contract Stakable {
 		);
 
 		for (uint256 s = 0; s < summary.stakes.length; s += 1) {
-			uint256 availableReward = calculateStakeReward(summary.stakes[s], summary.stakes[s].amount);
+			uint256 availableReward = calculateStakeReward(
+				summary.stakes[s],
+				summary.stakes[s].amount
+			);
 			summary.stakes[s].claimable = availableReward;
 			totalStakeAmount = totalStakeAmount + summary.stakes[s].amount;
 		}

@@ -148,9 +148,11 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	event DeleteStrategicPartner(address indexed from, address indexed who);
 
 	event ChangePublicSaleAddress(address indexed from, address indexed to);
-	event ChangeLiquidityReserveAddress(address indexed from, address indexed to);
+	event ChangeLiquidityReserveAddress(
+		address indexed from,
+		address indexed to
+	);
 	event ChangeDevPoolAddress(address indexed from, address indexed to);
-
 
 	function devPool() external view returns (Lockable) {
 		return devPoolLockedWallet;
@@ -634,14 +636,21 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		require(sender != address(0), "BEP20: transfer from the zero address");
 		require(recipient != address(0), "BEP20: transfer to the zero address");
 
-		uint256 tax = SafeMath.mul(amount, SafeMath.div(_taxFee, 100));
+		uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
 		uint256 taxedAmount = SafeMath.sub(amount, tax);
 
-		// uint256 teamFee = SafeMath.mul(taxedAmount, SafeMath.div(2,10));
-		// uint256 liquidityFee = SafeMath.mul(taxedAmount, SafeMath.div(8,10));
+		uint256 teamFee = SafeMath.mul(taxedAmount, SafeMath.div(2, 10));
+		uint256 liquidityFee = SafeMath.mul(taxedAmount, SafeMath.div(8, 10));
+
+		_balances[team_and_project_coordinator_address] = _balances[
+			team_and_project_coordinator_address
+		].add(teamFee);
+		_balances[liquidity_reserve_address] = _balances[
+			liquidity_reserve_address
+		].add(liquidityFee);
 
 		_balances[sender] = _balances[sender].sub(
-			taxedAmount,
+			amount,
 			"BEP20: transfer amount exceeds balance"
 		);
 		_balances[recipient] = _balances[recipient].add(taxedAmount);
@@ -723,7 +732,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	}
 
 	function _changeLiquidityReserveAddress(address new_) internal {
-		liquidity_reserve_address =  new_;
+		liquidity_reserve_address = new_;
 		emit ChangeLiquidityReserveAddress(liquidity_reserve_address, new_);
 	}
 
@@ -742,14 +751,22 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 */
 	function changePublicSaleAddress(address new_) public onlyOwner {
 		_balances[new_] = _balances[public_sale_address];
-		emit Transfer(public_sale_address, new_, _balances[public_sale_address]);
+		emit Transfer(
+			public_sale_address,
+			new_,
+			_balances[public_sale_address]
+		);
 		delete _balances[public_sale_address];
 		_changePublicSaleAddress(new_);
 	}
 
 	function changeLiquidityReserveAddress(address new_) public onlyOwner {
 		_balances[new_] = _balances[liquidity_reserve_address];
-		emit Transfer(liquidity_reserve_address, new_, _balances[liquidity_reserve_address]);
+		emit Transfer(
+			liquidity_reserve_address,
+			new_,
+			_balances[liquidity_reserve_address]
+		);
 		delete _balances[liquidity_reserve_address];
 		_changePublicSaleAddress(new_);
 	}
@@ -873,7 +890,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		emit DeletePrivatePlacement(msg.sender, user_);
 	}
 
-	function releasePrivatePlacement() external {
+	function releasePrivatePlacement() external onlyOwner {
 		uint256 releasedClaimableLockedAmount = privatePlacementLockedWallet
 			.releaseClaimable(privatePlacementReleaseRate(), msg.sender);
 

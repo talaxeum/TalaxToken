@@ -11,12 +11,12 @@ const helper = require("./helpers/truffleTestHelpers");
  */
 
 contract("TalaxToken", async (accounts) => {
-	it("initial supply", async () => {
-		let talax = await TalaxToken.deployed();
-		let supply = await talax.totalSupply();
-		// console.log(supply.toString());
-		assert.equal(0, supply, "Supply should be 210 Million Talax");
-	});
+	// it("initial supply", async () => {
+	// 	let talax = await TalaxToken.deployed();
+	// 	let supply = await talax.totalSupply();
+	// 	// console.log(supply.toString());
+	// 	assert.equal(0, supply, "Supply should be 210 Million Talax");
+	// });
 
 	it("initial owner", async () => {
 		let talax = await TalaxToken.deployed();
