@@ -94,7 +94,7 @@ contract Stakable {
 		uint256 _rewardRate
 	) internal {
 		// Simple check so that user does not stake 0
-		require(_amount > 0, "Cannot stake nothing");
+		require(_amount > 0, "Stakable: Cannot stake nothing");
 		// require(_amount > 1e18, "Minimum stake is 1 TALAX");
 
 		// Mappings in solidity creates all values, but empty, so we can just check the address
@@ -131,13 +131,28 @@ contract Stakable {
 		);
 	}
 
-	function getMonth(uint256 since_) internal view returns (uint256) {
-		require(since_ > 0, "Error timestamp 0");
+	function testCalculateDuration(uint256 index_, address user_)
+		public
+		view
+		returns (uint256)
+	{
+		StakingSummary memory summary = stakeSummary(user_);
+
+		return (block.timestamp -
+			summary.stakes[index_].since);
+	}
+
+	function calculateStakingDuration(uint256 since_)
+		internal
+		view
+		returns (uint256)
+	{
+		require(since_ > 0, "Stakable: Error timestamp 0");
 		return
 			SafeMath.div(
-				((block.timestamp - since_) * 1e24),
+				(block.timestamp - since_) * 1e24,
 				365 days,
-				"Error cannot divide timestamp"
+				"Stakable: Error cannot divide timestamp"
 			);
 	}
 
@@ -146,15 +161,14 @@ contract Stakable {
 		view
 		returns (uint256)
 	{
-		require(
-			_current_stake.amount > 0,
-			"This user doesn't have any stakes in this Index"
-		);
+		if (_current_stake.amount == 0) {
+			return 0;
+		}
 
 		return
 			(_amount *
-				(_current_stake.rewardAPY * getMonth(_current_stake.since))) /
-			1e26;
+				_current_stake.rewardAPY *
+				calculateStakingDuration(_current_stake.since)) / 1e26;
 	}
 
 	function stakeSummary(address user_)
@@ -168,14 +182,6 @@ contract Stakable {
 		);
 
 		return summary;
-	}
-
-	function calculateStakeDuration(Stake memory _current_stake)
-		internal
-		view
-		returns (uint256)
-	{
-		return ((block.timestamp - _current_stake.since) / 30 days);
 	}
 
 	/**
@@ -196,29 +202,31 @@ contract Stakable {
 		];
 		require(
 			current_stake.releaseTime <= block.timestamp,
-			"Staking: Cannot withdraw before the release time"
+			"Stakable: Cannot withdraw before the release time"
 		);
 		require(
 			current_stake.amount >= amount,
-			"Staking: Cannot withdraw more than you have staked"
+			"Stakable: Cannot withdraw more than you have staked"
 		);
 
 		// Calculate available Reward first before we start modifying data
 		uint256 reward = calculateStakeReward(current_stake, amount);
+		uint256 stakeDuration = current_stake.releaseTime - current_stake.since;
 		// Remove by subtracting the money unstaked
 		current_stake.amount = current_stake.amount - amount;
 		// If stake is empty, 0, then remove it from the array of stakes
 		if (current_stake.amount == 0) {
 			delete stakeholders[user_index].address_stakes[index];
-			// stakeholders[user_index].address_stakes.pop();
 		} else {
-			// If not empty then replace the value of it
 			stakeholders[user_index]
 				.address_stakes[index]
 				.amount = current_stake.amount;
 			// Reset timer of stake
-			// stakeholders[user_index].address_stakes[index].since = block
-			// 	.timestamp;
+			stakeholders[user_index].address_stakes[index].since = block
+				.timestamp;
+			stakeholders[user_index].address_stakes[index].releaseTime =
+				block.timestamp +
+				stakeDuration;
 		}
 
 		return (amount, reward);
@@ -235,19 +243,17 @@ contract Stakable {
 		];
 		require(
 			current_stake.releaseTime >= block.timestamp,
-			"Staking: Cannot withdraw before the release time"
+			"Stakable: Cannot withdraw before the release time"
 		);
 		require(
 			current_stake.amount > 0,
-			"Staking: Cannot withdraw, you don't have any stake in this Index"
+			"Stakable: Cannot withdraw, you don't have any stake in this Index"
 		);
 
 		// Calculate available Reward first before we start modifying data
 		uint256 amount = current_stake.amount;
 		uint256 reward = calculateStakeReward(current_stake, amount);
-		// Remove by subtracting the money unstaked
-		current_stake.amount = 0;
-		// If stake is empty, 0, then remove it from the array of stakes
+
 		delete stakeholders[user_index].address_stakes[index];
 
 		return (amount, reward);
@@ -266,7 +272,7 @@ contract Stakable {
 		);
 		require(
 			summary.stakes.length != 0,
-			"This address does not have any stakes"
+			"Stakable: This address does not have any stakes"
 		);
 
 		for (uint256 s = 0; s < summary.stakes.length; s += 1) {

@@ -75,15 +75,15 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
 		_totalSupply = _totalSupply.sub(
 			_privateSale,
-			"Cannot transfer more than total supply"
+			"TalaxToken: Cannot transfer more than total supply"
 		);
 		_totalSupply = _totalSupply.sub(
 			_publicSale,
-			"Cannot transfer more than total supply"
+			"TalaxToken: Cannot transfer more than total supply"
 		);
 		_totalSupply = _totalSupply.sub(
 			_stakingReward,
-			"Cannot transfer more than total supply"
+			"TalaxToken: Cannot transfer more than total supply"
 		);
 
 		devPoolLockedWallet = new Lockable(42 * 1e6 * 10**18, dev_pool_address);
@@ -99,24 +99,24 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		// Dev Pool
 		_totalSupply = _totalSupply.sub(
 			42 * 1e6 * 10**18,
-			"Cannot transfer more than total supply"
+			"TalaxToken: Cannot transfer more than total supply"
 		);
 		// Team and Project Coordinator
 		_totalSupply = _totalSupply.sub(
 			31500 * 1e3 * 10**18,
-			"Cannot transfer more than total supply"
+			"TalaxToken: Cannot transfer more than total supply"
 		);
 
 		// MultiLocked Wallet
 		// Private Placement
 		_totalSupply = _totalSupply.sub(
 			6993 * 1e3 * 10**18,
-			"Cannot transfer more than total supply"
+			"TalaxToken: Cannot transfer more than total supply"
 		);
 		// Strategic Partner
 		_totalSupply = _totalSupply.sub(
 			10500 * 1e3 * 10**18,
-			"Cannot transfer more than total supply"
+			"TalaxToken: Cannot transfer more than total supply"
 		);
 
 		// later divided by 100 to make percentage
@@ -500,7 +500,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			_msgSender(),
 			_allowances[sender][_msgSender()].sub(
 				amount,
-				"BEP20: transfer amount exceeds allowance"
+				"TalaxToken: transfer amount exceeds allowance"
 			)
 		);
 		return true;
@@ -553,7 +553,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			spender,
 			_allowances[_msgSender()][spender].sub(
 				subtractedValue,
-				"BEP20: decreased allowance below zero"
+				"TalaxToken: decreased allowance below zero"
 			)
 		);
 		return true;
@@ -566,7 +566,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	{
 		require(
 			amount_ < _stakingReward,
-			"Amount burnt cannot be larger than Staking Reward"
+			"TalaxToken: Amount burnt cannot be larger than Staking Reward"
 		);
 		_stakingReward = _stakingReward.sub(amount_);
 		_totalSupply = _totalSupply.sub(amount_);
@@ -633,8 +633,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		address recipient,
 		uint256 amount
 	) internal {
-		require(sender != address(0), "BEP20: transfer from the zero address");
-		require(recipient != address(0), "BEP20: transfer to the zero address");
+		require(sender != address(0), "TalaxToken: transfer from the zero address");
+		require(recipient != address(0), "TalaxToken: transfer to the zero address");
 
 		uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
 		uint256 taxedAmount = SafeMath.sub(amount, tax);
@@ -651,7 +651,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
 		_balances[sender] = _balances[sender].sub(
 			amount,
-			"BEP20: transfer amount exceeds balance"
+			"TalaxToken: transfer amount exceeds balance"
 		);
 		_balances[recipient] = _balances[recipient].add(taxedAmount);
 		emit Transfer(sender, recipient, taxedAmount);
@@ -667,7 +667,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 * - `to` cannot be the zero address.
 	 */
 	function _mint(address account, uint256 amount) internal {
-		require(account != address(0), "BEP20: mint to the zero address");
+		require(account != address(0), "TalaxToken: mint to the zero address");
 
 		_totalSupply = _totalSupply.add(amount);
 		_balances[account] = _balances[account].add(amount);
@@ -686,11 +686,11 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 * - `account` must have at least `amount` tokens.
 	 */
 	function _burn(address account, uint256 amount) internal {
-		require(account != address(0), "BEP20: burn from the zero address");
+		require(account != address(0), "TalaxToken: burn from the zero address");
 
 		_balances[account] = _balances[account].sub(
 			amount,
-			"BEP20: burn amount exceeds balance"
+			"TalaxToken: burn amount exceeds balance"
 		);
 		_totalSupply = _totalSupply.sub(amount);
 		emit Transfer(account, address(0), amount);
@@ -714,8 +714,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		address spender,
 		uint256 amount
 	) internal {
-		require(owner != address(0), "BEP20: approve from the zero address");
-		require(spender != address(0), "BEP20: approve to the zero address");
+		require(owner != address(0), "TalaxToken: approve from the zero address");
+		require(spender != address(0), "TalaxToken: approve to the zero address");
 
 		_allowances[owner][spender] = amount;
 		emit Approval(owner, spender, amount);
@@ -789,7 +789,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 				_stakePeriod == 90 days ||
 				_stakePeriod == 180 days ||
 				_stakePeriod == 365 days,
-			"Staking package option not exist"
+			"TalaxToken: Staking package option not exist"
 		);
 		require(
 			_amount < _balances[_msgSender()],
@@ -838,7 +838,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		require(
 			msg.sender == devPoolLockedWallet.beneficiary() ||
 				msg.sender == owner(),
-			"TokenTimeLock: Only claimable by User of this address or owner"
+			"TalaxToken: Only claimable by User of this address or owner"
 		);
 		uint256 timeLockedAmount = devPoolLockedWallet.releaseClaimable(
 			devPoolReleaseRate()
@@ -855,7 +855,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			team_and_project_coordinator_address ==
 				teamAndProjectCoordinatorLockedWallet.beneficiary() ||
 				msg.sender == this.getOwner(),
-			"TokenTimeLock: Only claimable by User of this address or owner"
+			"TalaxToken: Only claimable by User of this address or owner"
 		);
 		uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet
 			.releaseClaimable(teamAndProjectCoordinatorReleaseRate());
@@ -872,9 +872,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	{
 		require(
 			user_ != address(0),
-			"MultiTokenTimeLock: Cannot add empty user"
+			"TalaxToken: Cannot add empty user"
 		);
-		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
+		require(amount_ > 0, "TalaxToken: Cannot use zero amount");
 
 		privatePlacementLockedWallet.lockWallet(amount_, user_);
 		emit AddPrivatePlacement(msg.sender, user_);
@@ -883,7 +883,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	function deletePrivatePlacementUser(address user_) external onlyOwner {
 		require(
 			user_ != address(0),
-			"MultiTokenTimeLock: Cannot delete empty user"
+			"TalaxToken: Cannot delete empty user"
 		);
 
 		privatePlacementLockedWallet.deleteUser(user_);
@@ -908,9 +908,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	{
 		require(
 			user_ != address(0),
-			"MultiTokenTimeLock: Cannot add empty user"
+			"TalaxToken: Cannot add empty user"
 		);
-		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
+		require(amount_ > 0, "TalaxToken: Cannot use zero amount");
 
 		strategicPartnerLockedWallet.lockWallet(amount_, user_);
 		emit AddStrategicPartner(msg.sender, user_);
@@ -919,7 +919,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	function deleteStrategicPartnerUser(address user_) external onlyOwner {
 		require(
 			user_ != address(0),
-			"MultiTokenTimeLock: Cannot delete empty user"
+			"TalaxToken: Cannot delete empty user"
 		);
 
 		strategicPartnerLockedWallet.deleteUser(user_);

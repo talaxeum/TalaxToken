@@ -79,7 +79,7 @@ contract Lockable {
 		_amount = SafeMath.sub(
 			_amount,
 			claimableLockedAmount,
-			"Cannot substract total amount with claimable"
+			"TokenTimeLock: Cannot substract total amount with claimable"
 		);
 
 		return claimableLockedAmount;
