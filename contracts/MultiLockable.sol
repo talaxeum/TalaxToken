@@ -35,9 +35,6 @@ contract MultiLockable {
 		_startLocked = block.timestamp;
 	}
 
-	/**
-	 * @return the token being held.
-	 */
 	function _getIndex(address user_) external view returns(uint256){
 		return getUserIndex(user_);
 	}

@@ -28,8 +28,6 @@ contract Lockable {
 		_amount = amount_;
 		_beneficiary = beneficiary_;
 		_startLockedWallet = block.timestamp;
-
-		_latestClaimMonth = 0;
 	}
 
 	/**
