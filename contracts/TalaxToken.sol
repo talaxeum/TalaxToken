@@ -63,6 +63,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		// staking_reward_address = [ADDRESS];
 		// liquidity_reserve_address = [ADDRESS];
 		// dev_pool_address = [ADDRESS];
+		dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
 		// team_and_project_coordinator_address = [ADDRESS];
 
 		_privateSale = 6993 * 1e3 * 10**18;
@@ -230,49 +231,101 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 */
 	function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
 		return [
-			SafeMath.div(3 * 1e16, 42),
+			SafeMath.mul(3 * 1e6, 1e18),
 			0,
 			0,
 			0,
-			SafeMath.div(3 * 1e16, 42),
+			SafeMath.mul(3 * 1e6, 1e18),
 			0,
 			0,
-			SafeMath.div(3 * 1e16, 42),
+			SafeMath.mul(3 * 1e6, 1e18),
 			0,
 			0,
-			SafeMath.div(3 * 1e16, 42),
+			SafeMath.mul(3 * 1e6, 1e18),
 			0,
 			0,
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42)
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18),
+			SafeMath.mul(1 * 1e6, 1e18)
+		];
+	}
+
+	function teamAndProjectCoordinatorReleaseRate()
+		internal
+		pure
+		returns (uint256[43] memory)
+	{
+		return [
+			SafeMath.mul(35 * 1e6, 1e18),
+			0,
+			0,
+			0,
+			SafeMath.mul(30 * 1e6, 1e18),
+			0,
+			0,
+			SafeMath.mul(30 * 1e6, 1e18),
+			0,
+			0,
+			SafeMath.mul(30 * 1e6, 1e18),
+			0,
+			0,
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			SafeMath.mul(10 * 1e6, 1e18),
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0
 		];
 	}
 
@@ -380,57 +433,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		];
 	}
 
-	function teamAndProjectCoordinatorReleaseRate()
-		internal
-		pure
-		returns (uint256[43] memory)
-	{
-		return [
-			SafeMath.div(35 * 1e16, 315),
-			0,
-			0,
-			0,
-			SafeMath.div(30 * 1e16, 315),
-			0,
-			0,
-			SafeMath.div(30 * 1e16, 315),
-			0,
-			0,
-			SafeMath.div(30 * 1e16, 315),
-			0,
-			0,
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0
-		];
-	}
 
 	/**
 	 * @dev See {BEP20-transfer}.

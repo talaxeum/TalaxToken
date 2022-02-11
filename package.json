@@ -22,7 +22,7 @@
   "homepage": "https://github.com/evan533/TalaxToken#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.0",
-    "@truffle/hdwallet-provider": "^2.0.0",
+    "@truffle/hdwallet-provider": "^2.0.3",
     "bignumber.js": "^9.0.2",
     "chai": "^4.3.4",
     "truffle-assertions": "^0.9.2"

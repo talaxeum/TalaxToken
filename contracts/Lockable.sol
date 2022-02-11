@@ -11,7 +11,7 @@ contract Lockable {
 
 	uint256 private _startLockedWallet;
 
-	uint256 public _latestClaimMonth;
+	uint256 private _latestClaimMonth;
 
 	constructor(uint256 amount_, address beneficiary_) {
 		require(amount_ > 0, "TokenTimeLock: Amount must greater than zero");
@@ -33,8 +33,8 @@ contract Lockable {
 
 
 	/**
-	 * @dev 	Main Functions
-	 * @return 	Claimable amount from Locked Wallet
+	 *  @dev 	Main Functions
+	 *  @return 	Claimable amount from Locked Wallet
 	 */
 	function _calculateClaimableAmount(uint256[43] memory rate_)
 		internal
@@ -46,11 +46,7 @@ contract Lockable {
 		for (uint256 i = _latestClaimMonth; i <= months; i++) {
 			claimable = SafeMath.add(
 				claimable,
-				SafeMath.div(
-					SafeMath.mul(_amount, rate_[i]),
-					1e16,
-					"Cannot divide 0"
-				)
+				rate_[i]
 			);
 		}
 
