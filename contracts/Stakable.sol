@@ -95,7 +95,6 @@ contract Stakable {
 	) internal {
 		// Simple check so that user does not stake 0
 		require(_amount > 0, "Cannot stake nothing");
-		// require(_amount > 1e18, "Minimum stake is 1 TALAX");
 
 		// Mappings in solidity creates all values, but empty, so we can just check the address
 		uint256 index = stakes[msg.sender];
