@@ -294,10 +294,17 @@ contract("Stakable_", async (accounts) => {
 		}
 
 		let stake = summary.stakes[1];
+
+		let blocktime = await talax.blockTime();
+
+		let duration = (blocktime - stake.since) / (3600 * 24 * 30 * 12)
+
+		console.log("Stake Duration in Months :",duration)
+
 		assert.equal(
 			stake.claimable,
-			(10 * 1e3 * 0.05) * 3 / 12,
-			"Reward should be 125 after staking 10000 for 90 days"
+			Math.round((10 * 1e3 * 0.05) * (3600 * 24 * 365)),
+			"Reward should be 123 after staking 10000 for 90 days"
 		);
 	});
 });

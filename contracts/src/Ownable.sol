@@ -55,7 +55,7 @@ contract Ownable is Context {
 	 */
 
 	/**
-	 @dev Blocked out until further discussion and research
+	 @dev Blocked out until further discussion
 	 */
 	 
 	// function renounceOwnership() external onlyOwner {
