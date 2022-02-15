@@ -13,181 +13,186 @@ import "./src/SafeMath.sol";
  * after 1 year".
  */
 contract MultiLockable {
-	struct userLockedInfo {
-		address user;
-		uint256 amount;
-		uint256 latestClaim;
-		uint256 startLockedWallet;
-	}
-	// ERC20 basic token contract being held
-	userLockedInfo[] internal userLockedWallets;
-	mapping(address => uint256) private users;
+    struct userLockedInfo {
+        address user;
+        uint256 amount;
+        uint256 latestClaim;
+        uint256 startLockedWallet;
+    }
+    // ERC20 basic token contract being held
+    userLockedInfo[] internal userLockedWallets;
+    mapping(address => uint256) private users;
 
-	uint256 private _totalAmount;
-	uint256 private _startLocked;
+    uint256 private _totalAmount;
+    uint256 private _startLocked;
 
-	constructor(uint256 totalAmount_) {
-		require(
-			totalAmount_ > 0,
-			"MultiTokenTimelock: total amount cannot be zero"
-		);
-		_totalAmount = totalAmount_;
-		_startLocked = block.timestamp;
-	}
+    constructor(uint256 totalAmount_) {
+        require(
+            totalAmount_ > 0,
+            "MultiTokenTimelock: total amount cannot be zero"
+        );
+        _totalAmount = totalAmount_;
+        _startLocked = block.timestamp;
+    }
 
-	function _getIndex(address user_) external view returns(uint256){
-		return getUserIndex(user_);
-	}
+    function _getIndex(address user_) external view returns (uint256) {
+        return getUserIndex(user_);
+    }
 
-	function _getAmount(address user_) external view returns (uint256) {
-		return userLockedWallets[getUserIndex(user_)].amount;
-	}
+    function _getAmount(address user_) external view returns (uint256) {
+        return userLockedWallets[getUserIndex(user_)].amount;
+    }
 
-	function _getMonth(address user_) external view returns (uint256) {
-		return userLockedWallets[getUserIndex(user_)].latestClaim;
-	}
+    function _getMonth(address user_) external view returns (uint256) {
+        return userLockedWallets[getUserIndex(user_)].latestClaim;
+    }
 
-	function _getDuration(address user_) external view returns (uint256) {
-		return
-			(block.timestamp -
-				userLockedWallets[getUserIndex(user_)].startLockedWallet) /
-			30 days;
-	}
+    function _getDuration(address user_) external view returns (uint256) {
+        return
+            (block.timestamp -
+                userLockedWallets[getUserIndex(user_)].startLockedWallet) /
+            30 days;
+    }
 
-	function getTestDuration() external view returns (uint256) {
-		return (block.timestamp - _startLocked) / 30 days;
-	}
+    function getTestDuration() external view returns (uint256) {
+        return (block.timestamp - _startLocked) / 30 days;
+    }
 
-	function getUserIndex(address user_) internal view returns (uint256) {
-		return users[user_];
-	}
+    function getUserIndex(address user_) internal view returns (uint256) {
+        return users[user_];
+    }
 
-	function _lockWallet(uint256 amount_, address user_) external {
-		uint256 index = users[user_];
-		require(
-			user_ != address(0),
-			"MultiTokenTimeLock: Cannot add address(0)"
-		);
+    function _lockWallet(uint256 amount_, address user_) external {
+        uint256 index = users[user_];
+        require(amount_ > 0, "MultiTokenTimeLock: amount is zero");
 
-		require(
-			amount_ < _totalAmount,
-			"MultiTokenTimeLock: Amount is larger than allocated Total Amount left"
-		);
+        require(
+            user_ != address(0),
+            "MultiTokenTimeLock: Cannot add address(0)"
+        );
 
-		require(
-			userLockedWallets[index].amount == 0,
-			"MultiTokenTimeLock: User already exist"
-		);
+        require(
+            amount_ < _totalAmount,
+            "MultiTokenTimeLock: Amount is larger than allocated Total Amount left"
+        );
 
-		if (index == 0) {
-			// This stakeholder stakes for the first time
-			// We need to add him to the stakeHolders and also map it into the Index of the stakes
-			// The index returned will be the index of the stakeholder in the stakeholders array
-			if (userLockedWallets.length == 0){
-				userLockedWallets.push();
-				userLockedWallets.push();
-			}else{
-				userLockedWallets.push();
-			}
+        require(
+            userLockedWallets[index].amount == 0,
+            "MultiTokenTimeLock: User already exist"
+        );
 
-			// Calculate the index of the last item in the array by Len-1
-			uint256 userIndex = userLockedWallets.length - 1;
-			// Assign the address to the new index
-			userLockedWallets[userIndex].user = user_;
-			userLockedWallets[userIndex].amount = amount_;
-			userLockedWallets[userIndex].latestClaim = 0;
-			userLockedWallets[userIndex].startLockedWallet = block.timestamp;
-			// Add index to the stakeHolders
-			users[user_] = userIndex;
+        if (index == 0) {
+            // This stakeholder stakes for the first time
+            // We need to add him to the stakeHolders and also map it into the Index of the stakes
+            // The index returned will be the index of the stakeholder in the stakeholders array
+            if (userLockedWallets.length == 0) {
+                userLockedWallets.push();
+                userLockedWallets.push();
+            } else {
+                userLockedWallets.push();
+            }
 
-			index = userIndex;
-		}
+            // Calculate the index of the last item in the array by Len-1
+            uint256 userIndex = userLockedWallets.length - 1;
+            // Assign the address to the new index
+            userLockedWallets[userIndex].user = user_;
+            userLockedWallets[userIndex].amount = amount_;
+            userLockedWallets[userIndex].latestClaim = 0;
+            userLockedWallets[userIndex].startLockedWallet = block.timestamp;
+            // Add index to the stakeHolders
+            users[user_] = userIndex;
 
-		_totalAmount = SafeMath.sub(
-			_totalAmount,
-			amount_,
-			"MultiTokenTimeLock: Cannot subs larget than total amount"
-		);
-	}
+            index = userIndex;
+        }
 
-	function deleteUser(address user_) external {
-		require(
-			user_ != address(0),
-			"MultiTokenTimeLock: User has some token left in locked wallet"
-		);
+        _totalAmount = SafeMath.sub(
+            _totalAmount,
+            amount_,
+            "MultiTokenTimeLock: Cannot subs larget than total amount"
+        );
+    }
 
-		_totalAmount = SafeMath.add(
-			_totalAmount,
-			userLockedWallets[getUserIndex(user_)].amount
-		);
-		delete userLockedWallets[getUserIndex(user_)];
-	}
+    function deleteUser(address user_) external {
+        require(
+            user_ != address(0),
+            "MultiTokenTimeLock: User has some token left in locked wallet"
+        );
 
-	function calculateClaimableAmount(
-		uint256[43] memory rate_,
-		userLockedInfo storage current_info
-	) internal returns (uint256) {
-		uint256 months = (block.timestamp - current_info.startLockedWallet) /
-			30 days;
-		uint256 claimable;
+        _totalAmount = SafeMath.add(
+            _totalAmount,
+            userLockedWallets[getUserIndex(user_)].amount
+        );
+        delete userLockedWallets[getUserIndex(user_)];
+    }
 
-		for (uint256 i = current_info.latestClaim; i <= months; i++) {
-			claimable = SafeMath.add(
-				claimable,
-				SafeMath.div(
-					SafeMath.mul(current_info.amount, rate_[i]),
-					1e16,
-					"Cannot divide 0"
-				)
-			);
-		}
+    function calculateClaimableAmount(
+        uint256[43] memory rate_,
+        userLockedInfo storage current_info
+    ) internal returns (uint256) {
+        uint256 months = (block.timestamp - current_info.startLockedWallet) /
+            30 days;
+        uint256 claimable;
 
-		current_info.latestClaim = months + 1;
+        for (uint256 i = current_info.latestClaim; i <= months; i++) {
+            claimable = SafeMath.add(
+                claimable,
+                SafeMath.div(
+                    SafeMath.mul(current_info.amount, rate_[i]),
+                    1e16,
+                    "Cannot divide 0"
+                )
+            );
+        }
 
-		require(
-			claimable != 0,
-			"MultiTokenTimeLock: There's nothing to claim yet"
-		);
+        current_info.latestClaim = months + 1;
 
-		return claimable;
-	}
+        require(
+            claimable != 0,
+            "MultiTokenTimeLock: There's nothing to claim yet"
+        );
 
-	/**
-	 * @notice Transfers tokens held by timelock to beneficiary.
-	 */
-	function releaseClaimable(uint256[43] memory rate_, address user_)
-		external
-		returns (uint256)
-	{
-		require(_totalAmount > 0, "MultiTokenTimeLock: no tokens left");
+        return claimable;
+    }
 
-		require(getUserIndex(user_) != 0, "MultiTokenTimeLock: User doesn't exist");
+    /**
+     * @notice Transfers tokens held by timelock to beneficiary.
+     */
+    function releaseClaimable(uint256[43] memory rate_, address user_)
+        external
+        returns (uint256)
+    {
+        require(_totalAmount > 0, "MultiTokenTimeLock: no tokens left");
 
-		userLockedInfo storage current_info = userLockedWallets[
-			getUserIndex(user_)
-		];
+        require(
+            getUserIndex(user_) != 0,
+            "MultiTokenTimeLock: User doesn't exist"
+        );
 
-		uint256 claimableLockedAmount = calculateClaimableAmount(
-			rate_,
-			current_info
-		);
-		require(
-			claimableLockedAmount > 0,
-			"MultiTokenTimeLock: no tokens to release"
-		);
+        userLockedInfo storage current_info = userLockedWallets[
+            getUserIndex(user_)
+        ];
 
-		current_info.amount = SafeMath.sub(
-			current_info.amount,
-			claimableLockedAmount,
-			"MultiTokenTimeLock: Cannot do this operation"
-		);
+        uint256 claimableLockedAmount = calculateClaimableAmount(
+            rate_,
+            current_info
+        );
+        require(
+            claimableLockedAmount > 0,
+            "MultiTokenTimeLock: no tokens to release"
+        );
 
-		// if (current_info.amount == 0) {
-		// 	delete current_info;
-		// }
+        current_info.amount = SafeMath.sub(
+            current_info.amount,
+            claimableLockedAmount,
+            "MultiTokenTimeLock: Cannot do this operation"
+        );
 
-		_totalAmount = SafeMath.add(_totalAmount, claimableLockedAmount);
+        // if (current_info.amount == 0) {
+        // 	delete current_info;
+        // }
 
-		return claimableLockedAmount;
-	}
+        _totalAmount = SafeMath.add(_totalAmount, claimableLockedAmount);
+
+        return claimableLockedAmount;
+    }
 }
