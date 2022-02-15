@@ -53,7 +53,7 @@ contract Ownable is Context {
 	 * NOTE: Renouncing ownership will leave the contract without an owner,
 	 * thereby removing any functionality that is only available to the owner.
 	 */
-	function renounceOwnership() public onlyOwner {
+	function renounceOwnership() external onlyOwner {
 		emit OwnershipTransferred(_owner, address(0));
 		_owner = address(0);
 	}
@@ -62,7 +62,7 @@ contract Ownable is Context {
 	 * @dev Transfers ownership of the contract to a new account (`newOwner`).
 	 * Can only be called by the current owner.
 	 */
-	function transferOwnership(address newOwner) public onlyOwner {
+	function transferOwnership(address newOwner) external onlyOwner {
 		_transferOwnership(newOwner);
 	}
 

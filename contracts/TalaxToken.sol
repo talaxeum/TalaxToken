@@ -570,7 +570,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 * - `spender` cannot be the zero address.
 	 */
 	function increaseAllowance(address spender, uint256 addedValue)
-		public
+		external
 		returns (bool)
 	{
 		_approve(
@@ -596,7 +596,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 * `subtractedValue`.
 	 */
 	function decreaseAllowance(address spender, uint256 subtractedValue)
-		public
+		external
 		returns (bool)
 	{
 		_approve(
@@ -611,7 +611,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	}
 
 	function burnStakingReward(uint256 amount_)
-		public
+		external
 		onlyOwner
 		returns (bool)
 	{
@@ -625,7 +625,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	}
 
 	function mintStakingReward(uint256 amount_)
-		public
+		external
 		onlyOwner
 		returns (bool)
 	{
@@ -654,12 +654,12 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 *
 	 * - `msg.sender` must be the token owner
 	 */
-	function mint(uint256 amount) public onlyOwner returns (bool) {
+	function mint(uint256 amount) external onlyOwner returns (bool) {
 		_mint(_msgSender(), amount);
 		return true;
 	}
 
-	function changeTaxFee(uint16 taxFee_) public onlyOwner returns (bool) {
+	function changeTaxFee(uint16 taxFee_) external onlyOwner returns (bool) {
 		_changeTaxFee(taxFee_);
 		return true;
 	}
@@ -790,7 +790,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	 * Add functionality like burn to the _stake afunction
 	 *
 	 */
-	function stake(uint256 _amount, uint256 _stakePeriod) public {
+	function stake(uint256 _amount, uint256 _stakePeriod) external {
 		// Make sure staker actually is good for it
 		require(
 			_stakePeriod == 30 days ||
@@ -828,7 +828,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_mint(_msgSender(), amount_ + reward_);
 	}
 
-	function withdrawAllStake(uint256 stake_index) public {
+	function withdrawAllStake(uint256 stake_index) external {
 		(uint256 amount_, uint256 reward_) = _withdrawAllStake(stake_index);
 		// Return staked tokens to user
 		// Amount staked on liquidity reserved goes to the user
@@ -842,7 +842,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// DEV POOL LOCKED WALLET
 
-	function unlockDevPoolWallet() public {
+	function unlockDevPoolWallet() external {
 		require(
 			msg.sender == devPoolLockedWallet.beneficiary() ||
 				msg.sender == owner(),
@@ -858,7 +858,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// Strategic Partner LOCKED WALLET
 
-	function unlockTeamAndProjectCoordinatorWallet() public {
+	function unlockTeamAndProjectCoordinatorWallet() external {
 		require(
 			team_and_project_coordinator_address ==
 				teamAndProjectCoordinatorLockedWallet.beneficiary() ||
@@ -874,24 +874,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// Private Placement LOCKED WALLET
 
-	function privatePlacementAmount() public view returns (uint256) {
-		return privatePlacementLockedWallet._getAmount(msg.sender);
-	}
-
-	function privatePlacementIndex() public view returns (uint256) {
-		return privatePlacementLockedWallet._getIndex(msg.sender);
-	}
-
-	function privatePlacementMonth() public view returns (uint256) {
-		return privatePlacementLockedWallet._getMonth(msg.sender);
-	}
-
-	function privatePlacementDuration() public view returns (uint256) {
-		return privatePlacementLockedWallet._getDuration(msg.sender);
-	}
-
 	function addPrivatePlacementUser(address user_, uint256 amount_)
-		public
+		external
 		onlyOwner
 	{
 		require(
@@ -903,7 +887,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		privatePlacementLockedWallet._lockWallet(amount_, user_);
 	}
 
-	function deletePrivatePlacementUser(address user_) public onlyOwner {
+	function deletePrivatePlacementUser(address user_) external onlyOwner {
 		require(
 			user_ != address(0),
 			"MultiTokenTimeLock: Cannot delete empty user"
@@ -912,7 +896,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		privatePlacementLockedWallet.deleteUser(user_);
 	}
 
-	function releasePrivatePlacement() public {
+	function releasePrivatePlacement() external {
 		uint256 releasedClaimableLockedAmount = privatePlacementLockedWallet
 			.releaseClaimable(privatePlacementReleaseRate(), msg.sender);
 
@@ -924,7 +908,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	////////////////////////////////////////////////
 	// Team and Project Coordinator LOCKED WALLET
 	function addStrategicPartnerUser(address user_, uint256 amount_)
-		private
+		external
 		onlyOwner
 	{
 		require(
@@ -936,7 +920,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		strategicPartnerLockedWallet._lockWallet(amount_, user_);
 	}
 
-	function deleteStrategicPartner(address user_) public onlyOwner {
+	function deleteStrategicPartner(address user_) external onlyOwner {
 		require(
 			user_ != address(0),
 			"MultiTokenTimeLock: Cannot delete empty user"
@@ -945,7 +929,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		strategicPartnerLockedWallet.deleteUser(user_);
 	}
 
-	function releaseStrategicPartner() public {
+	function releaseStrategicPartner() external {
 		uint256 releasedClaimableLockedAmount = strategicPartnerLockedWallet
 			.releaseClaimable(strategicPartnerReleaseRate(), msg.sender);
 
