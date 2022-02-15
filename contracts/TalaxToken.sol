@@ -26,36 +26,31 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	string private _name;
 
 	// balances
-	uint256 private _publicSale;
-	uint256 private _privateSale;
-	uint256 private _stakingReward;
-	uint256 private _liquidityReserve;
+    uint256 private _publicSale;
+    uint256 private _privateSale;
+    uint256 private _stakingReward;
+    uint256 private _liquidityReserve;
 
-	uint256 private _devPool;
-	uint256 private _teamAndProjectCoordinator;
+    uint256 private _devPool;
+    uint256 private _teamAndProjectCoordinator;
 
-	uint256 private _privatePlacement;
-	uint256 private _strategicPartner;
+    uint256 private _privatePlacement;
+    uint256 private _strategicPartner;
 
-	address public_sale_address;
-	address private_sale_address;
-	address staking_reward_address;
-	address liquidity_reserve_address;
+    address public_sale_address;
+    address private_sale_address;
+    address staking_reward_address;
+    address liquidity_reserve_address;
 
-	address dev_pool_address;
-	address team_and_project_coordinator_address;
+    address dev_pool_address;
+    address team_and_project_coordinator_address;
 
-	// address private_placement_address;
-	// address strategic_partner_address;
+    Lockable public devPoolLockedWallet;
+    Lockable public teamAndProjectCoordinatorLockedWallet;
 
-	// mapping(address => Lockable) public _lockedWallet;
+    MultiLockable public privatePlacementLockedWallet;
+    MultiLockable public strategicPartnerLockedWallet;
 
-	Lockable public devPoolLockedWallet;
-	Lockable public teamAndProjectCoordinatorLockedWallet;
-
-	// MultiLockable public privateSaleLockedWallet;
-	MultiLockable public privatePlacementLockedWallet;
-	MultiLockable public strategicPartnerLockedWallet;
 
 	constructor() {
 		_name = "TALAXEUM";
