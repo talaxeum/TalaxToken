@@ -144,6 +144,22 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
 	receive() external payable {}
 
+	event ChangeTax(address indexed who, uint256 amount);
+
+    event AddPrivatePlacement(address indexed from, address indexed who);
+    event DeletePrivatePlacement(address indexed from, address indexed who);
+
+    event AddStrategicPartner(address indexed from, address indexed who);
+    event DeleteStrategicPartner(address indexed from, address indexed who);
+
+    event ChangePublicSaleAddress(address indexed from, address indexed to);
+    event ChangeLiquidityReserveAddress(
+        address indexed from,
+        address indexed to
+    );
+    event ChangeDevPoolAddress(address indexed from, address indexed to);
+
+
 	function devPoolRate() public pure returns (uint256[43] memory) {
 		return devPoolReleaseRate();
 	}
@@ -227,261 +243,212 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		return _balances[account];
 	}
 
-	function privateSaleReleaseRate()
-		internal
-		pure
-		returns (uint256[43] memory)
-	{
-		return [
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(493 * 1e16, 6993),
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0
-		];
-	}
+    /**
+     * @dev this is the release rate for partial token release
+     */
+    function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
+        return [
+            SafeMath.mul(3 * 1e6, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(3 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(3 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(3 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18)
+        ];
+    }
 
-	function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
-		return [
-			SafeMath.div(3 * 1e16, 42),
-			0,
-			0,
-			0,
-			SafeMath.div(3 * 1e16, 42),
-			0,
-			0,
-			SafeMath.div(3 * 1e16, 42),
-			0,
-			0,
-			SafeMath.div(3 * 1e16, 42),
-			0,
-			0,
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42),
-			SafeMath.div(1 * 1e16, 42)
-		];
-	}
+    function teamAndProjectCoordinatorReleaseRate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            SafeMath.mul(35 * 1e6, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(30 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(30 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(30 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(10 * 1e6, 1e18),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ];
+    }
 
-	function strategicPartnerReleaseRate()
-		internal
-		pure
-		returns (uint256[43] memory)
-	{
-		return [
-			SafeMath.div(10 * 1e16, 105),
-			0,
-			0,
-			0,
-			SafeMath.div(10 * 1e16, 105),
-			0,
-			0,
-			SafeMath.div(10 * 1e16, 105),
-			0,
-			0,
-			SafeMath.div(10 * 1e16, 105),
-			0,
-			0,
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000),
-			SafeMath.div(216667 * 1e16, 10500000)
-		];
-	}
+    function strategicPartnerReleaseRate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            SafeMath.div(10 * 1e16, 105),
+            0,
+            0,
+            0,
+            SafeMath.div(10 * 1e16, 105),
+            0,
+            0,
+            SafeMath.div(10 * 1e16, 105),
+            0,
+            0,
+            SafeMath.div(10 * 1e16, 105),
+            0,
+            0,
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000),
+            SafeMath.div(216667 * 1e16, 10500000)
+        ];
+    }
 
-	function privatePlacementReleaseRate()
-		internal
-		pure
-		returns (uint256[43] memory)
-	{
-		return [
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(500 * 1e16, 6993),
-			SafeMath.div(493 * 1e16, 6993),
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0
-		];
-	}
-
-	function teamAndProjectCoordinatorReleaseRate()
-		internal
-		pure
-		returns (uint256[43] memory)
-	{
-		return [
-			SafeMath.div(35 * 1e16, 315),
-			0,
-			0,
-			0,
-			SafeMath.div(30 * 1e16, 315),
-			0,
-			0,
-			SafeMath.div(30 * 1e16, 315),
-			0,
-			0,
-			SafeMath.div(30 * 1e16, 315),
-			0,
-			0,
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			SafeMath.div(10 * 1e16, 315),
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0
-		];
-	}
+    function privatePlacementReleaseRate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(500 * 1e16, 6993),
+            SafeMath.div(493 * 1e16, 6993),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ];
+    }
 
 	/**
 	 * @dev See {BEP20-transfer}.
@@ -610,42 +577,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		return true;
 	}
 
-	function burnStakingReward(uint256 amount_)
-		external
-		onlyOwner
-		returns (bool)
-	{
-		require(
-			amount_ < _stakingReward,
-			"Amount burnt cannot be larger than Staking Reward"
-		);
-		_stakingReward = _stakingReward.sub(amount_);
-		_totalSupply = _totalSupply.sub(amount_);
-		return true;
-	}
-
-	function mintStakingReward(uint256 amount_)
-		external
-		onlyOwner
-		returns (bool)
-	{
-		require(amount_ != 0, "Amount mint cannot be 0");
-		_stakingReward = _stakingReward.add(amount_);
-		_totalSupply = _totalSupply.add(amount_);
-		return true;
-	}
-
-	function mintLiquidityReserve(uint256 amount_)
-		public
-		onlyOwner
-		returns (bool)
-	{
-		require(amount_ != 0, "Amount mint cannot be 0");
-		_liquidityReserve = _liquidityReserve.add(amount_);
-		_totalSupply = _totalSupply.add(amount_);
-		return true;
-	}
-
 	/**
 	 * @dev Creates `amount` tokens and assigns them to `msg.sender`, increasing
 	 * the total supply.
@@ -657,15 +588,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 	function mint(uint256 amount) external onlyOwner returns (bool) {
 		_mint(_msgSender(), amount);
 		return true;
-	}
-
-	function changeTaxFee(uint16 taxFee_) external onlyOwner returns (bool) {
-		_changeTaxFee(taxFee_);
-		return true;
-	}
-
-	function _changeTaxFee(uint16 taxFee_) internal {
-		_taxFee = taxFee_;
 	}
 
 	/**
@@ -767,24 +689,106 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		_allowances[owner][spender] = amount;
 		emit Approval(owner, spender, amount);
 	}
-
-	/**
-	 * @dev Destroys `amount` tokens from `account`.`amount` is then deducted
-	 * from the caller's allowance.
-	 *
-	 * See {_burn} and {_approve}.
-	 */
-	function _burnFrom(address account, uint256 amount) internal {
-		_burn(account, amount);
-		_approve(
-			account,
-			_msgSender(),
-			_allowances[account][_msgSender()].sub(
-				amount,
-				"BEP20: burn amount exceeds allowance"
-			)
+	
+	function burnStakingReward(uint256 amount_)
+		external
+		onlyOwner
+		returns (bool)
+	{
+		require(
+			amount_ < _stakingReward,
+			"Amount burnt cannot be larger than Staking Reward"
 		);
+		_stakingReward = _stakingReward.sub(amount_);
+		_totalSupply = _totalSupply.sub(amount_);
+		emit Transfer(staking_reward_address, address(0), amount_);
+
+		return true;
 	}
+
+	function mintStakingReward(uint256 amount_)
+		external
+		onlyOwner
+		returns (bool)
+	{
+		require(amount_ != 0, "Amount mint cannot be 0");
+		_stakingReward = _stakingReward.add(amount_);
+		_totalSupply = _totalSupply.add(amount_);
+		emit Transfer(address(0), staking_reward_address, amount_);
+
+		return true;
+	}
+
+	function mintLiquidityReserve(uint256 amount_)
+		public
+		onlyOwner
+		returns (bool)
+	{
+		require(amount_ != 0, "Amount mint cannot be 0");
+		_liquidityReserve = _liquidityReserve.add(amount_);
+		_totalSupply = _totalSupply.add(amount_);
+		emit Transfer(address(0), liquidity_reserve_address, amount_);
+
+		return true;
+	}
+	
+
+	function _changeTaxFee(uint16 taxFee_) internal {
+		_taxFee = taxFee_;
+		emit ChangeTax(msg.sender, taxFee_);
+	}
+
+	    function _changePublicSaleAddress(address new_) internal {
+        public_sale_address = new_;
+        emit ChangePublicSaleAddress(public_sale_address, new_);
+    }
+
+    function _changeLiquidityReserveAddress(address new_) internal {
+        liquidity_reserve_address = new_;
+        emit ChangeLiquidityReserveAddress(liquidity_reserve_address, new_);
+    }
+
+    function _changeDevPoolAddress(address new_) internal {
+        dev_pool_address = new_;
+        emit ChangeDevPoolAddress(dev_pool_address, new_);
+    }
+
+    function changeTaxFee(uint16 taxFee_) external onlyOwner returns (bool) {
+        _changeTaxFee(taxFee_);
+        return true;
+    }
+
+    /**
+     * @dev Transfer all the balance of an address, delete the old address, and change to new address
+     */
+    function changePublicSaleAddress(address new_) public onlyOwner {
+        _balances[new_] = _balances[public_sale_address];
+        emit Transfer(
+            public_sale_address,
+            new_,
+            _balances[public_sale_address]
+        );
+        delete _balances[public_sale_address];
+        _changePublicSaleAddress(new_);
+    }
+
+    function changeLiquidityReserveAddress(address new_) public onlyOwner {
+        _balances[new_] = _balances[liquidity_reserve_address];
+        emit Transfer(
+            liquidity_reserve_address,
+            new_,
+            _balances[liquidity_reserve_address]
+        );
+        delete _balances[liquidity_reserve_address];
+        _changePublicSaleAddress(new_);
+    }
+
+    function changeDevPoolAddress(address new_) public onlyOwner {
+        _balances[new_] = _balances[dev_pool_address];
+        emit Transfer(dev_pool_address, new_, _balances[dev_pool_address]);
+        delete _balances[dev_pool_address];
+        _changeDevPoolAddress(new_);
+    }
 
 	/**
 	 * Add functionality like burn to the _stake afunction
@@ -885,6 +889,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
 		privatePlacementLockedWallet._lockWallet(amount_, user_);
+		emit AddPrivatePlacement(msg.sender, user_);
 	}
 
 	function deletePrivatePlacementUser(address user_) external onlyOwner {
@@ -894,6 +899,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 
 		privatePlacementLockedWallet.deleteUser(user_);
+		emit DeletePrivatePlacement(msg.sender, user_);
 	}
 
 	function releasePrivatePlacement() external {
@@ -918,6 +924,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		require(amount_ > 0, "MultiTokenTimeLock: Cannot use zero amount");
 
 		strategicPartnerLockedWallet._lockWallet(amount_, user_);
+		emit AddStrategicPartner(msg.sender, user_);
 	}
 
 	function deleteStrategicPartner(address user_) external onlyOwner {
@@ -927,6 +934,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 		);
 
 		strategicPartnerLockedWallet.deleteUser(user_);
+		emit DeleteStrategicPartner(msg.sender, user_);
 	}
 
 	function releaseStrategicPartner() external {
