@@ -7,7 +7,6 @@ import "./src/Ownable.sol";
 import "./src/SafeMath.sol";
 import "./Stakable.sol";
 import "./Lockable.sol";
-import "./MultiLockable.sol";
 
 contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     using SafeMath for uint256;
@@ -44,12 +43,13 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     address dev_pool_address;
     address team_and_project_coordinator_address;
+	address private_placement_address;
+	address strategic_partner_address;
 
     Lockable public devPoolLockedWallet;
     Lockable public teamAndProjectCoordinatorLockedWallet;
-
-    MultiLockable public privatePlacementLockedWallet;
-    MultiLockable public strategicPartnerLockedWallet;
+    Lockable public privatePlacementLockedWallet;
+    Lockable public strategicPartnerLockedWallet;
 
     constructor() {
         _name = "TALAXEUM";
@@ -91,9 +91,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             31500 * 1e3 * 10**18,
             team_and_project_coordinator_address
         );
-
-        privatePlacementLockedWallet = new MultiLockable(6993 * 1e3 * 10**18);
-        strategicPartnerLockedWallet = new MultiLockable(10500 * 1e3 * 10**18);
+        privatePlacementLockedWallet = new Lockable(6993 * 1e3 * 10**18, private_placement_address);
+        strategicPartnerLockedWallet = new Lockable(10500 * 1e3 * 10**18, strategic_partner_address);
 
         // Locked Wallet
         // Dev Pool
@@ -106,8 +105,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             31500 * 1e3 * 10**18,
             "TalaxToken: Cannot transfer more than total supply"
         );
-
-        // MultiLocked Wallet
         // Private Placement
         _totalSupply = _totalSupply.sub(
             6993 * 1e3 * 10**18,
@@ -166,11 +163,11 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         return teamAndProjectCoordinatorLockedWallet;
     }
 
-    function privatePlacement() external view returns (MultiLockable) {
+    function privatePlacement() external view returns (Lockable) {
         return privatePlacementLockedWallet;
     }
 
-    function stratPartner() external view returns (MultiLockable) {
+    function stratPartner() external view returns (Lockable) {
         return strategicPartnerLockedWallet;
     }
 
@@ -882,63 +879,35 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /**
-     * @dev MultiLockedWallet: PrivatePlacement Locked Wallet
+	/**
+     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
-    function addPrivatePlacementUser(address user_, uint256 amount_)
-        external
-        onlyOwner
-    {
-        require(user_ != address(0), "TalaxToken: Cannot add empty user");
-        require(amount_ > 0, "TalaxToken: Cannot use zero amount");
-
-        privatePlacementLockedWallet.lockWallet(amount_, user_);
-        emit AddPrivatePlacement(msg.sender, user_);
-    }
-
-    function deletePrivatePlacementUser(address user_) external onlyOwner {
-        require(user_ != address(0), "TalaxToken: Cannot delete empty user");
-
-        privatePlacementLockedWallet.deleteUser(user_);
-        emit DeletePrivatePlacement(msg.sender, user_);
-    }
-
-    function releasePrivatePlacement() public {
-        uint256 releasedClaimableLockedAmount = privatePlacementLockedWallet
-            .releaseClaimable(privatePlacementReleaseRate(), msg.sender);
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            releasedClaimableLockedAmount
+    function unlockPrivatePlacementWallet() external {
+        require(
+            private_placement_address ==
+                privatePlacementLockedWallet.beneficiary() ||
+                msg.sender == this.getOwner(),
+            "TalaxToken: Only claimable by User of this address or owner"
         );
+        uint256 timeLockedAmount = privatePlacementLockedWallet
+            .releaseClaimable(privatePlacementReleaseRate());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /**
-     * @dev MultiLockedWallet: Strategic Partner Locked Wallet
+	/**
+     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
-    function addStrategicPartnerUser(address user_, uint256 amount_)
-        external
-        onlyOwner
-    {
-        require(user_ != address(0), "TalaxToken: Cannot add empty user");
-        require(amount_ > 0, "TalaxToken: Cannot use zero amount");
-
-        strategicPartnerLockedWallet.lockWallet(amount_, user_);
-        emit AddStrategicPartner(msg.sender, user_);
-    }
-
-    function deleteStrategicPartnerUser(address user_) external onlyOwner {
-        require(user_ != address(0), "TalaxToken: Cannot delete empty user");
-
-        strategicPartnerLockedWallet.deleteUser(user_);
-        emit DeleteStrategicPartner(msg.sender, user_);
-    }
-
-    function releaseStrategicPartner() public {
-        uint256 releasedClaimableLockedAmount = strategicPartnerLockedWallet
-            .releaseClaimable(strategicPartnerReleaseRate(), msg.sender);
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            releasedClaimableLockedAmount
+    function unlockStrategicPartnerWallet() external {
+        require(
+            strategic_partner_address ==
+                strategicPartnerLockedWallet.beneficiary() ||
+                msg.sender == this.getOwner(),
+            "TalaxToken: Only claimable by User of this address or owner"
         );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet
+            .releaseClaimable(strategicPartnerReleaseRate());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 }
