@@ -617,7 +617,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 			taxedAmount,
 			"BEP20: transfer amount exceeds balance"
 		);
-		_balances[recipient] = _balances[recipient].add(amount);
+		_balances[recipient] = _balances[recipient].add(taxedAmount);
 		emit Transfer(sender, recipient, amount);
 	}
 
