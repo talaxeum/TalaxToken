@@ -24,10 +24,12 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     string private _symbol;
     string private _name;
 
-    // balances
+    /**
+     * Balances
+     */
     uint256 private _publicSale;
-    uint256 private _privateSale;
     uint256 private _stakingReward;
+    uint256 private _privateSale;
     uint256 private _liquidityReserve;
 
     uint256 private _devPool;
@@ -36,15 +38,38 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     uint256 private _privatePlacement;
     uint256 private _strategicPartner;
 
-    address public_sale_address;
-    address private_sale_address;
-    address staking_reward_address;
-    address liquidity_reserve_address;
+    /**
+     * Addresses
+     */
+    address public_sale_address_1;
+    address public_sale_address_2;
+    address public_sale_address_3;
 
-    address dev_pool_address;
-    address team_and_project_coordinator_address;
-	address private_placement_address;
-	address strategic_partner_address;
+    address private_sale_address_1;
+    address private_sale_address_2;
+    address private_sale_address_3;
+
+    /**
+     * Local
+     * address staking_reward_address;
+     * address liquidity_reserve_address;
+     */
+
+    address dev_pool_address_1;
+    address dev_pool_address_2;
+    address dev_pool_address_3;
+
+    address team_and_project_coordinator_address_1;
+    address team_and_project_coordinator_address_2;
+    address team_and_project_coordinator_address_3;
+
+    address private_placement_address_1;
+    address private_placement_address_2;
+    address private_placement_address_3;
+
+    address strategic_partner_address_1;
+    address strategic_partner_address_2;
+    address strategic_partner_address_3;
 
     Lockable public devPoolLockedWallet;
     Lockable public teamAndProjectCoordinatorLockedWallet;
@@ -59,8 +84,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
         // public_sale_address = [ADDRESS];
         // private_sale_address = [ADDRESS];
-        // staking_reward_address = [ADDRESS];
-        // liquidity_reserve_address = [ADDRESS];
         // dev_pool_address = [ADDRESS];
         dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
         // team_and_project_coordinator_address = [ADDRESS];
@@ -91,8 +114,14 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             31500 * 1e3 * 10**18,
             team_and_project_coordinator_address
         );
-        privatePlacementLockedWallet = new Lockable(6993 * 1e3 * 10**18, private_placement_address);
-        strategicPartnerLockedWallet = new Lockable(10500 * 1e3 * 10**18, strategic_partner_address);
+        privatePlacementLockedWallet = new Lockable(
+            6993 * 1e3 * 10**18,
+            private_placement_address
+        );
+        strategicPartnerLockedWallet = new Lockable(
+            10500 * 1e3 * 10**18,
+            strategic_partner_address
+        );
 
         // Locked Wallet
         // Dev Pool
@@ -151,26 +180,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     );
     event ChangeDevPoolAddress(address indexed from, address indexed to);
 
-    function blockTime() external view returns (uint256) {
-        return block.timestamp;
-    }
-
-    function devPool() external view returns (Lockable) {
-        return devPoolLockedWallet;
-    }
-
-    function teamAndProject() external view returns (Lockable) {
-        return teamAndProjectCoordinatorLockedWallet;
-    }
-
-    function privatePlacement() external view returns (Lockable) {
-        return privatePlacementLockedWallet;
-    }
-
-    function stratPartner() external view returns (Lockable) {
-        return strategicPartnerLockedWallet;
-    }
-
     /**
      * @dev Returns the bep token owner.
      */
@@ -224,6 +233,34 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         returns (uint256)
     {
         return _balances[account];
+    }
+
+    function blockTime() external view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function stakingRewardAmount() external view returns (uint256) {
+        return _stakingReward;
+    }
+
+    function liquidityReserveAmount() external view returns (uint256) {
+        return _liquidityReserve;
+    }
+
+    function devPool() external view returns (Lockable) {
+        return devPoolLockedWallet;
+    }
+
+    function teamAndProject() external view returns (Lockable) {
+        return teamAndProjectCoordinatorLockedWallet;
+    }
+
+    function privatePlacement() external view returns (Lockable) {
+        return privatePlacementLockedWallet;
+    }
+
+    function stratPartner() external view returns (Lockable) {
+        return strategicPartnerLockedWallet;
     }
 
     /**
@@ -879,7 +916,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-	/**
+    /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
     function unlockPrivatePlacementWallet() external {
@@ -895,7 +932,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-	/**
+    /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
     function unlockStrategicPartnerWallet() external {
