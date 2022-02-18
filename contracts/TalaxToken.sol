@@ -29,6 +29,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      */
     uint256 private _publicSale;
     uint256 private _stakingReward;
+
     uint256 private _privateSale;
     uint256 private _liquidityReserve;
 
@@ -41,13 +42,10 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     /**
      * Addresses
      */
-    address public_sale_address_1;
-    address public_sale_address_2;
-    address public_sale_address_3;
+    address public_sale_address;
 
-    address private_sale_address_1;
-    address private_sale_address_2;
-    address private_sale_address_3;
+    address private_sale_address;
+    address private_placement_address;
 
     /**
      * Local
@@ -59,22 +57,21 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     address dev_pool_address_2;
     address dev_pool_address_3;
 
-    address team_and_project_coordinator_address_1;
-    address team_and_project_coordinator_address_2;
-    address team_and_project_coordinator_address_3;
-
-    address private_placement_address_1;
-    address private_placement_address_2;
-    address private_placement_address_3;
-
     address strategic_partner_address_1;
     address strategic_partner_address_2;
     address strategic_partner_address_3;
 
-    Lockable public devPoolLockedWallet;
-    Lockable public teamAndProjectCoordinatorLockedWallet;
+    address team_and_project_coordinator_address_1;
+    address team_and_project_coordinator_address_2;
+    address team_and_project_coordinator_address_3;
+
+    /**
+     * Lockable Object
+     */
     Lockable public privatePlacementLockedWallet;
+    Lockable public devPoolLockedWallet;
     Lockable public strategicPartnerLockedWallet;
+    Lockable public teamAndProjectCoordinatorLockedWallet;
 
     constructor() {
         _name = "TALAXEUM";
@@ -82,19 +79,38 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         _decimals = 18;
         _totalSupply = 210 * 1e6 * 10**18;
 
+        /**
+         * Addresses initialization
+         */
+
         // public_sale_address = [ADDRESS];
         // private_sale_address = [ADDRESS];
-        // dev_pool_address = [ADDRESS];
-        dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
-        // team_and_project_coordinator_address = [ADDRESS];
 
-        _privateSale = 6993 * 1e3 * 10**18;
+        // dev_pool_address_1 = [ADDRESS];
+        // dev_pool_address_2 = [ADDRESS];
+        // dev_pool_address_3 = [ADDRESS];
+        dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
+
+        //strategic_partner_address_1 = [ADDRESS]
+        //strategic_partner_address_2 = [ADDRESS]
+        //strategic_partner_address_3 = [ADDRESS]
+
+        //team_and_project_coordinator_address_1 = [ADDRESS]
+        //team_and_project_coordinator_address_2 = [ADDRESS]
+        //team_and_project_coordinator_address_3 = [ADDRESS]
+
+        /**
+         * Amount Initialization
+         */
+
         _publicSale = 42 * 1e6 * 10**18;
+        _privateSale = 6993 * 1e3 * 10**18;
+
         _stakingReward = 17514 * 1e3 * 10**18;
         _liquidityReserve = 52500 * 1e3 * 10**18;
 
-        _balances[private_sale_address] = _privateSale;
         _balances[public_sale_address] = _publicSale;
+        _balances[private_sale_address] = _privateSale;
 
         _totalSupply = _totalSupply.sub(
             _privateSale,
@@ -109,21 +125,54 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             "TalaxToken: Cannot transfer more than total supply"
         );
 
-        devPoolLockedWallet = new Lockable(42 * 1e6 * 10**18, dev_pool_address);
-        teamAndProjectCoordinatorLockedWallet = new Lockable(
-            31500 * 1e3 * 10**18,
-            team_and_project_coordinator_address
-        );
+        /**
+         * Locked Wallet Initialization
+         */
+
         privatePlacementLockedWallet = new Lockable(
             6993 * 1e3 * 10**18,
             private_placement_address
         );
-        strategicPartnerLockedWallet = new Lockable(
-            10500 * 1e3 * 10**18,
-            strategic_partner_address
+
+        devPoolLockedWallet_1 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_1
+        );
+        devPoolLockedWallet_2 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_2
+        );
+        devPoolLockedWallet_3 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_3
         );
 
-        // Locked Wallet
+        teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
+            10500 * 1e3 * 10**18,
+            team_and_project_coordinator_address_1
+        );
+        teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
+            10500 * 1e3 * 10**18,
+            team_and_project_coordinator_address_2
+        );
+        teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
+            10500 * 1e3 * 10**18,
+            team_and_project_coordinator_address_3
+        );
+
+        strategicPartnerLockedWallet_1 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_1
+        );
+        strategicPartnerLockedWallet_2 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_2
+        );
+        strategicPartnerLockedWallet_3 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_3
+        );
+
         // Dev Pool
         _totalSupply = _totalSupply.sub(
             42 * 1e6 * 10**18,
@@ -266,158 +315,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     /**
      * @dev this is the release rate for partial token release
      */
-    function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
-        return [
-            SafeMath.mul(3 * 1e6, 1e18),
-            0,
-            0,
-            0,
-            SafeMath.mul(3 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(3 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(3 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18),
-            SafeMath.mul(1 * 1e6, 1e18)
-        ];
-    }
-
-    function teamAndProjectCoordinatorReleaseRate()
-        internal
-        pure
-        returns (uint256[43] memory)
-    {
-        return [
-            SafeMath.mul(35 * 1e6, 1e18),
-            0,
-            0,
-            0,
-            SafeMath.mul(30 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(30 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(30 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            SafeMath.mul(10 * 1e6, 1e18),
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-        ];
-    }
-
-    function strategicPartnerReleaseRate()
-        internal
-        pure
-        returns (uint256[43] memory)
-    {
-        return [
-            SafeMath.div(10 * 1e16, 105),
-            0,
-            0,
-            0,
-            SafeMath.div(10 * 1e16, 105),
-            0,
-            0,
-            SafeMath.div(10 * 1e16, 105),
-            0,
-            0,
-            SafeMath.div(10 * 1e16, 105),
-            0,
-            0,
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000),
-            SafeMath.div(216667 * 1e16, 10500000)
-        ];
-    }
-
     function privatePlacementReleaseRate()
         internal
         pure
@@ -456,6 +353,314 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ];
+    }
+
+    function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
+        return [
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18)
+        ];
+    }
+
+    function devPoolReleaseRateAlternate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(1 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18)
+        ];
+    }
+
+    function strategicPartnerReleaseRate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            SafeMath.mul(333333, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(333333, 1e18),
+            0,
+            0,
+            SafeMath.mul(333333, 1e18),
+            0,
+            0,
+            SafeMath.mul(333333, 1e18),
+            0,
+            0,
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18),
+            SafeMath.mul(72222, 1e18)
+        ];
+    }
+
+    function strategicPartnerReleaseRateAlternate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            SafeMath.mul(333334, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(333334, 1e18),
+            0,
+            0,
+            SafeMath.mul(333334, 1e18),
+            0,
+            0,
+            SafeMath.mul(333334, 1e18),
+            0,
+            0,
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18),
+            SafeMath.mul(72223, 1e18)
+        ];
+    }
+
+    function teamAndProjectCoordinatorReleaseRate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            SafeMath.mul(1166667, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(10 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(10 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(10 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            SafeMath.mul(333333, 1e18),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ];
+    }
+
+    function teamAndProjectCoordinatorReleaseRateAlternate()
+        internal
+        pure
+        returns (uint256[43] memory)
+    {
+        return [
+            SafeMath.mul(1166666, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(10 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(10 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(10 * 1e6, 1e18),
+            0,
+            0,
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(333334, 1e18),
             0,
             0,
             0,
@@ -885,38 +1090,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     }
 
     /**
-     * @dev LockedWallet: Dev Pool Locked Wallet
-     */
-    function unlockDevPoolWallet() external {
-        require(
-            msg.sender == devPoolLockedWallet.beneficiary() ||
-                msg.sender == owner(),
-            "TalaxToken: Only claimable by User of this address or owner"
-        );
-        uint256 timeLockedAmount = devPoolLockedWallet.releaseClaimable(
-            devPoolReleaseRate()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /**
-     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
-     */
-    function unlockTeamAndProjectCoordinatorWallet() external {
-        require(
-            team_and_project_coordinator_address ==
-                teamAndProjectCoordinatorLockedWallet.beneficiary() ||
-                msg.sender == this.getOwner(),
-            "TalaxToken: Only claimable by User of this address or owner"
-        );
-        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet
-            .releaseClaimable(teamAndProjectCoordinatorReleaseRate());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
     function unlockPrivatePlacementWallet() external {
@@ -933,17 +1106,124 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     }
 
     /**
+     * @dev LockedWallet: Dev Pool Locked Wallet
+     */
+    function unlockDevPoolWallet_1() external {
+        require(
+            msg.sender == devPoolLockedWallet_1.beneficiary() ||
+                msg.sender == owner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
+            devPoolReleaseRate()
+        );
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockDevPoolWallet_2() external {
+        require(
+            msg.sender == devPoolLockedWallet_2.beneficiary() ||
+                msg.sender == owner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
+            devPoolReleaseRate()
+        );
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockDevPoolWallet_3() external {
+        require(
+            msg.sender == devPoolLockedWallet_3.beneficiary() ||
+                msg.sender == owner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
+            devPoolReleaseRateAlternate()
+        );
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
-    function unlockStrategicPartnerWallet() external {
+    function unlockStrategicPartnerWallet_1() external {
         require(
-            strategic_partner_address ==
-                strategicPartnerLockedWallet.beneficiary() ||
+            msg.sender == strategicPartnerLockedWallet_1.beneficiary() ||
                 msg.sender == this.getOwner(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
-        uint256 timeLockedAmount = strategicPartnerLockedWallet
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_1
             .releaseClaimable(strategicPartnerReleaseRate());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockStrategicPartnerWallet_2() external {
+        require(
+            msg.sender == strategicPartnerLockedWallet_2.beneficiary() ||
+                msg.sender == this.getOwner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_2
+            .releaseClaimable(strategicPartnerReleaseRate());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockStrategicPartnerWallet_3() external {
+        require(
+            msg.sender == strategicPartnerLockedWallet_3.beneficiary() ||
+                msg.sender == this.getOwner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_3
+            .releaseClaimable(strategicPartnerReleaseRateAlternate());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    /**
+     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
+     */
+    function unlockTeamAndProjectCoordinatorWallet_1() external {
+        require(
+            msg.sender ==
+                teamAndProjectCoordinatorLockedWallet_1.beneficiary() ||
+                msg.sender == this.getOwner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
+            .releaseClaimable(teamAndProjectCoordinatorReleaseRate());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockTeamAndProjectCoordinatorWallet_2() external {
+        require(
+            msg.sender ==
+                teamAndProjectCoordinatorLockedWallet_2.beneficiary() ||
+                msg.sender == this.getOwner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
+            .releaseClaimable(teamAndProjectCoordinatorReleaseRate());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockTeamAndProjectCoordinatorWallet_3() external {
+        require(
+            msg.sender ==
+                teamAndProjectCoordinatorLockedWallet_3.beneficiary() ||
+                msg.sender == this.getOwner(),
+            "TalaxToken: Only claimable by User of this address or owner"
+        );
+        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
+            .releaseClaimable(teamAndProjectCoordinatorReleaseRateAlternate());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
