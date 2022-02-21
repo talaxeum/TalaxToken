@@ -27,11 +27,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     /**
      * Balances
      */
-    uint256 private _publicSale;
     uint256 private _stakingReward;
-
-    uint256 private _privateSale;
-    uint256 private _liquidityReserve;
 
     uint256 private _devPool;
     uint256 private _teamAndProjectCoordinator;
@@ -69,9 +65,16 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      * Lockable Object
      */
     Lockable public privatePlacementLockedWallet;
-    Lockable public devPoolLockedWallet;
-    Lockable public strategicPartnerLockedWallet;
-    Lockable public teamAndProjectCoordinatorLockedWallet;
+
+    Lockable public devPoolLockedWallet_1;
+    Lockable public devPoolLockedWallet_2;
+    Lockable public devPoolLockedWallet_3;
+    Lockable public strategicPartnerLockedWallet_1;
+    Lockable public strategicPartnerLockedWallet_2;
+    Lockable public strategicPartnerLockedWallet_3;
+    Lockable public teamAndProjectCoordinatorLockedWallet_1;
+    Lockable public teamAndProjectCoordinatorLockedWallet_2;
+    Lockable public teamAndProjectCoordinatorLockedWallet_3;
 
     constructor() {
         _name = "TALAXEUM";
@@ -89,7 +92,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         // dev_pool_address_1 = [ADDRESS];
         // dev_pool_address_2 = [ADDRESS];
         // dev_pool_address_3 = [ADDRESS];
-        dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
+        // dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
 
         //strategic_partner_address_1 = [ADDRESS]
         //strategic_partner_address_2 = [ADDRESS]
@@ -103,23 +106,23 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
          * Amount Initialization
          */
 
-        _publicSale = 42 * 1e6 * 10**18;
-        _privateSale = 6993 * 1e3 * 10**18;
-
         _stakingReward = 17514 * 1e3 * 10**18;
-        _liquidityReserve = 52500 * 1e3 * 10**18;
+        _balances[address(this)] = 52500 * 1e3 * 10**18;
 
-        _balances[public_sale_address] = _publicSale;
-        _balances[private_sale_address] = _privateSale;
+        _balances[public_sale_address] = 42 * 1e6 * 10**18;
+        _balances[private_sale_address] = 6993 * 1e3 * 10**18;
 
+        //Public Sale
         _totalSupply = _totalSupply.sub(
-            _privateSale,
+            42 * 1e6 * 10**18,
             "TalaxToken: Cannot transfer more than total supply"
         );
+        //Private Sale
         _totalSupply = _totalSupply.sub(
-            _publicSale,
+            6993 * 1e3 * 10**18,
             "TalaxToken: Cannot transfer more than total supply"
         );
+
         _totalSupply = _totalSupply.sub(
             _stakingReward,
             "TalaxToken: Cannot transfer more than total supply"
@@ -207,12 +210,34 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     }
 
     fallback() external payable {
-        _balances[team_and_project_coordinator_address] = _balances[
-            team_and_project_coordinator_address
-        ].add(msg.value);
+        uint256 thirdOfValue = SafeMath.div(msg.value, 3);
+        _balances[team_and_project_coordinator_address_1] = _balances[
+            team_and_project_coordinator_address_1
+        ].add(thirdOfValue);
+
+        _balances[team_and_project_coordinator_address_2] = _balances[
+            team_and_project_coordinator_address_2
+        ].add(thirdOfValue);
+
+        _balances[team_and_project_coordinator_address_3] = _balances[
+            team_and_project_coordinator_address_3
+        ].add(thirdOfValue);
     }
 
-    receive() external payable {}
+    receive() external payable {
+        uint256 thirdOfValue = SafeMath.div(msg.value, 3);
+        _balances[team_and_project_coordinator_address_1] = _balances[
+            team_and_project_coordinator_address_1
+        ].add(thirdOfValue);
+
+        _balances[team_and_project_coordinator_address_2] = _balances[
+            team_and_project_coordinator_address_2
+        ].add(thirdOfValue);
+
+        _balances[team_and_project_coordinator_address_3] = _balances[
+            team_and_project_coordinator_address_3
+        ].add(thirdOfValue);
+    }
 
     event ChangeTax(address indexed who, uint256 amount);
 
@@ -221,13 +246,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     event AddStrategicPartner(address indexed from, address indexed who);
     event DeleteStrategicPartner(address indexed from, address indexed who);
-
-    event ChangePublicSaleAddress(address indexed from, address indexed to);
-    event ChangeLiquidityReserveAddress(
-        address indexed from,
-        address indexed to
-    );
-    event ChangeDevPoolAddress(address indexed from, address indexed to);
 
     /**
      * @dev Returns the bep token owner.
@@ -292,24 +310,12 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         return _stakingReward;
     }
 
-    function liquidityReserveAmount() external view returns (uint256) {
-        return _liquidityReserve;
-    }
-
-    function devPool() external view returns (Lockable) {
-        return devPoolLockedWallet;
-    }
-
-    function teamAndProject() external view returns (Lockable) {
-        return teamAndProjectCoordinatorLockedWallet;
+    function liquidityReserveBalance() external view returns (uint256) {
+        return this.balanceOf(address(this));
     }
 
     function privatePlacement() external view returns (Lockable) {
         return privatePlacementLockedWallet;
-    }
-
-    function stratPartner() external view returns (Lockable) {
-        return strategicPartnerLockedWallet;
     }
 
     /**
@@ -813,7 +819,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         );
         _stakingReward = _stakingReward.sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
-        emit Transfer(staking_reward_address, address(0), amount_);
 
         return true;
     }
@@ -826,7 +831,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         require(amount_ != 0, "Amount mint cannot be 0");
         _stakingReward = _stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
-        emit Transfer(address(0), staking_reward_address, amount_);
 
         return true;
     }
@@ -837,9 +841,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         returns (bool)
     {
         require(amount_ != 0, "Amount mint cannot be 0");
-        _liquidityReserve = _liquidityReserve.add(amount_);
+        _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
-        emit Transfer(address(0), liquidity_reserve_address, amount_);
 
         return true;
     }
@@ -888,15 +891,25 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
         uint256 taxedAmount = SafeMath.sub(amount, tax);
 
-        uint256 teamFee = SafeMath.mul(taxedAmount, SafeMath.div(2, 10));
+        uint256 teamFeeOfThird = SafeMath.div(
+            (SafeMath.mul(taxedAmount, SafeMath.div(2, 10))),
+            3
+        );
         uint256 liquidityFee = SafeMath.mul(taxedAmount, SafeMath.div(8, 10));
 
-        _balances[team_and_project_coordinator_address] = _balances[
-            team_and_project_coordinator_address
-        ].add(teamFee);
-        _balances[liquidity_reserve_address] = _balances[
-            liquidity_reserve_address
-        ].add(liquidityFee);
+        _balances[team_and_project_coordinator_address_1] = _balances[
+            team_and_project_coordinator_address_1
+        ].add(teamFeeOfThird);
+
+        _balances[team_and_project_coordinator_address_2] = _balances[
+            team_and_project_coordinator_address_2
+        ].add(teamFeeOfThird);
+
+        _balances[team_and_project_coordinator_address_3] = _balances[
+            team_and_project_coordinator_address_3
+        ].add(teamFeeOfThird);
+
+        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
 
         _balances[sender] = _balances[sender].sub(
             amount,
@@ -984,58 +997,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         emit ChangeTax(msg.sender, taxFee_);
     }
 
-    function _changePublicSaleAddress(address new_) internal {
-        public_sale_address = new_;
-        emit ChangePublicSaleAddress(public_sale_address, new_);
-    }
-
-    function _changeLiquidityReserveAddress(address new_) internal {
-        liquidity_reserve_address = new_;
-        emit ChangeLiquidityReserveAddress(liquidity_reserve_address, new_);
-    }
-
-    function _changeDevPoolAddress(address new_) internal {
-        dev_pool_address = new_;
-        emit ChangeDevPoolAddress(dev_pool_address, new_);
-    }
-
-    function changeTaxFee(uint16 taxFee_) external onlyOwner returns (bool) {
-        _changeTaxFee(taxFee_);
-        return true;
-    }
-
-    /**
-     * @dev Transfer all the balance of an address, delete the old address, and change to new address
-     */
-    function changePublicSaleAddress(address new_) public onlyOwner {
-        _balances[new_] = _balances[public_sale_address];
-        emit Transfer(
-            public_sale_address,
-            new_,
-            _balances[public_sale_address]
-        );
-        delete _balances[public_sale_address];
-        _changePublicSaleAddress(new_);
-    }
-
-    function changeLiquidityReserveAddress(address new_) public onlyOwner {
-        _balances[new_] = _balances[liquidity_reserve_address];
-        emit Transfer(
-            liquidity_reserve_address,
-            new_,
-            _balances[liquidity_reserve_address]
-        );
-        delete _balances[liquidity_reserve_address];
-        _changePublicSaleAddress(new_);
-    }
-
-    function changeDevPoolAddress(address new_) public onlyOwner {
-        _balances[new_] = _balances[dev_pool_address];
-        emit Transfer(dev_pool_address, new_, _balances[dev_pool_address]);
-        delete _balances[dev_pool_address];
-        _changeDevPoolAddress(new_);
-    }
-
     /**
      * Add functionality like burn to the _stake afunction
      *
@@ -1058,7 +1019,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         // Burn the amount of tokens on the sender
         _burn(_msgSender(), _amount);
         // Stake amount goes to liquidity reserve
-        _liquidityReserve.add(_amount);
+        _balances[address(this)].add(_amount);
     }
 
     /**
@@ -1073,8 +1034,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
         mintLiquidityReserve(reward_);
-        _liquidityReserve.sub(amount_);
-        _liquidityReserve.sub(reward_);
+        _balances[address(this)].sub(amount_);
+        _balances[address(this)].sub(reward_);
         _mint(_msgSender(), amount_ + reward_);
     }
 
@@ -1084,8 +1045,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
         mintLiquidityReserve(reward_);
-        _liquidityReserve.sub(amount_);
-        _liquidityReserve.sub(reward_);
+        _balances[address(this)].sub(amount_);
+        _balances[address(this)].sub(reward_);
         _mint(_msgSender(), amount_ + reward_);
     }
 

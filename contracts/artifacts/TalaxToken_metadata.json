@@ -79,63 +79,6 @@
 					{
 						"indexed": true,
 						"internalType": "address",
-						"name": "from",
-						"type": "address"
-					},
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					}
-				],
-				"name": "ChangeDevPoolAddress",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "from",
-						"type": "address"
-					},
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					}
-				],
-				"name": "ChangeLiquidityReserveAddress",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "from",
-						"type": "address"
-					},
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					}
-				],
-				"name": "ChangePublicSaleAddress",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
 						"name": "who",
 						"type": "address"
 					},
@@ -289,42 +232,6 @@
 				"inputs": [
 					{
 						"internalType": "address",
-						"name": "user_",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount_",
-						"type": "uint256"
-					}
-				],
-				"name": "addPrivatePlacementUser",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "user_",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount_",
-						"type": "uint256"
-					}
-				],
-				"name": "addStrategicPartnerUser",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
 						"name": "owner",
 						"type": "address"
 					},
@@ -389,6 +296,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "blockTime",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -397,64 +317,6 @@
 					}
 				],
 				"name": "burnStakingReward",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "new_",
-						"type": "address"
-					}
-				],
-				"name": "changeDevPoolAddress",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "new_",
-						"type": "address"
-					}
-				],
-				"name": "changeLiquidityReserveAddress",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "new_",
-						"type": "address"
-					}
-				],
-				"name": "changePublicSaleAddress",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint16",
-						"name": "taxFee_",
-						"type": "uint16"
-					}
-				],
-				"name": "changeTaxFee",
 				"outputs": [
 					{
 						"internalType": "bool",
@@ -503,34 +365,8 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "user_",
-						"type": "address"
-					}
-				],
-				"name": "deletePrivatePlacementUser",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "user_",
-						"type": "address"
-					}
-				],
-				"name": "deleteStrategicPartnerUser",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
 				"inputs": [],
-				"name": "devPool",
+				"name": "devPoolLockedWallet_1",
 				"outputs": [
 					{
 						"internalType": "contract Lockable",
@@ -543,7 +379,20 @@
 			},
 			{
 				"inputs": [],
-				"name": "devPoolLockedWallet",
+				"name": "devPoolLockedWallet_2",
+				"outputs": [
+					{
+						"internalType": "contract Lockable",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "devPoolLockedWallet_3",
 				"outputs": [
 					{
 						"internalType": "contract Lockable",
@@ -655,6 +504,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "liquidityReserveBalance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -742,7 +604,7 @@
 				"name": "privatePlacement",
 				"outputs": [
 					{
-						"internalType": "contract MultiLockable",
+						"internalType": "contract Lockable",
 						"name": "",
 						"type": "address"
 					}
@@ -755,26 +617,12 @@
 				"name": "privatePlacementLockedWallet",
 				"outputs": [
 					{
-						"internalType": "contract MultiLockable",
+						"internalType": "contract Lockable",
 						"name": "",
 						"type": "address"
 					}
 				],
 				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "releasePrivatePlacement",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "releaseStrategicPartner",
-				"outputs": [],
-				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -879,10 +727,23 @@
 			},
 			{
 				"inputs": [],
-				"name": "stratPartner",
+				"name": "stakingRewardAmount",
 				"outputs": [
 					{
-						"internalType": "contract MultiLockable",
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "strategicPartnerLockedWallet_1",
+				"outputs": [
+					{
+						"internalType": "contract Lockable",
 						"name": "",
 						"type": "address"
 					}
@@ -892,10 +753,23 @@
 			},
 			{
 				"inputs": [],
-				"name": "strategicPartnerLockedWallet",
+				"name": "strategicPartnerLockedWallet_2",
 				"outputs": [
 					{
-						"internalType": "contract MultiLockable",
+						"internalType": "contract Lockable",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "strategicPartnerLockedWallet_3",
+				"outputs": [
+					{
+						"internalType": "contract Lockable",
 						"name": "",
 						"type": "address"
 					}
@@ -931,7 +805,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "teamAndProject",
+				"name": "teamAndProjectCoordinatorLockedWallet_1",
 				"outputs": [
 					{
 						"internalType": "contract Lockable",
@@ -944,12 +818,49 @@
 			},
 			{
 				"inputs": [],
-				"name": "teamAndProjectCoordinatorLockedWallet",
+				"name": "teamAndProjectCoordinatorLockedWallet_2",
 				"outputs": [
 					{
 						"internalType": "contract Lockable",
 						"name": "",
 						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "teamAndProjectCoordinatorLockedWallet_3",
+				"outputs": [
+					{
+						"internalType": "contract Lockable",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "index_",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "user_",
+						"type": "address"
+					}
+				],
+				"name": "testCalculateDuration",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -1036,14 +947,70 @@
 			},
 			{
 				"inputs": [],
-				"name": "unlockDevPoolWallet",
+				"name": "unlockDevPoolWallet_1",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "unlockTeamAndProjectCoordinatorWallet",
+				"name": "unlockDevPoolWallet_2",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockDevPoolWallet_3",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockPrivatePlacementWallet",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockStrategicPartnerWallet_1",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockStrategicPartnerWallet_2",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockStrategicPartnerWallet_3",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockTeamAndProjectCoordinatorWallet_1",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockTeamAndProjectCoordinatorWallet_2",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockTeamAndProjectCoordinatorWallet_3",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -1087,12 +1054,6 @@
 		"devdoc": {
 			"kind": "dev",
 			"methods": {
-				"addPrivatePlacementUser(address,uint256)": {
-					"details": "MultiLockedWallet: PrivatePlacement Locked Wallet"
-				},
-				"addStrategicPartnerUser(address,uint256)": {
-					"details": "MultiLockedWallet: Strategic Partner Locked Wallet"
-				},
 				"allowance(address,address)": {
 					"details": "See {BEP20-allowance}."
 				},
@@ -1101,9 +1062,6 @@
 				},
 				"balanceOf(address)": {
 					"details": "See {BEP20-balanceOf}."
-				},
-				"changePublicSaleAddress(address)": {
-					"details": "Transfer all the balance of an address, delete the old address, and change to new address"
 				},
 				"decimals()": {
 					"details": "Returns the token decimals."
@@ -1141,10 +1099,16 @@
 				"transferOwnership(address)": {
 					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
 				},
-				"unlockDevPoolWallet()": {
+				"unlockDevPoolWallet_1()": {
 					"details": "LockedWallet: Dev Pool Locked Wallet"
 				},
-				"unlockTeamAndProjectCoordinatorWallet()": {
+				"unlockPrivatePlacementWallet()": {
+					"details": "LockedWallet: Team And Project Coordinator Locked Wallet"
+				},
+				"unlockStrategicPartnerWallet_1()": {
+					"details": "LockedWallet: Team And Project Coordinator Locked Wallet"
+				},
+				"unlockTeamAndProjectCoordinatorWallet_1()": {
 					"details": "LockedWallet: Team And Project Coordinator Locked Wallet"
 				}
 			},
@@ -1158,6 +1122,9 @@
 			},
 			"kind": "user",
 			"methods": {
+				"privatePlacementLockedWallet()": {
+					"notice": "Lockable Object"
+				},
 				"stake(uint256,uint256)": {
 					"notice": "Add functionality like burn to the _stake afunction"
 				},
@@ -1185,67 +1152,59 @@
 	},
 	"sources": {
 		"contracts/Lockable.sol": {
-			"keccak256": "0x8865f176df7a5224fd38b6b40838ce6b9c8b62228f31f60cce9e187007a07b46",
+			"keccak256": "0x8f2ea02b1cc36f5c51909ddad86f2103058cfb6416d009f429f1d7389f77c529",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://0ef583cf74477a5860a4c93bf8328ff8c953110d3c0492eeb6aa3f8c0a32205b",
-				"dweb:/ipfs/QmPj5e7GWgqw6CAqAXxT6M73RMqQfxy8iu6Jp7kiTkDYSr"
-			]
-		},
-		"contracts/MultiLockable.sol": {
-			"keccak256": "0x980202034e2d89e0590b0c3c5776d92ba9889c5591db4174f08da840459a69ef",
-			"license": "UNLICENSED",
-			"urls": [
-				"bzz-raw://660fd86ea8401c0b7640edc9bb723e8c6004216010ee0a6f666b887d8075d2d6",
-				"dweb:/ipfs/QmcMe4ybZ4Yh9E8VaAcRx4vLUPkgytuzrMV8PWuQ6oxQDW"
+				"bzz-raw://7fef1106a937c99f4c4c4906e2076d5ea31ff5efcf9799f55c82656cdfe67d90",
+				"dweb:/ipfs/QmZ8qtpkwfRinJCypLSWrzuMiZRX5BTQ95kYMHvyVp2iu4"
 			]
 		},
 		"contracts/Stakable.sol": {
-			"keccak256": "0x4ffe6ae61d7f8f67b9f0e43da2b5b2c36f47541cb694c0aa982e126dde8042a5",
+			"keccak256": "0xa3b0cb153c5d69b5b90ba9ca5730b941b44044030c489975e87307af9cfa2f83",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://d91f97cc5e0103c34087677e9d24e011d0ba486510c6ca7b520c2e187cdddd85",
-				"dweb:/ipfs/QmYB6LF548kXVyoeSoG1dQmnELU32gtbfVRf55ZjUMF7Mx"
+				"bzz-raw://5ab052ea895c9e83ac24af9b0b630ee03e2afd40ef193b18211e161ad410f0fa",
+				"dweb:/ipfs/QmcakFujRjgKKnTWM5okfbUtyaNuajduYW2wRH5CF7yB13"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0xeb60912d54ebf055daebfdbd118c4b239e48e58ef60b4d397ceace8cfc5d3e30",
+			"keccak256": "0x50898034ea0234d627bcb9f5033a296a019d93726ecb1e12e81ccb6b9d8ab2fb",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://50d22e0bdc7a2e966c882dbd69084a34d806037e9172065848211eb7c3172182",
-				"dweb:/ipfs/QmZsmSTp3HnuSB9b9dyRTWcoaEGkY7cZU3mf2AyaYuPZPZ"
+				"bzz-raw://3c59fdb5ee58b223908c037bc51b6825770e9b9ead1b692dddbb5bbaec850034",
+				"dweb:/ipfs/QmXMV6wNr19ZS26G6Yvos7FUgJB6LU7ek3ytbqkjyQiGm7"
 			]
 		},
 		"contracts/src/Context.sol": {
-			"keccak256": "0xb09771a2aa95d090a5d341949df9dff69ba05a49628bde0051c44bae0c9b2174",
+			"keccak256": "0x01a4620f87841deb1ed89bc8d496e1fe55bb761860b5caffb4d7bb37e858daae",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://6046cb4b6f132ef00908f34e063c9910728116ba97d999ec8704a17dd5aaf006",
-				"dweb:/ipfs/QmZdkPYpyxoJiGDrZ6Fm6TLGTm7ZAHWTkkrhWN7hZnYWpf"
+				"bzz-raw://e6816580e7d2fb79319f5bd067006b23b8df7d1071ce0e6287631808bc9fa063",
+				"dweb:/ipfs/QmXXPT2capxxeMeR8DwVBRc2f6PAFwTK9zikAtvYRDuWC7"
 			]
 		},
 		"contracts/src/IBEP20.sol": {
-			"keccak256": "0xdab64dae3bc3d188f774d4682e510e767c0c6337a5595ea1c83bfcd6aa213efd",
+			"keccak256": "0x8bb39b9ed6ede95659193d7172234fc1769b7e78f91cc770944362577ea53375",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://de2bb477e03b80bfcb37c7af4662e5fe4b81e7e27746dde9eb32e26e839b5783",
-				"dweb:/ipfs/QmeMKmri2cYnkLQjK5QFhjjC8D7Un4UxKm2MNNhY9xUYyC"
+				"bzz-raw://47138e0ce5c9087335afef84d7ffb0025f217e5f1c4955e2e00c937e08876284",
+				"dweb:/ipfs/QmT4saS8i33tQnon7zYUy64YgnZVstN7gU4R7RBNqmwEKC"
 			]
 		},
 		"contracts/src/Ownable.sol": {
-			"keccak256": "0xae2aa587b9bbfe3696fd047df5c440588d9b11dd9d24f4a1193e275481ba86f1",
+			"keccak256": "0x70709ae841a12ea85d4686ea62fb28d3d82e95e72c404e02e01b811367971716",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://a84554503ad0276266608b07d45b9a7f1e9fd600905465308e205573906f046e",
-				"dweb:/ipfs/QmYY9onFV9bqqSCMabvEU3hSLzSCuMxsGDvRUAHWsjiUAg"
+				"bzz-raw://f2ef7af7457c7fe132920f20e5b94d70f162c8ca546b39dcabbacee438f9ab52",
+				"dweb:/ipfs/QmVuvgGAiSdAXBCrCm9DrTGb4rL2QC51osxu3pnou6NsY5"
 			]
 		},
 		"contracts/src/SafeMath.sol": {
-			"keccak256": "0x26c42438ed4e0123075ad481a0a9afa299fe96e2ee6035d307c592dc47146054",
+			"keccak256": "0x48dd4b2fbb2593a14f12e43718768f59039beee161378683ae242c488d26618b",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://3f7be313b9b8acece0b811f210b176f7f72530c3d7cbf5666c7e2d8801c989db",
-				"dweb:/ipfs/QmQrJhxun7YTyBbVmKDTbPjdP8iuAwSwrmHQjkuEcThFqr"
+				"bzz-raw://36a6804cf690a61ac7e28ca12f3f584413ef5321a0e54c4130b8a9652292a08c",
+				"dweb:/ipfs/QmaGRrYqMxYrqqnqUGDQPWGHy7omFMGJiKgBiGb28ZT1AS"
 			]
 		}
 	},
