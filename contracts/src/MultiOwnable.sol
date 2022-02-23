@@ -190,25 +190,17 @@ contract Multiownable {
      * @dev Allows owners to change ownership
      * @param newOwners defines array of addresses of new owners
      */
-    function transferOwnership(address[] memory newOwners) public {
-        transferOwnershipWithHowMany(newOwners);
-    }
-
-    /**
-     * @dev Allows owners to change ownership
-     * @param newOwners defines array of addresses of new owners
-     */
-    function transferOwnershipWithHowMany(address[] memory newOwners)
+    function transferOwnership(address[] memory newOwners)
         public
         onlyAllOwners
     {
         require(
             newOwners.length > 0,
-            "transferOwnershipWithHowMany: owners array is empty"
+            "transferOwnership: owners array is empty"
         );
         require(
             newOwners.length <= 256,
-            "transferOwnershipWithHowMany: owners count is greater then 256"
+            "transferOwnership: owners count is greater then 256"
         );
 
         // Reset owners reverse lookup table
@@ -218,11 +210,11 @@ contract Multiownable {
         for (uint256 i = 0; i < newOwners.length; i++) {
             require(
                 newOwners[i] != address(0),
-                "transferOwnershipWithHowMany: owners array contains zero"
+                "transferOwnership: owners array contains zero"
             );
             require(
                 ownersIndices[newOwners[i]] == 0,
-                "transferOwnershipWithHowMany: owners array contains duplicates"
+                "transferOwnership: owners array contains duplicates"
             ); // TO Reseacrh
             ownersIndices[newOwners[i]] = i + 1;
         }

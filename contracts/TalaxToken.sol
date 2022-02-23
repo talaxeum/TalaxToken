@@ -248,75 +248,8 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     event DeleteStrategicPartner(address indexed from, address indexed who);
 
     /**
-     * @dev Returns the bep token owner.
-     */
-    function getOwner() external view override returns (address[] memory) {
-        return getAllOwners();
-    }
-
-    /**
-     * @dev Returns the token decimals.
-     */
-    function decimals() external view override returns (uint8) {
-        return _decimals;
-    }
-
-    /**
-     * @dev Returns the token symbol.
-     */
-    function symbol() external view override returns (string memory) {
-        return _symbol;
-    }
-
-    /**
-     * @dev Returns the token name.
-     */
-    function name() external view override returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev See {BEP20-totalSupply}.
-     */
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply;
-    }
-
-    function stakingPackage(uint256 index) external view returns (uint256) {
-        return _stakingPackage[index];
-    }
-
-    function taxFee() external view returns (uint256) {
-        return _taxFee;
-    }
-
-    /**
-     * @dev See {BEP20-balanceOf}.
-     */
-    function balanceOf(address account)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return _balances[account];
-    }
-
-    function blockTime() external view returns (uint256) {
-        return block.timestamp;
-    }
-
-    function stakingRewardAmount() external view returns (uint256) {
-        return _stakingReward;
-    }
-
-    function liquidityReserveBalance() external view returns (uint256) {
-        return this.balanceOf(address(this));
-    }
-
-    function privatePlacement() external view returns (Lockable) {
-        return privatePlacementLockedWallet;
-    }
+    * @notice INTERNAL FUNCTIONS
+    */
 
     /**
      * @dev this is the release rate for partial token release
@@ -681,6 +614,210 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
+        /**
+     * @dev Moves tokens `amount` from `sender` to `recipient`.
+     *
+     * This is internal function is equivalent to {transfer}, and can be used to
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+     *
+     * Emits a {Transfer} event.
+     *
+     * Requirements:
+     *
+     * - `sender` cannot be the zero address.
+     * - `recipient` cannot be the zero address.
+     * - `sender` must have a balance of at least `amount`.
+     */
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal {
+        require(
+            sender != address(0),
+            "TalaxToken: transfer from the zero address"
+        );
+        require(
+            recipient != address(0),
+            "TalaxToken: transfer to the zero address"
+        );
+
+        uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
+        uint256 taxedAmount = SafeMath.sub(amount, tax);
+
+        uint256 teamFeeOfThird = SafeMath.div(
+            (SafeMath.mul(taxedAmount, SafeMath.div(2, 10))),
+            3
+        );
+        uint256 liquidityFee = SafeMath.mul(taxedAmount, SafeMath.div(8, 10));
+
+        _balances[team_and_project_coordinator_address_1] = _balances[
+            team_and_project_coordinator_address_1
+        ].add(teamFeeOfThird);
+
+        _balances[team_and_project_coordinator_address_2] = _balances[
+            team_and_project_coordinator_address_2
+        ].add(teamFeeOfThird);
+
+        _balances[team_and_project_coordinator_address_3] = _balances[
+            team_and_project_coordinator_address_3
+        ].add(teamFeeOfThird);
+
+        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
+
+        _balances[sender] = _balances[sender].sub(
+            amount,
+            "TalaxToken: transfer amount exceeds balance"
+        );
+        _balances[recipient] = _balances[recipient].add(taxedAmount);
+        emit Transfer(sender, recipient, taxedAmount);
+    }
+
+    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
+     * the total supply.
+     *
+     * Emits a {Transfer} event with `from` set to the zero address.
+     *
+     * Requirements
+     *
+     * - `to` cannot be the zero address.
+     */
+    function _mint(address account, uint256 amount) internal {
+        require(account != address(0), "TalaxToken: mint to the zero address");
+
+        _totalSupply = _totalSupply.add(amount);
+        _balances[account] = _balances[account].add(amount);
+        emit Transfer(address(0), account, amount);
+    }
+
+
+    /**
+     * @dev Destroys `amount` tokens from `account`, reducing the
+     * total supply.
+     *
+     * Emits a {Transfer} event with `to` set to the zero address.
+     *
+     * Requirements
+     *
+     * - `account` cannot be the zero address.
+     * - `account` must have at least `amount` tokens.
+     */
+    function _burn(address account, uint256 amount) internal {
+        require(
+            account != address(0),
+            "TalaxToken: burn from the zero address"
+        );
+
+        _balances[account] = _balances[account].sub(
+            amount,
+            "TalaxToken: burn amount exceeds balance"
+        );
+        _totalSupply = _totalSupply.sub(amount);
+        emit Transfer(account, address(0), amount);
+    }
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
+     *
+     * This is internal function is equivalent to `approve`, and can be used to
+     * e.g. set automatic allowances for certain subsystems, etc.
+     *
+     * Emits an {Approval} event.
+     *
+     * Requirements:
+     *
+     * - `owner` cannot be the zero address.
+     * - `spender` cannot be the zero address.
+     */
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal {
+        require(
+            owner != address(0),
+            "TalaxToken: approve from the zero address"
+        );
+        require(
+            spender != address(0),
+            "TalaxToken: approve to the zero address"
+        );
+
+        _allowances[owner][spender] = amount;
+        emit Approval(owner, spender, amount);
+    }
+
+    /**
+    * @notice EXTERNAL FUNCTIONS
+    */
+
+    /**
+     * @dev Returns the bep token owner.
+     */
+    function getOwner() external view override returns (address[] memory) {
+        return getAllOwners();
+    }
+
+    /**
+     * @dev Returns the token decimals.
+     */
+    function decimals() external view override returns (uint8) {
+        return _decimals;
+    }
+
+    /**
+     * @dev Returns the token symbol.
+     */
+    function symbol() external view override returns (string memory) {
+        return _symbol;
+    }
+
+    /**
+     * @dev Returns the token name.
+     */
+    function name() external view override returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev See {BEP20-totalSupply}.
+     */
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
+
+    function stakingPackage(uint256 index) external view returns (uint256) {
+        return _stakingPackage[index];
+    }
+
+    function taxFee() external view returns (uint256) {
+        return _taxFee;
+    }
+
+    /**
+     * @dev See {BEP20-balanceOf}.
+     */
+    function balanceOf(address account)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _balances[account];
+    }
+
+    function blockTime() external view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function stakingRewardAmount() external view returns (uint256) {
+        return _stakingReward;
+    }
+
+    function liquidityReserveBalance() external view returns (uint256) {
+        return this.balanceOf(address(this));
+    }
+
     /**
      * @dev See {BEP20-transfer}.
      *
@@ -808,13 +945,16 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         return true;
     }
 
-    function burnStakingReward(uint256 amount_) external onlyAllOwners {
-        require(
-            amount_ < _stakingReward,
-            "TalaxToken: Amount burnt cannot be larger than Staking Reward"
-        );
-        _stakingReward = _stakingReward.sub(amount_);
-        _totalSupply = _totalSupply.sub(amount_);
+    /**
+     * @dev Creates `amount` tokens and assigns them to `msg.sender`, increasing
+     * the total supply.
+     *
+     * Requirements
+     *
+     * - `msg.sender` must be the token owner
+     */
+    function mint(uint256 amount) external onlyAllOwners {
+        _mint(_msgSender(), amount);
     }
 
     function mintStakingReward(uint256 amount_) external onlyAllOwners {
@@ -828,149 +968,14 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
     }
-
-    /**
-     * @dev Creates `amount` tokens and assigns them to `msg.sender`, increasing
-     * the total supply.
-     *
-     * Requirements
-     *
-     * - `msg.sender` must be the token owner
-     */
-    function mint(uint256 amount) external onlyAllOwners {
-        _mint(_msgSender(), amount);
-    }
-
-    /**
-     * @dev Moves tokens `amount` from `sender` to `recipient`.
-     *
-     * This is internal function is equivalent to {transfer}, and can be used to
-     * e.g. implement automatic token fees, slashing mechanisms, etc.
-     *
-     * Emits a {Transfer} event.
-     *
-     * Requirements:
-     *
-     * - `sender` cannot be the zero address.
-     * - `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     */
-    function _transfer(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) internal {
+    
+    function burnStakingReward(uint256 amount_) external onlyAllOwners {
         require(
-            sender != address(0),
-            "TalaxToken: transfer from the zero address"
+            amount_ < _stakingReward,
+            "TalaxToken: Amount burnt cannot be larger than Staking Reward"
         );
-        require(
-            recipient != address(0),
-            "TalaxToken: transfer to the zero address"
-        );
-
-        uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
-        uint256 taxedAmount = SafeMath.sub(amount, tax);
-
-        uint256 teamFeeOfThird = SafeMath.div(
-            (SafeMath.mul(taxedAmount, SafeMath.div(2, 10))),
-            3
-        );
-        uint256 liquidityFee = SafeMath.mul(taxedAmount, SafeMath.div(8, 10));
-
-        _balances[team_and_project_coordinator_address_1] = _balances[
-            team_and_project_coordinator_address_1
-        ].add(teamFeeOfThird);
-
-        _balances[team_and_project_coordinator_address_2] = _balances[
-            team_and_project_coordinator_address_2
-        ].add(teamFeeOfThird);
-
-        _balances[team_and_project_coordinator_address_3] = _balances[
-            team_and_project_coordinator_address_3
-        ].add(teamFeeOfThird);
-
-        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
-
-        _balances[sender] = _balances[sender].sub(
-            amount,
-            "TalaxToken: transfer amount exceeds balance"
-        );
-        _balances[recipient] = _balances[recipient].add(taxedAmount);
-        emit Transfer(sender, recipient, taxedAmount);
-    }
-
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements
-     *
-     * - `to` cannot be the zero address.
-     */
-    function _mint(address account, uint256 amount) internal {
-        require(account != address(0), "TalaxToken: mint to the zero address");
-
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
-        emit Transfer(address(0), account, amount);
-    }
-
-    /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
-     *
-     * Emits a {Transfer} event with `to` set to the zero address.
-     *
-     * Requirements
-     *
-     * - `account` cannot be the zero address.
-     * - `account` must have at least `amount` tokens.
-     */
-    function _burn(address account, uint256 amount) internal {
-        require(
-            account != address(0),
-            "TalaxToken: burn from the zero address"
-        );
-
-        _balances[account] = _balances[account].sub(
-            amount,
-            "TalaxToken: burn amount exceeds balance"
-        );
-        _totalSupply = _totalSupply.sub(amount);
-        emit Transfer(account, address(0), amount);
-    }
-
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
-     *
-     * This is internal function is equivalent to `approve`, and can be used to
-     * e.g. set automatic allowances for certain subsystems, etc.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `owner` cannot be the zero address.
-     * - `spender` cannot be the zero address.
-     */
-    function _approve(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal {
-        require(
-            owner != address(0),
-            "TalaxToken: approve from the zero address"
-        );
-        require(
-            spender != address(0),
-            "TalaxToken: approve to the zero address"
-        );
-
-        _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, amount);
+        _stakingReward = _stakingReward.sub(amount_);
+        _totalSupply = _totalSupply.sub(amount_);
     }
 
     function changeTaxFee(uint16 taxFee_) external onlyAllOwners {
@@ -1091,7 +1096,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockStrategicPartnerWallet_1() external {
         require(
             msg.sender == strategicPartnerLockedWallet_1.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_1
             .releaseClaimable(strategicPartnerReleaseRate());
@@ -1102,7 +1107,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockStrategicPartnerWallet_2() external {
         require(
             msg.sender == strategicPartnerLockedWallet_2.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_2
             .releaseClaimable(strategicPartnerReleaseRate());
@@ -1113,7 +1118,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockStrategicPartnerWallet_3() external {
         require(
             msg.sender == strategicPartnerLockedWallet_3.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_3
             .releaseClaimable(strategicPartnerReleaseRateAlternate());
@@ -1127,7 +1132,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockTeamAndProjectCoordinatorWallet_1() external {
         require(
             msg.sender == teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
             .releaseClaimable(teamAndProjectCoordinatorReleaseRate());
@@ -1138,7 +1143,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockTeamAndProjectCoordinatorWallet_2() external {
         require(
             msg.sender == teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
             .releaseClaimable(teamAndProjectCoordinatorReleaseRate());
@@ -1149,7 +1154,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockTeamAndProjectCoordinatorWallet_3() external {
         require(
             msg.sender == teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
             .releaseClaimable(teamAndProjectCoordinatorReleaseRateAlternate());

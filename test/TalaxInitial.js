@@ -61,8 +61,8 @@ contract("TalaxToken", async (accounts) => {
 
         await talax.changeTaxFee(2, { from: accounts[1] });
 
-        let tax = await talax.taxFee()
-        console.log("Tax: ",tax)
+        let tax = await talax.taxFee();
+        console.log("Tax: ", tax.toString());
     });
 
     it("TalaxInitial: change tax fee account 2", async () => {
@@ -73,7 +73,18 @@ contract("TalaxToken", async (accounts) => {
 
         await talax.changeTaxFee(2, { from: accounts[2] });
 
-        let tax = await talax.taxFee()
-        console.log("Tax: ",tax)
+        let tax = await talax.taxFee();
+        console.log("Tax: ", tax.toString());
     });
+
+    it("TalaxInitial: mint", async () => {
+        talax = await TalaxToken.deployed();
+
+    });
+
+    it("TalaxInitial: burn", async () => {
+        talax = await TalaxToken.deployed();
+        
+    });
+
 });
