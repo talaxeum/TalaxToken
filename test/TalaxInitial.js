@@ -80,11 +80,20 @@ contract("TalaxToken", async (accounts) => {
     it("TalaxInitial: mint", async () => {
         talax = await TalaxToken.deployed();
 
+        owner = await talax.getOwner();
+        let balance = await talax.balanceOf(accounts[1]);
+        let balance1 = await talax.balanceOf(accounts[2]);
+        console.log("Balance: ", balance.toString(), balance1.toString());
+
+        await talax.mint(accounts[1], 100000, { from: accounts[1] });
+        await talax.mint(accounts[1], 100000, { from: accounts[2] });
+
+        balance = await talax.balanceOf(accounts[1]);
+        balance1 = await talax.balanceOf(accounts[2]);
+        console.log("Balance: ", balance.toString(), balance1.toString());
     });
 
     it("TalaxInitial: burn", async () => {
         talax = await TalaxToken.deployed();
-        
     });
-
 });

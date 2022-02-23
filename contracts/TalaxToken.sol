@@ -239,6 +239,10 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ].add(thirdOfValue);
     }
 
+    /**
+     * @notice EVENTS
+     */
+
     event ChangeTax(address indexed who, uint256 amount);
 
     event AddPrivatePlacement(address indexed from, address indexed who);
@@ -248,8 +252,55 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     event DeleteStrategicPartner(address indexed from, address indexed who);
 
     /**
-    * @notice INTERNAL FUNCTIONS
-    */
+     * @notice ACCESSORS
+     */
+
+    /**
+     * @dev Returns the bep token owner.
+     */
+    function getOwner() external view override returns (address[] memory) {
+        return getAllOwners();
+    }
+
+    /**
+     * @dev Returns the token decimals.
+     */
+    function decimals() external view override returns (uint8) {
+        return _decimals;
+    }
+
+    /**
+     * @dev Returns the token symbol.
+     */
+    function symbol() external view override returns (string memory) {
+        return _symbol;
+    }
+
+    /**
+     * @dev Returns the token name.
+     */
+    function name() external view override returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev See {BEP20-totalSupply}.
+     */
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
+
+    function stakingPackage(uint256 index) external view returns (uint256) {
+        return _stakingPackage[index];
+    }
+
+    function taxFee() external view returns (uint256) {
+        return _taxFee;
+    }
+
+    /**
+     * @notice INTERNAL FUNCTIONS
+     */
 
     /**
      * @dev this is the release rate for partial token release
@@ -614,7 +665,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
-        /**
+    /**
      * @dev Moves tokens `amount` from `sender` to `recipient`.
      *
      * This is internal function is equivalent to {transfer}, and can be used to
@@ -690,7 +741,6 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         emit Transfer(address(0), account, amount);
     }
 
-
     /**
      * @dev Destroys `amount` tokens from `account`, reducing the
      * total supply.
@@ -748,51 +798,8 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     }
 
     /**
-    * @notice EXTERNAL FUNCTIONS
-    */
-
-    /**
-     * @dev Returns the bep token owner.
+     * @notice EXTERNAL FUNCTIONS
      */
-    function getOwner() external view override returns (address[] memory) {
-        return getAllOwners();
-    }
-
-    /**
-     * @dev Returns the token decimals.
-     */
-    function decimals() external view override returns (uint8) {
-        return _decimals;
-    }
-
-    /**
-     * @dev Returns the token symbol.
-     */
-    function symbol() external view override returns (string memory) {
-        return _symbol;
-    }
-
-    /**
-     * @dev Returns the token name.
-     */
-    function name() external view override returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev See {BEP20-totalSupply}.
-     */
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply;
-    }
-
-    function stakingPackage(uint256 index) external view returns (uint256) {
-        return _stakingPackage[index];
-    }
-
-    function taxFee() external view returns (uint256) {
-        return _taxFee;
-    }
 
     /**
      * @dev See {BEP20-balanceOf}.
@@ -946,16 +953,10 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     }
 
     /**
-     * @dev Creates `amount` tokens and assigns them to `msg.sender`, increasing
-     * the total supply.
-     *
-     * Requirements
-     *
-     * - `msg.sender` must be the token owner
+     * @dev Creates 'amount_' of token into _stakingReward and liduidityReserve
+     * @dev Deletes 'amount_' of token from _stakingReward
+     * @dev Change '_taxFee' with 'taxFee_'
      */
-    function mint(uint256 amount) external onlyAllOwners {
-        _mint(_msgSender(), amount);
-    }
 
     function mintStakingReward(uint256 amount_) external onlyAllOwners {
         require(amount_ != 0, "Amount mint cannot be 0");
@@ -968,7 +969,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
     }
-    
+
     function burnStakingReward(uint256 amount_) external onlyAllOwners {
         require(
             amount_ < _stakingReward,
