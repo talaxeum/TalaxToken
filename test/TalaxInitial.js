@@ -3,7 +3,6 @@ const { assert } = require("chai");
 const truffleAssert = require("truffle-assertions");
 const helper = require("./helpers/truffleTestHelpers");
 
-
 /*
  * uncomment accounts to access the test accounts made available by the
  * Ethereum client
@@ -11,37 +10,46 @@ const helper = require("./helpers/truffleTestHelpers");
  */
 
 contract("TalaxToken", async (accounts) => {
-	// it("initial supply", async () => {
-	// 	let talax = await TalaxToken.deployed();
-	// 	let supply = await talax.totalSupply();
-	// 	// console.log(supply.toString());
-	// 	assert.equal(0, supply, "Supply should be 210 Million Talax");
-	// });
+    it("TalaxInitial: initial owner", async () => {
+        let talax = await TalaxToken.deployed();
+        owner = await talax.getOwner();
+        assert.equal(
+            accounts[0],
+            owner,
+            "Owner should be the one who deployed the contract"
+        );
+    });
 
-	it("initial owner", async () => {
-		let talax = await TalaxToken.deployed();
-		owner = await talax.getOwner();
-		assert.equal(
-			accounts[0],
-			owner,
-			"Owner should be the one who deployed the contract"
-		);
-	});
+    it("TalaxInitial: transfer owner", async () => {
+        let talax = await TalaxToken.deployed();
+        owner = await talax.getOwner();
+        console.log("Owners", owner);
 
-	it("initial staking package", async () => {
-		let talax = await TalaxToken.deployed();
-		let package = await talax.stakingPackage(2.592e6);
-		// console.log(package.toString());
-		assert.equal(5, package, "Supply should be 5 %");
-		package = await talax.stakingPackage(15.552e6);
-		// console.log(package.toString());
-		assert.equal(7, package, "Supply should be 7 %");
-	});
+        let newOwners = [accounts[1], accounts[2]];
 
-	it("initial tax fee", async () => {
-		let talax = await TalaxToken.deployed();
-		let tax = await talax.taxFee();
-		// console.log(tax.toString());
-		assert.equal(1, tax, "Supply should be 5 %");
-	});
+        await talax.transferOwnership(newOwners);
+
+        owner = await talax.getOwner();
+        console.log("Owners", owner);
+    });
+
+    it("TalaxInitial: change tax fee from not owner", async () => {
+        let talax = await TalaxToken.deployed();
+        owner = await talax.getOwner();
+        console.log(owner);
+
+        bool = await talax.isOwner(accounts[3]);
+        console.log(bool);
+
+        try {
+            await talax.changeTaxFee(2, { from: accounts[3] });
+        } catch (err) {
+            console.log(err.reason);
+            assert.equal(
+                err.reason,
+                "checkHowManyOwners: msg.sender is not an owner",
+                "Failed to notice not owner validation"
+            );
+        }
+    });
 });

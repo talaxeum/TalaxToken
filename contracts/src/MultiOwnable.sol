@@ -5,7 +5,6 @@ contract Multiownable {
     // VARIABLES
 
     uint256 public ownersGeneration;
-    uint256 public howManyOwnersDecide;
     address[] public owners;
     bytes32[] public allOperations;
     address internal insideCallSender;
@@ -21,12 +20,7 @@ contract Multiownable {
 
     // EVENTS
 
-    event OwnershipTransferred(
-        address[] previousOwners,
-        uint256 howManyOwnersDecide,
-        address[] newOwners,
-        uint256 newHowManyOwnersDecide
-    );
+    event OwnershipTransferred(address[] previousOwners, address[] newOwners);
     event OperationCreated(
         bytes32 operation,
         uint256 howMany,
@@ -47,15 +41,10 @@ contract Multiownable {
         address performer
     );
 
-    // event OperationDownvoted(
-    //     bytes32 operation,
-    //     uint256 votes,
-    //     uint256 ownersCount,
-    //     address downvoter
-    // );
-    // event OperationCancelled(bytes32 operation, address lastCanceller);
-
     // ACCESSORS
+    function getAllOwners() public view returns (address[] memory) {
+        return owners;
+    }
 
     function isOwner(address wallet) public view returns (bool) {
         return ownersIndices[wallet] > 0;
@@ -90,24 +79,6 @@ contract Multiownable {
     }
 
     /**
-     * @dev Allows to perform method only after many owners call it with the same arguments
-     */
-    modifier onlyManyOwners() {
-        if (checkHowManyOwners(howManyOwnersDecide)) {
-            bool update = (insideCallSender == address(0));
-            if (update) {
-                insideCallSender = msg.sender;
-                insideCallCount = howManyOwnersDecide;
-            }
-            _;
-            if (update) {
-                insideCallSender = address(0);
-                insideCallCount = 0;
-            }
-        }
-    }
-
-    /**
      * @dev Allows to perform method only after all owners call it with the same arguments
      */
     modifier onlyAllOwners() {
@@ -125,36 +96,11 @@ contract Multiownable {
         }
     }
 
-    /**
-     * @dev Allows to perform method only after some owners call it with the same arguments
-     */
-    modifier onlySomeOwners(uint256 howMany) {
-        require(howMany > 0, "onlySomeOwners: howMany argument is zero");
-        require(
-            howMany <= owners.length,
-            "onlySomeOwners: howMany argument exceeds the number of owners"
-        );
-
-        if (checkHowManyOwners(howMany)) {
-            bool update = (insideCallSender == address(0));
-            if (update) {
-                insideCallSender = msg.sender;
-                insideCallCount = howMany;
-            }
-            _;
-            if (update) {
-                insideCallSender = address(0);
-                insideCallCount = 0;
-            }
-        }
-    }
-
     // CONSTRUCTOR
 
     constructor() {
         owners.push(msg.sender);
         ownersIndices[msg.sender] = 1;
-        howManyOwnersDecide = 1;
     }
 
     // INTERNAL METHODS
@@ -171,11 +117,12 @@ contract Multiownable {
             return true;
         }
 
-        uint256 ownerIndex = ownersIndices[msg.sender] - 1;
         require(
-            ownerIndex < owners.length,
+            isOwner(msg.sender) == true,
             "checkHowManyOwners: msg.sender is not an owner"
         );
+
+        uint256 ownerIndex = ownersIndices[msg.sender] - 1;
         bytes32 operation = keccak256(
             abi.encodePacked(msg.data, ownersGeneration)
         );
@@ -239,48 +186,22 @@ contract Multiownable {
 
     // // PUBLIC METHODS
 
-    // /**
-    //  * @dev Allows owners to change their mind by cancelling votesMaskByOperation operations
-    //  * @param operation defines which operation to delete
-    //  */
-    // function cancelPending(bytes32 operation) public onlyAnyOwner {
-    //     uint256 ownerIndex = ownersIndices[msg.sender] - 1;
-    //     require(
-    //         (votesMaskByOperation[operation] & (2**ownerIndex)) != 0,
-    //         "cancelPending: operation not found for this user"
-    //     );
-    //     votesMaskByOperation[operation] &= ~(2**ownerIndex);
-    //     uint256 operationVotesCount = votesCountByOperation[operation] - 1;
-    //     votesCountByOperation[operation] = operationVotesCount;
-    //     emit OperationDownvoted(
-    //         operation,
-    //         operationVotesCount,
-    //         owners.length,
-    //         msg.sender
-    //     );
-    //     if (operationVotesCount == 0) {
-    //         deleteOperation(operation);
-    //         emit OperationCancelled(operation, msg.sender);
-    //     }
-    // }
-
     /**
      * @dev Allows owners to change ownership
      * @param newOwners defines array of addresses of new owners
      */
-    function transferOwnership(address[] memory newOwners) external {
-        transferOwnershipWithHowMany(newOwners, newOwners.length);
+    function transferOwnership(address[] memory newOwners) public {
+        transferOwnershipWithHowMany(newOwners);
     }
 
     /**
      * @dev Allows owners to change ownership
      * @param newOwners defines array of addresses of new owners
-     * @param newHowManyOwnersDecide defines how many owners can decide
      */
-    function transferOwnershipWithHowMany(
-        address[] memory newOwners,
-        uint256 newHowManyOwnersDecide
-    ) public onlyManyOwners {
+    function transferOwnershipWithHowMany(address[] memory newOwners)
+        public
+        onlyAllOwners
+    {
         require(
             newOwners.length > 0,
             "transferOwnershipWithHowMany: owners array is empty"
@@ -288,14 +209,6 @@ contract Multiownable {
         require(
             newOwners.length <= 256,
             "transferOwnershipWithHowMany: owners count is greater then 256"
-        );
-        require(
-            newHowManyOwnersDecide > 0,
-            "transferOwnershipWithHowMany: newHowManyOwnersDecide equal to 0"
-        );
-        require(
-            newHowManyOwnersDecide <= newOwners.length,
-            "transferOwnershipWithHowMany: newHowManyOwnersDecide exceeds the number of owners"
         );
 
         // Reset owners reverse lookup table
@@ -314,14 +227,9 @@ contract Multiownable {
             ownersIndices[newOwners[i]] = i + 1;
         }
 
-        emit OwnershipTransferred(
-            owners,
-            howManyOwnersDecide,
-            newOwners,
-            newHowManyOwnersDecide
-        );
+        emit OwnershipTransferred(owners, newOwners);
+
         owners = newOwners;
-        howManyOwnersDecide = newHowManyOwnersDecide;
         delete allOperations;
         ownersGeneration++;
     }

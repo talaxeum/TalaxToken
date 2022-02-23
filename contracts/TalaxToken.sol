@@ -3,12 +3,12 @@ pragma solidity 0.8.11;
 
 import "./src/Context.sol";
 import "./src/IBEP20.sol";
-import "./src/Ownable.sol";
+import "./src/Multiownable.sol";
 import "./src/SafeMath.sol";
-import "./Stakable.sol";
 import "./Lockable.sol";
+import "./Stakable.sol";
 
-contract TalaxToken is Context, IBEP20, Ownable, Stakable {
+contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     using SafeMath for uint256;
 
     mapping(address => uint256) private _balances;
@@ -150,31 +150,31 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             dev_pool_address_3
         );
 
-        teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-            10500 * 1e3 * 10**18,
-            team_and_project_coordinator_address_1
-        );
-        teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-            10500 * 1e3 * 10**18,
-            team_and_project_coordinator_address_2
-        );
-        teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-            10500 * 1e3 * 10**18,
-            team_and_project_coordinator_address_3
-        );
+        // teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
+        //     10500 * 1e3 * 10**18,
+        //     team_and_project_coordinator_address_1
+        // );
+        // teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
+        //     10500 * 1e3 * 10**18,
+        //     team_and_project_coordinator_address_2
+        // );
+        // teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
+        //     10500 * 1e3 * 10**18,
+        //     team_and_project_coordinator_address_3
+        // );
 
-        strategicPartnerLockedWallet_1 = new Lockable(
-            3500 * 1e3 * 10**18,
-            strategic_partner_address_1
-        );
-        strategicPartnerLockedWallet_2 = new Lockable(
-            3500 * 1e3 * 10**18,
-            strategic_partner_address_2
-        );
-        strategicPartnerLockedWallet_3 = new Lockable(
-            3500 * 1e3 * 10**18,
-            strategic_partner_address_3
-        );
+        // strategicPartnerLockedWallet_1 = new Lockable(
+        //     3500 * 1e3 * 10**18,
+        //     strategic_partner_address_1
+        // );
+        // strategicPartnerLockedWallet_2 = new Lockable(
+        //     3500 * 1e3 * 10**18,
+        //     strategic_partner_address_2
+        // );
+        // strategicPartnerLockedWallet_3 = new Lockable(
+        //     3500 * 1e3 * 10**18,
+        //     strategic_partner_address_3
+        // );
 
         // Dev Pool
         _totalSupply = _totalSupply.sub(
@@ -250,8 +250,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     /**
      * @dev Returns the bep token owner.
      */
-    function getOwner() external view override returns (address) {
-        return owner();
+    function getOwner() external view override returns (address[] memory) {
+        return getAllOwners();
     }
 
     /**
@@ -808,43 +808,25 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         return true;
     }
 
-    function burnStakingReward(uint256 amount_)
-        external
-        onlyOwner
-        returns (bool)
-    {
+    function burnStakingReward(uint256 amount_) external onlyAllOwners {
         require(
             amount_ < _stakingReward,
             "TalaxToken: Amount burnt cannot be larger than Staking Reward"
         );
         _stakingReward = _stakingReward.sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
-
-        return true;
     }
 
-    function mintStakingReward(uint256 amount_)
-        external
-        onlyOwner
-        returns (bool)
-    {
+    function mintStakingReward(uint256 amount_) external onlyAllOwners {
         require(amount_ != 0, "Amount mint cannot be 0");
         _stakingReward = _stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
-
-        return true;
     }
 
-    function mintLiquidityReserve(uint256 amount_)
-        public
-        onlyOwner
-        returns (bool)
-    {
+    function mintLiquidityReserve(uint256 amount_) public onlyAllOwners {
         require(amount_ != 0, "Amount mint cannot be 0");
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
-
-        return true;
     }
 
     /**
@@ -855,9 +837,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      *
      * - `msg.sender` must be the token owner
      */
-    function mint(uint256 amount) external onlyOwner returns (bool) {
+    function mint(uint256 amount) external onlyAllOwners {
         _mint(_msgSender(), amount);
-        return true;
     }
 
     /**
@@ -992,7 +973,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         emit Approval(owner, spender, amount);
     }
 
-    function _changeTaxFee(uint16 taxFee_) internal {
+    function changeTaxFee(uint16 taxFee_) external onlyAllOwners {
         _taxFee = taxFee_;
         emit ChangeTax(msg.sender, taxFee_);
     }
@@ -1056,8 +1037,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     function unlockPrivatePlacementWallet() external {
         require(
             private_placement_address ==
-                privatePlacementLockedWallet.beneficiary() ||
-                msg.sender == this.getOwner(),
+                privatePlacementLockedWallet.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = privatePlacementLockedWallet
@@ -1071,8 +1051,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      */
     function unlockDevPoolWallet_1() external {
         require(
-            msg.sender == devPoolLockedWallet_1.beneficiary() ||
-                msg.sender == owner(),
+            msg.sender == devPoolLockedWallet_1.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
@@ -1084,8 +1063,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     function unlockDevPoolWallet_2() external {
         require(
-            msg.sender == devPoolLockedWallet_2.beneficiary() ||
-                msg.sender == owner(),
+            msg.sender == devPoolLockedWallet_2.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
@@ -1097,8 +1075,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     function unlockDevPoolWallet_3() external {
         require(
-            msg.sender == devPoolLockedWallet_3.beneficiary() ||
-                msg.sender == owner(),
+            msg.sender == devPoolLockedWallet_3.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
@@ -1113,8 +1090,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      */
     function unlockStrategicPartnerWallet_1() external {
         require(
-            msg.sender == strategicPartnerLockedWallet_1.beneficiary() ||
-                msg.sender == this.getOwner(),
+            msg.sender == strategicPartnerLockedWallet_1.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_1
@@ -1125,8 +1101,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     function unlockStrategicPartnerWallet_2() external {
         require(
-            msg.sender == strategicPartnerLockedWallet_2.beneficiary() ||
-                msg.sender == this.getOwner(),
+            msg.sender == strategicPartnerLockedWallet_2.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_2
@@ -1137,8 +1112,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     function unlockStrategicPartnerWallet_3() external {
         require(
-            msg.sender == strategicPartnerLockedWallet_3.beneficiary() ||
-                msg.sender == this.getOwner(),
+            msg.sender == strategicPartnerLockedWallet_3.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_3
@@ -1152,9 +1126,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      */
     function unlockTeamAndProjectCoordinatorWallet_1() external {
         require(
-            msg.sender ==
-                teamAndProjectCoordinatorLockedWallet_1.beneficiary() ||
-                msg.sender == this.getOwner(),
+            msg.sender == teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
@@ -1165,9 +1137,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     function unlockTeamAndProjectCoordinatorWallet_2() external {
         require(
-            msg.sender ==
-                teamAndProjectCoordinatorLockedWallet_2.beneficiary() ||
-                msg.sender == this.getOwner(),
+            msg.sender == teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
@@ -1178,9 +1148,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     function unlockTeamAndProjectCoordinatorWallet_3() external {
         require(
-            msg.sender ==
-                teamAndProjectCoordinatorLockedWallet_3.beneficiary() ||
-                msg.sender == this.getOwner(),
+            msg.sender == teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
             "TalaxToken: Only claimable by User of this address or owner"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
