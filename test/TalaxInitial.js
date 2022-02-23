@@ -23,14 +23,14 @@ contract("TalaxToken", async (accounts) => {
     it("TalaxInitial: transfer owner", async () => {
         let talax = await TalaxToken.deployed();
         owner = await talax.getOwner();
-        console.log("Owners", owner);
+        console.log("Owners: ", owner);
 
         let newOwners = [accounts[1], accounts[2]];
 
         await talax.transferOwnership(newOwners);
 
         owner = await talax.getOwner();
-        console.log("Owners", owner);
+        console.log("Owners: ", owner);
     });
 
     it("TalaxInitial: change tax fee from not owner", async () => {
@@ -51,5 +51,29 @@ contract("TalaxToken", async (accounts) => {
                 "Failed to notice not owner validation"
             );
         }
+    });
+
+    it("TalaxInitial: change tax fee account 1", async () => {
+        let talax = await TalaxToken.deployed();
+
+        owner = await talax.getOwner();
+        console.log("Owners: ", owner);
+
+        await talax.changeTaxFee(2, { from: accounts[1] });
+
+        let tax = await talax.taxFee()
+        console.log("Tax: ",tax)
+    });
+
+    it("TalaxInitial: change tax fee account 2", async () => {
+        let talax = await TalaxToken.deployed();
+
+        owner = await talax.getOwner();
+        console.log("Owners: ", owner);
+
+        await talax.changeTaxFee(2, { from: accounts[2] });
+
+        let tax = await talax.taxFee()
+        console.log("Tax: ",tax)
     });
 });
