@@ -96,18 +96,18 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         // public_sale_address = [ADDRESS];
         // private_sale_address = [ADDRESS];
 
-        // dev_pool_address_1 = [ADDRESS];
-        // dev_pool_address_2 = [ADDRESS];
+        // dev_pool_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
+        // dev_pool_address_2 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
         // dev_pool_address_3 = [ADDRESS];
         // dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
 
-        //strategic_partner_address_1 = [ADDRESS]
-        //strategic_partner_address_2 = [ADDRESS]
-        //strategic_partner_address_3 = [ADDRESS]
+        // strategic_partner_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
+        //strategic_partner_address_2 = ;
+        //strategic_partner_address_3 = ;
 
-        //team_and_project_coordinator_address_1 = [ADDRESS]
-        //team_and_project_coordinator_address_2 = [ADDRESS]
-        //team_and_project_coordinator_address_3 = [ADDRESS]
+        team_and_project_coordinator_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
+        //team_and_project_coordinator_address_2 = ;
+        //team_and_project_coordinator_address_3 = ;
 
         /**
          * @notice Transfer Ownership
@@ -135,7 +135,12 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             6993 * 1e3 * 10**18,
             "TalaxToken: Cannot transfer more than total supply"
         );
-
+        // Private Placement
+        _totalSupply = _totalSupply.sub(
+            6993 * 1e3 * 10**18,
+            "TalaxToken: Cannot transfer more than total supply"
+        );
+        // Staking Reward
         _totalSupply = _totalSupply.sub(
             _stakingReward,
             "TalaxToken: Cannot transfer more than total supply"
@@ -150,30 +155,17 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             private_placement_address
         );
 
-        devPoolLockedWallet_1 = new Lockable(
-            14 * 1e6 * 10**18,
-            dev_pool_address_1
-        );
-        devPoolLockedWallet_2 = new Lockable(
-            14 * 1e6 * 10**18,
-            dev_pool_address_2
-        );
-        devPoolLockedWallet_3 = new Lockable(
-            14 * 1e6 * 10**18,
-            dev_pool_address_3
-        );
-
-        // teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-        //     10500 * 1e3 * 10**18,
-        //     team_and_project_coordinator_address_1
+        // devPoolLockedWallet_1 = new Lockable(
+        //     14 * 1e6 * 10**18,
+        //     dev_pool_address_1
         // );
-        // teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-        //     10500 * 1e3 * 10**18,
-        //     team_and_project_coordinator_address_2
+        // devPoolLockedWallet_2 = new Lockable(
+        //     14 * 1e6 * 10**18,
+        //     dev_pool_address_2
         // );
-        // teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-        //     10500 * 1e3 * 10**18,
-        //     team_and_project_coordinator_address_3
+        // devPoolLockedWallet_3 = new Lockable(
+        //     14 * 1e6 * 10**18,
+        //     dev_pool_address_3
         // );
 
         // strategicPartnerLockedWallet_1 = new Lockable(
@@ -189,24 +181,33 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         //     strategic_partner_address_3
         // );
 
+        teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
+            10500 * 1e3 * 10**18,
+            team_and_project_coordinator_address_1
+        );
+        teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
+            10500 * 1e3 * 10**18,
+            team_and_project_coordinator_address_2
+        );
+        teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
+            10500 * 1e3 * 10**18,
+            team_and_project_coordinator_address_3
+        );
+
+
         // Dev Pool
         _totalSupply = _totalSupply.sub(
             42 * 1e6 * 10**18,
             "TalaxToken: Cannot transfer more than total supply"
         );
-        // Team and Project Coordinator
-        _totalSupply = _totalSupply.sub(
-            31500 * 1e3 * 10**18,
-            "TalaxToken: Cannot transfer more than total supply"
-        );
-        // Private Placement
-        _totalSupply = _totalSupply.sub(
-            6993 * 1e3 * 10**18,
-            "TalaxToken: Cannot transfer more than total supply"
-        );
         // Strategic Partner
         _totalSupply = _totalSupply.sub(
             10500 * 1e3 * 10**18,
+            "TalaxToken: Cannot transfer more than total supply"
+        );
+        // Team and Project Coordinator
+        _totalSupply = _totalSupply.sub(
+            31500 * 1e3 * 10**18,
             "TalaxToken: Cannot transfer more than total supply"
         );
 
@@ -599,13 +600,13 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             0,
             0,
             0,
-            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
             0,
             0,
-            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
             0,
             0,
-            SafeMath.mul(10 * 1e6, 1e18),
+            SafeMath.mul(1 * 1e6, 1e18),
             0,
             0,
             SafeMath.mul(333333, 1e18),
@@ -1076,7 +1077,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         require(
             private_placement_address ==
                 privatePlacementLockedWallet.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = privatePlacementLockedWallet
             .releaseClaimable(privatePlacementReleaseRate());
@@ -1090,7 +1091,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockDevPoolWallet_1() external {
         require(
             msg.sender == devPoolLockedWallet_1.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
             devPoolReleaseRate()
@@ -1102,7 +1103,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockDevPoolWallet_2() external {
         require(
             msg.sender == devPoolLockedWallet_2.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
             devPoolReleaseRate()
@@ -1114,7 +1115,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     function unlockDevPoolWallet_3() external {
         require(
             msg.sender == devPoolLockedWallet_3.beneficiary(),
-            "TalaxToken: Only claimable by User of this address or owner"
+            "TalaxToken: Only claimable by User of this address"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
             devPoolReleaseRateAlternate()
