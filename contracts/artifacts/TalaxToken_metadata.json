@@ -709,19 +709,6 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
-				"name": "mint",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
 						"name": "amount_",
 						"type": "uint256"
 					}
@@ -816,19 +803,6 @@
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "privatePlacement",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -937,6 +911,19 @@
 					}
 				],
 				"name": "stakingPackage",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "stakingReward",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -1090,6 +1077,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "thisAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "totalSupply",
 				"outputs": [
 					{
@@ -1151,19 +1151,6 @@
 						"type": "bool"
 					}
 				],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address[]",
-						"name": "newOwners",
-						"type": "address[]"
-					}
-				],
-				"name": "transferOwnership",
-				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
@@ -1335,14 +1322,26 @@
 				"increaseAllowance(address,uint256)": {
 					"details": "Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {BEP20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address."
 				},
-				"mint(uint256)": {
-					"details": "Creates `amount` tokens and assigns them to `msg.sender`, increasing the total supply. Requirements - `msg.sender` must be the token owner"
+				"mintStakingReward(uint256)": {
+					"details": "Creates 'amount_' of token into _stakingReward and liduidityReserveDeletes 'amount_' of token from _stakingRewardChange '_taxFee' with 'taxFee_'"
 				},
 				"name()": {
 					"details": "Returns the token name."
 				},
+				"stakingPackage(uint256)": {
+					"details": "See _stakingPackage being used in 'index'."
+				},
+				"stakingReward()": {
+					"details": "See _stakingReward."
+				},
 				"symbol()": {
 					"details": "Returns the token symbol."
+				},
+				"taxFee()": {
+					"details": "See _taxFee."
+				},
+				"thisAddress()": {
+					"details": "See address of this smart contract."
 				},
 				"totalSupply()": {
 					"details": "See {BEP20-totalSupply}."
@@ -1352,12 +1351,6 @@
 				},
 				"transferFrom(address,address,uint256)": {
 					"details": "See {BEP20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {BEP20}; Requirements: - `sender` and `recipient` cannot be the zero address. - `sender` must have a balance of at least `amount`. - the caller must have allowance for `sender`'s tokens of at least `amount`."
-				},
-				"transferOwnership(address[])": {
-					"details": "Allows owners to change ownership",
-					"params": {
-						"newOwners": "defines array of addresses of new owners"
-					}
 				},
 				"unlockDevPoolWallet_1()": {
 					"details": "LockedWallet: Dev Pool Locked Wallet"
@@ -1376,6 +1369,9 @@
 		},
 		"userdoc": {
 			"events": {
+				"ChangeTax(address,uint256)": {
+					"notice": "EVENTS"
+				},
 				"Staked(address,uint256,uint256,uint256,uint256)": {
 					"notice": "Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable"
 				}
@@ -1428,11 +1424,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0xb008cb1d96aa0bd290762cd4457175c3677db060f27de674be86b91789adec7c",
+			"keccak256": "0xabeb56ea474750ba854e93cb5bff6a71995e37de43a10115ad61b3e3270d07f7",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://1ace4e2a0816093e422d528eff14f1764f641e07f04d0584b71936b20c025c17",
-				"dweb:/ipfs/QmVYdReTbcn9jpN5aN2kLGs1rnWSU16RXGJ2hQRmxCFrrb"
+				"bzz-raw://4c0ebab010c003412404b1f29c0f47dcf3b1e9f3b911079e146147357d517956",
+				"dweb:/ipfs/QmYBLeM69UNhFpRo1jetoT7KNZuZz1mJvsKGGxBvEaSv4a"
 			]
 		},
 		"contracts/src/Context.sol": {
@@ -1452,11 +1448,11 @@
 			]
 		},
 		"contracts/src/Multiownable.sol": {
-			"keccak256": "0x3486d12af99dd447825ff5c54ed21b946de5cbd7fe10b685f609186f34baa600",
+			"keccak256": "0x6f03865213aab7ee6cabec0ef7ab136695b119cf9c76640965be56c3e260f5cd",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://501dceef23881a96eeb4b4649e70479b9f5283950c3523cf3a1472e99592aae1",
-				"dweb:/ipfs/QmWJzdDBwoaDqyC1mh4WTeqaNatfPZQ98k4GxZVFgb91ob"
+				"bzz-raw://78741a2c0d377e220981e47c0624ebbeefe386a904cade8c425e890933363ae3",
+				"dweb:/ipfs/Qmb1k2gykrCbx5boGQr1MuoTw7bm9xRTnL6uY58ojeEKmL"
 			]
 		},
 		"contracts/src/SafeMath.sol": {

@@ -9,7 +9,7 @@ const helper = require("./helpers/truffleTestHelpers");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 
-contract("TalaxToken", async (accounts) => {
+contract("Lockable", async (accounts) => {
 
 	it("Not yet Claimable Test", async () => {
 		talax = await TalaxToken.deployed();

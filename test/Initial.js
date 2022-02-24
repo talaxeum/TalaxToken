@@ -9,8 +9,8 @@ const helper = require("./helpers/truffleTestHelpers");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 
-contract("TalaxToken", async (accounts) => {
-    it("TalaxInitial: initial owner", async () => {
+contract("Initial", async (accounts) => {
+    it("Initial: initial owner", async () => {
         let talax = await TalaxToken.deployed();
         owner = await talax.getOwner();
         assert.equal(
@@ -20,7 +20,7 @@ contract("TalaxToken", async (accounts) => {
         );
     });
 
-    it("TalaxInitial: transfer owner", async () => {
+    it("Initial: transfer owner", async () => {
         let talax = await TalaxToken.deployed();
         owner = await talax.getOwner();
         console.log("Owners: ", owner);
@@ -33,7 +33,7 @@ contract("TalaxToken", async (accounts) => {
         console.log("Owners: ", owner);
     });
 
-    it("TalaxInitial: change tax fee from not owner", async () => {
+    it("Initial: change tax fee from not owner", async () => {
         let talax = await TalaxToken.deployed();
         owner = await talax.getOwner();
         console.log(owner);
@@ -53,7 +53,7 @@ contract("TalaxToken", async (accounts) => {
         }
     });
 
-    it("TalaxInitial: change tax fee account 1", async () => {
+    it("Initial: change tax fee account 1", async () => {
         let talax = await TalaxToken.deployed();
 
         owner = await talax.getOwner();
@@ -65,7 +65,7 @@ contract("TalaxToken", async (accounts) => {
         console.log("Tax: ", tax.toString());
     });
 
-    it("TalaxInitial: change tax fee account 2", async () => {
+    it("Initial: change tax fee account 2", async () => {
         let talax = await TalaxToken.deployed();
 
         owner = await talax.getOwner();
@@ -77,23 +77,38 @@ contract("TalaxToken", async (accounts) => {
         console.log("Tax: ", tax.toString());
     });
 
-    it("TalaxInitial: mint", async () => {
+    it("Initial: mint", async () => {
         talax = await TalaxToken.deployed();
 
-        owner = await talax.getOwner();
-        let balance = await talax.balanceOf(accounts[1]);
-        let balance1 = await talax.balanceOf(accounts[2]);
-        console.log("Balance: ", balance.toString(), balance1.toString());
+        thisAddress = await talax.thisAddress();
+        let balance = await talax.balanceOf(thisAddress);
+        console.log("Balance: ", balance.toString());
 
-        await talax.mint(accounts[1], 100000, { from: accounts[1] });
-        await talax.mint(accounts[1], 100000, { from: accounts[2] });
+        await talax.mintLiquidityReserve(100000, {
+            from: accounts[1],
+        });
+        await talax.mintLiquidityReserve(100000, {
+            from: accounts[2],
+        });
 
-        balance = await talax.balanceOf(accounts[1]);
-        balance1 = await talax.balanceOf(accounts[2]);
-        console.log("Balance: ", balance.toString(), balance1.toString());
+        balance = await talax.balanceOf(thisAddress);
+        console.log("Balance: ", balance.toString());
     });
 
-    it("TalaxInitial: burn", async () => {
+    it("Initial: burn", async () => {
         talax = await TalaxToken.deployed();
+
+        let stakingreward = await talax.stakingReward();
+        console.log("Start: ", stakingreward.toString());
+
+        await talax.burnStakingReward(100000, {
+            from: accounts[1],
+        });
+        await talax.burnStakingReward(100000, {
+            from: accounts[2],
+        });
+
+        stakingreward = await talax.stakingReward();
+        console.log("Start: ", stakingreward.toString());
     });
 });

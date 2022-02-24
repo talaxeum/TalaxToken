@@ -22,289 +22,289 @@ const helper = require("./helpers/truffleTestHelpers");
  */
 
 contract("Stakable_", async (accounts) => {
-	/**
-	 * ? Starting status
-	 * ? Balance :
-	 * * Owner : Total Supply
-	 * * acc1 : 0
-	 * * acc2 : 0
-	 * ? Staking :
-	 * * Owner : 0
-	 * * acc1 : 0
-	 * * acc2 : 0
-	 */
+    /**
+     * ? Starting status
+     * ? Balance :
+     * * Owner : Total Supply
+     * * acc1 : 0
+     * * acc2 : 0
+     * ? Staking :
+     * * Owner : 0
+     * * acc1 : 0
+     * * acc2 : 0
+     */
 
-	it("Staking 100x2", async () => {
-		talax = await TalaxToken.deployed();
-		supply = await talax.totalSupply();
+    it("Staking 100x2", async () => {
+        talax = await TalaxToken.deployed();
+        supply = await talax.totalSupply();
 
-		//? Stake 100 is used to stake 100 tokens twice and see that stake is added correctly and money burned
-		let owner = accounts[0];
-		let stake_amount = 10 * 1e3;
-		balance = await talax.balanceOf(owner);
+        //? Stake 100 is used to stake 100 tokens twice and see that stake is added correctly and money burned
+        let owner = accounts[0];
+        let stake_amount = 10 * 1e3;
+        balance = await talax.balanceOf(owner);
 
-		//? Stake the amount, notice the FROM parameter which specifes what the msg.sender address will be
-		stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
-			from: owner,
-		});
-		//? Stake again on owner because we want hasStake test to assert summary
-		stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
-			from: owner,
-		});
+        //? Stake the amount, notice the FROM parameter which specifes what the msg.sender address will be
+        stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
+            from: owner,
+        });
+        //? Stake again on owner because we want hasStake test to assert summary
+        stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
+            from: owner,
+        });
 
-		stake = await talax.stakeSummary(owner);
+        stake = await talax.stakeSummary(owner);
 
-		summary = await talax.hasStake(owner);
-		// console.log(summary.toString());
+        summary = await talax.hasStake(owner);
+        // console.log(summary.toString());
 
-		//? Assert on the emittedEvent using truffleAssert
-		//? This will capture the event and inside the event callback we can use assert on the values returned
-		truffleAssert.eventEmitted(
-			stakeID,
-			"Staked",
-			(ev) => {
-				// console.log(ev.amount.toString());
-				//? In here we can do our assertion on the ev variable (its the event and will contain the values we emitted)
-				assert.equal(
-					ev.amount,
-					stake_amount,
-					"Stake amount in event was not correct"
-				);
-				assert.equal(ev.index, 1, "Stake index was not correct");
-				return true;
-			},
-			"Stake event should have triggered"
-		);
-	});
+        //? Assert on the emittedEvent using truffleAssert
+        //? This will capture the event and inside the event callback we can use assert on the values returned
+        truffleAssert.eventEmitted(
+            stakeID,
+            "Staked",
+            (ev) => {
+                // console.log(ev.amount.toString());
+                //? In here we can do our assertion on the ev variable (its the event and will contain the values we emitted)
+                assert.equal(
+                    ev.amount,
+                    stake_amount,
+                    "Stake amount in event was not correct"
+                );
+                assert.equal(ev.index, 1, "Stake index was not correct");
+                return true;
+            },
+            "Stake event should have triggered"
+        );
+    });
 
-	/**
-	 * ? Balance :
-	 * * Owner : Total Supply - 20 * 1e3
-	 * * acc1 : 0
-	 * * acc2 : 0
-	 * ? Staking :
-	 * * Owner : 2 [10 * 1e3, 10 * 1e3]
-	 * * acc1 : 0
-	 * * acc2 : 0
-	 */
+    /**
+     * ? Balance :
+     * * Owner : Total Supply - 20 * 1e3
+     * * acc1 : 0
+     * * acc2 : 0
+     * ? Staking :
+     * * Owner : 2 [10 * 1e3, 10 * 1e3]
+     * * acc1 : 0
+     * * acc2 : 0
+     */
 
-	it("New stakeholder should have increased index", async () => {
-		talax = await TalaxToken.deployed();
+    it("New stakeholder should have increased index", async () => {
+        talax = await TalaxToken.deployed();
 
-		let transferAmount = 100 * 1e3;
-		let stake_amount = 10 * 1e3;
+        let transferAmount = 100 * 1e3;
+        let stake_amount = 10 * 1e3;
 
-		await talax.transfer(accounts[1], transferAmount, {
-			from: accounts[0],
-		});
+        await talax.transfer(accounts[1], transferAmount, {
+            from: accounts[0],
+        });
 
-		let balance = await talax.balanceOf(accounts[1]);
-		console.log(balance.toString());
+        let balance = await talax.balanceOf(accounts[1]);
+        console.log(balance.toString());
 
-		assert.equal(
-			balance,
-			transferAmount - 0.01 * transferAmount,
-			"Transfer amount is not correct"
-		);
+        assert.equal(
+            balance,
+            transferAmount - 0.01 * transferAmount,
+            "Transfer amount is not correct"
+        );
 
-		stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
-			from: accounts[1],
-		});
+        stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
+            from: accounts[1],
+        });
 
-		truffleAssert.eventEmitted(
-			stakeID,
-			"Staked",
-			(ev) => {
-				// console.log(ev);
+        truffleAssert.eventEmitted(
+            stakeID,
+            "Staked",
+            (ev) => {
+                // console.log(ev);
 
-				assert.equal(
-					ev.amount,
-					stake_amount,
-					"Stake amount in event was not correct"
-				);
-				assert.equal(ev.index, 2, "Stake index was not correct");
-				return true;
-			},
-			"Stake event should have trigerred"
-		);
-	});
+                assert.equal(
+                    ev.amount,
+                    stake_amount,
+                    "Stake amount in event was not correct"
+                );
+                assert.equal(ev.index, 2, "Stake index was not correct");
+                return true;
+            },
+            "Stake event should have trigerred"
+        );
+    });
 
-	/**
-	 * ? Balance :
-	 * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3)
-	 * * acc1 : (100 * 1e3) - (10 * 1e3)
-	 * * acc2 : 0
-	 * ? Staking :
-	 * * Owner : 2 [10 * 1e3, 10 * 1e3, 0]
-	 * * acc1 : 1 [0, 0, 10 * 1e3]
-	 * * acc2 : 0
-	 */
+    /**
+     * ? Balance :
+     * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3)
+     * * acc1 : (100 * 1e3) - (10 * 1e3)
+     * * acc2 : 0
+     * ? Staking :
+     * * Owner : 2 [10 * 1e3, 10 * 1e3, 0]
+     * * acc1 : 1 [0, 0, 10 * 1e3]
+     * * acc2 : 0
+     */
 
-	it("Cannot stake more than balance", async () => {
-		talax = await TalaxToken.deployed();
+    it("Cannot stake more than balance", async () => {
+        talax = await TalaxToken.deployed();
 
-		try {
-			await talax.stake(10 * 1e3, 30 * 24 * 3600, { from: accounts[2] });
-		} catch (err) {
-			assert.equal(
-				err.reason,
-				"TalaxToken: Cannot stake more than you own"
-			);
-		}
-	});
+        try {
+            await talax.stake(10 * 1e3, 30 * 24 * 3600, { from: accounts[2] });
+        } catch (err) {
+            assert.equal(
+                err.reason,
+                "TalaxToken: Cannot stake more than you own"
+            );
+        }
+    });
 
-	/**
-	 * ? Balance :
-	 * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3)
-	 * * acc1 : (100 * 1e3) - (10 * 1e3)
-	 * * acc2 : 0
-	 * ? Staking :
-	 * * Owner : 2 [10 * 1e3, 10 * 1e3, 0]
-	 * * acc1 : 1 [0, 0, 10 * 1e3]
-	 * * acc2 : 0
-	 */
+    /**
+     * ? Balance :
+     * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3)
+     * * acc1 : (100 * 1e3) - (10 * 1e3)
+     * * acc2 : 0
+     * ? Staking :
+     * * Owner : 2 [10 * 1e3, 10 * 1e3, 0]
+     * * acc1 : 1 [0, 0, 10 * 1e3]
+     * * acc2 : 0
+     */
 
-	it("Cannot withdraw bigger amount than current stake index", async () => {
-		talax = await TalaxToken.deployed();
+    it("Cannot withdraw bigger amount than current stake index", async () => {
+        talax = await TalaxToken.deployed();
 
-		let owner = accounts[0];
+        let owner = accounts[0];
 
-		//* Try withdrawing (20 * 1e3) from first stake
-		try {
-			await helper.advanceTimeAndBlock(3600 * 24 * 30);
-			await talax.withdrawStake(20 * 1e3, 0, { from: owner });
-		} catch (error) {
-			assert.equal(
-				error.reason,
-				"Stakable: Cannot withdraw more than you have staked",
-				"Failed to notice a too big withdrawal from stake"
-			);
-		}
-	});
+        //* Try withdrawing (20 * 1e3) from first stake
+        try {
+            await helper.advanceTimeAndBlock(3600 * 24 * 30);
+            await talax.withdrawStake(20 * 1e3, 0, { from: owner });
+        } catch (error) {
+            assert.equal(
+                error.reason,
+                "Stakable: Cannot withdraw more than you have staked",
+                "Failed to notice a too big withdrawal from stake"
+            );
+        }
+    });
 
-	/**
-	 * ? Balance :
-	 * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3)
-	 * * acc1 : (100 * 1e3) - (10 * 1e3)
-	 * * acc2 : 0
-	 * ? Staking :
-	 * * Owner : 2 [10 * 1e3, 10 * 1e3, 0]
-	 * * acc1 : 1 [0, 0, 10 * 1e3]
-	 * * acc2 : 0
-	 */
+    /**
+     * ? Balance :
+     * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3)
+     * * acc1 : (100 * 1e3) - (10 * 1e3)
+     * * acc2 : 0
+     * ? Staking :
+     * * Owner : 2 [10 * 1e3, 10 * 1e3, 0]
+     * * acc1 : 1 [0, 0, 10 * 1e3]
+     * * acc2 : 0
+     */
 
-	it("Withdraw 5 from stake", async () => {
-		talax = await TalaxToken.deployed();
+    it("Withdraw 5 from stake", async () => {
+        talax = await TalaxToken.deployed();
 
-		let owner = accounts[0];
-		let withdraw_amount = 5 * 1e3;
+        let owner = accounts[0];
+        let withdraw_amount = 5 * 1e3;
 
-		await helper.advanceTimeAndBlock(3600 * 24 * 30);
+        await helper.advanceTimeAndBlock(3600 * 24 * 30);
 
-		await talax.withdrawStake(withdraw_amount, 0, { from: owner });
+        await talax.withdrawStake(withdraw_amount, 0, { from: owner });
 
-		let summary = await talax.hasStake(owner);
+        let summary = await talax.hasStake(owner);
 
-		assert.equal(
-			summary.total_amount,
-			20 * 1e3 - withdraw_amount,
-			"The total staking amount should be 15"
-		);
+        assert.equal(
+            summary.total_amount,
+            20 * 1e3 - withdraw_amount,
+            "The total staking amount should be 15"
+        );
 
-		let stake_amount = summary.stakes[0].amount;
+        let stake_amount = summary.stakes[0].amount;
 
-		assert.equal(
-			stake_amount,
-			10 * 1e3 - withdraw_amount,
-			"Wrong amount in first stake after withdrawal"
-		);
-	});
+        assert.equal(
+            stake_amount,
+            10 * 1e3 - withdraw_amount,
+            "Wrong amount in first stake after withdrawal"
+        );
+    });
 
-	/**
-	 * ? Balance :
-	 * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3) + (5 * 1e3)
-	 * * acc1 : (100 * 1e3) - (10 * 1e3)
-	 * * acc2 : 0
-	 * ? Staking :
-	 * * Owner : 2 [5 * 1e3, 10 * 1e3]
-	 * * acc1 : 1 [10 * 1e3]
-	 * * acc2 : 0
-	 */
+    /**
+     * ? Balance :
+     * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3) + (5 * 1e3)
+     * * acc1 : (100 * 1e3) - (10 * 1e3)
+     * * acc2 : 0
+     * ? Staking :
+     * * Owner : 2 [5 * 1e3, 10 * 1e3]
+     * * acc1 : 1 [10 * 1e3]
+     * * acc2 : 0
+     */
 
-	it("Cannot withdraw instantly after first withdrawal", async () => {
-		talax = await TalaxToken.deployed();
+    it("Cannot withdraw instantly after first withdrawal", async () => {
+        talax = await TalaxToken.deployed();
 
-		let owner = accounts[0];
+        let owner = accounts[0];
 
-		let withdrawAmount = 1 * 1e3;
+        let withdrawAmount = 1 * 1e3;
 
-		try {
-			await talax.withdrawStake(withdrawAmount, 0, { from: owner });
-		} catch (err) {
-			assert.equal(
-				err.reason,
-				"Stakable: Cannot withdraw before the release time"
-			);
-		}
-	});
+        try {
+            await talax.withdrawStake(withdrawAmount, 0, { from: owner });
+        } catch (err) {
+            assert.equal(
+                err.reason,
+                "Stakable: Cannot withdraw before the release time"
+            );
+        }
+    });
 
-	it("Remove stake if empty", async () => {
-		talax = await TalaxToken.deployed();
+    it("Remove stake if empty", async () => {
+        talax = await TalaxToken.deployed();
 
-		let owner = accounts[0];
-		let withdrawAmount = 5 * 1e3;
+        let owner = accounts[0];
+        let withdrawAmount = 5 * 1e3;
 
-		await helper.advanceTimeAndBlock(3600 * 24 * 30);
-		await talax.withdrawStake(withdrawAmount, 0, { from: owner });
+        await helper.advanceTimeAndBlock(3600 * 24 * 30);
+        await talax.withdrawStake(withdrawAmount, 0, { from: owner });
 
-		let summary = await talax.hasStake(owner);
-		for (s = 0; s < summary.stakes.length; s++) {
-			console.log(summary.stakes[s]);
-		}
+        let summary = await talax.hasStake(owner);
+        for (s = 0; s < summary.stakes.length; s++) {
+            console.log(summary.stakes[s]);
+        }
 
-		assert.equal(
-			summary.stakes[0].amount.toString(),
-			"0",
-			"Amount is not 0 after depletion"
-		);
-	});
+        assert.equal(
+            summary.stakes[0].amount.toString(),
+            "0",
+            "Amount is not 0 after depletion"
+        );
+    });
 
-	/**
-	 * ? Balance :
-	 * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3) + (5 * 1e3) + (5 * 1e3)
-	 * * acc1 : (100 * 1e3) - (10 * 1e3)
-	 * * acc2 : 0
-	 * ? Staking :
-	 * * Owner : 2 [0, 10 * 1e3, 0]
-	 * * acc1 : 1 [0, 0, 10 * 1e3]
-	 * * acc2 : 0
-	 */
+    /**
+     * ? Balance :
+     * * Owner : Total Supply - (20 * 1e3) - (100 * 1e3) + (5 * 1e3) + (5 * 1e3)
+     * * acc1 : (100 * 1e3) - (10 * 1e3)
+     * * acc2 : 0
+     * ? Staking :
+     * * Owner : 2 [0, 10 * 1e3, 0]
+     * * acc1 : 1 [0, 0, 10 * 1e3]
+     * * acc2 : 0
+     */
 
-	it("Calculate claimable staking amount", async () => {
-		talax = await TalaxToken.deployed();
+    it("Calculate claimable staking amount", async () => {
+        talax = await TalaxToken.deployed();
 
-		let owner = accounts[0];
+        let owner = accounts[0];
 
-		let test = await talax.testCalculateDuration(1, owner);
-		console.log(test / (3600 * 24 * 30))
+        let test = await talax.testCalculateDuration(1, owner);
+        console.log(test / (3600 * 24 * 30));
 
-		let summary = await talax.hasStake(owner);
-		for (s = 0; s < summary.stakes.length; s++) {
-			console.log(summary.stakes[s]);
-		}
+        let summary = await talax.hasStake(owner);
+        for (s = 0; s < summary.stakes.length; s++) {
+            console.log(summary.stakes[s]);
+        }
 
-		let stake = summary.stakes[1];
+        let stake = summary.stakes[1];
 
-		let blocktime = await talax.blockTime();
+        let blocktime = await talax.blockTime();
 
-		let duration = (blocktime - stake.since) / (3600 * 24 * 30 * 12)
+        let duration = (blocktime - stake.since) / (3600 * 24 * 30 * 12);
 
-		console.log("Stake Duration in Months :",duration)
+        console.log("Stake Duration in Months :", duration);
 
-		assert.equal(
-			stake.claimable,
-			Math.round((10 * 1e3 * 0.05) * (3600 * 24 * 365)),
-			"Reward should be 123 after staking 10000 for 90 days"
-		);
-	});
+        assert.equal(
+            stake.claimable,
+            Math.floor(10 * 1e3 * 0.05 * (90 / 365)),
+            "Reward should be 123 after staking 10000 for 90 days"
+        );
+    });
 });

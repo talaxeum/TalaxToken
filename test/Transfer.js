@@ -104,7 +104,7 @@ contract("Transfer", async (accounts) => {
 				transferAmount
 			);
 		} catch (err) {
-			assert.equal(err.reason, "BEP20: transfer to the zero address");
+			assert.equal(err.reason, "TalaxToken: transfer to the zero address");
 		}
 	});
 
@@ -139,7 +139,7 @@ contract("Transfer", async (accounts) => {
 		} catch (err) {
 			assert.equal(
 				err.reason,
-				"BEP20: transfer amount exceeds allowance"
+				"TalaxToken: transfer amount exceeds allowance"
 			);
 		}
 

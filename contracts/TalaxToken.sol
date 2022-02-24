@@ -38,6 +38,9 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     /**
      * Addresses
      */
+
+    address[] init_owners;
+
     address public_sale_address;
 
     address private_sale_address;
@@ -86,6 +89,10 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
          * Addresses initialization
          */
 
+        init_owners.push(0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075); //owner_1
+        init_owners.push(0x324505Aef2a89cd458824d4Fa225010329fd949A); //owner_2
+        init_owners.push(0xa9a58CF0a08B26FC832935870A329C99968f8Ec9); //owner_3
+
         // public_sale_address = [ADDRESS];
         // private_sale_address = [ADDRESS];
 
@@ -101,6 +108,12 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         //team_and_project_coordinator_address_1 = [ADDRESS]
         //team_and_project_coordinator_address_2 = [ADDRESS]
         //team_and_project_coordinator_address_3 = [ADDRESS]
+
+        /**
+         * @notice Transfer Ownership
+         */
+
+        transferOwnership(init_owners);
 
         /**
          * Amount Initialization
@@ -205,8 +218,6 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         _stakingPackage[90 days] = 6;
         _stakingPackage[180 days] = 7;
         _stakingPackage[365 days] = 8;
-
-        _balances[_msgSender()] = _totalSupply;
     }
 
     fallback() external payable {
@@ -256,10 +267,10 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
      */
 
     /**
-     * @dev Returns the bep token owner.
+     * @dev See address of this smart contract.
      */
-    function getOwner() external view override returns (address[] memory) {
-        return getAllOwners();
+    function thisAddress() external view returns (address) {
+        return address(this);
     }
 
     /**
@@ -290,12 +301,29 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         return _totalSupply;
     }
 
+    function getOwner() external view override returns (address[] memory) {
+        return getAllOwners();
+    }
+
+    /**
+     * @dev See _stakingPackage being used in 'index'.
+     */
     function stakingPackage(uint256 index) external view returns (uint256) {
         return _stakingPackage[index];
     }
 
+    /**
+     * @dev See _taxFee.
+     */
     function taxFee() external view returns (uint256) {
         return _taxFee;
+    }
+
+    /**
+     * @dev See _stakingReward.
+     */
+    function stakingReward() external view returns (uint256) {
+        return _stakingReward;
     }
 
     /**
@@ -797,6 +825,12 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         emit Approval(owner, spender, amount);
     }
 
+    function _mintLiquidityReserve(uint256 amount_) internal onlyAllOwners {
+        require(amount_ != 0, "Amount mint cannot be 0");
+        _balances[address(this)] = _balances[address(this)].add(amount_);
+        _totalSupply = _totalSupply.add(amount_);
+    }
+
     /**
      * @notice EXTERNAL FUNCTIONS
      */
@@ -965,9 +999,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyAllOwners {
-        require(amount_ != 0, "Amount mint cannot be 0");
-        _balances[address(this)] = _balances[address(this)].add(amount_);
-        _totalSupply = _totalSupply.add(amount_);
+        _mintLiquidityReserve(amount_);
     }
 
     function burnStakingReward(uint256 amount_) external onlyAllOwners {
@@ -1020,7 +1052,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintLiquidityReserve(reward_);
+        _mintLiquidityReserve(reward_);
         _balances[address(this)].sub(amount_);
         _balances[address(this)].sub(reward_);
         _mint(_msgSender(), amount_ + reward_);
@@ -1031,7 +1063,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintLiquidityReserve(reward_);
+        _mintLiquidityReserve(reward_);
         _balances[address(this)].sub(amount_);
         _balances[address(this)].sub(reward_);
         _mint(_msgSender(), amount_ + reward_);
