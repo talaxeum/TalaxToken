@@ -13,8 +13,16 @@ contract("Initial", async (accounts) => {
     it("Initial: initial owner", async () => {
         let talax = await TalaxToken.deployed();
         owner = await talax.getOwner();
+        console.log("Owners: ",owner);
+
+        let init_owners = [
+            "0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075",
+            "0x324505Aef2a89cd458824d4Fa225010329fd949A",
+            "0xa9a58CF0a08B26FC832935870A329C99968f8Ec9"
+        ];
+
         assert.equal(
-            accounts[0],
+            init_owners,
             owner,
             "Owner should be the one who deployed the contract"
         );
@@ -27,7 +35,9 @@ contract("Initial", async (accounts) => {
 
         let newOwners = [accounts[1], accounts[2]];
 
-        await talax.transferOwnership(newOwners);
+        await talax.transferOwnership(newOwners, {from: accounts[1]});
+        await talax.transferOwnership(newOwners, {from: accounts[2]});
+        await talax.transferOwnership(newOwners, {from: accounts[3]});
 
         owner = await talax.getOwner();
         console.log("Owners: ", owner);

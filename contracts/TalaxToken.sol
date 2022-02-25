@@ -93,21 +93,20 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         init_owners.push(0x324505Aef2a89cd458824d4Fa225010329fd949A); //owner_2
         init_owners.push(0xa9a58CF0a08B26FC832935870A329C99968f8Ec9); //owner_3
 
-        // public_sale_address = [ADDRESS];
-        // private_sale_address = [ADDRESS];
+        public_sale_address = 0x681c7F8845ad51f10af85aeAF116371953024899;
+        private_sale_address = 0x681c7F8845ad51f10af85aeAF116371953024899;
 
-        // dev_pool_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        // dev_pool_address_2 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        // dev_pool_address_3 = [ADDRESS];
-        // dev_pool_address = 0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075;
+        dev_pool_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
+        dev_pool_address_2 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
+        dev_pool_address_3 = 0x681c7F8845ad51f10af85aeAF116371953024899;
 
-        // strategic_partner_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        //strategic_partner_address_2 = ;
-        //strategic_partner_address_3 = ;
+        strategic_partner_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
+        strategic_partner_address_2 = 0x681c7F8845ad51f10af85aeAF116371953024899;
+        strategic_partner_address_3 = 0x681c7F8845ad51f10af85aeAF116371953024899;
 
         team_and_project_coordinator_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        //team_and_project_coordinator_address_2 = ;
-        //team_and_project_coordinator_address_3 = ;
+        team_and_project_coordinator_address_2 = 0x681c7F8845ad51f10af85aeAF116371953024899;
+        team_and_project_coordinator_address_3 = 0x681c7F8845ad51f10af85aeAF116371953024899;
 
         /**
          * @notice Transfer Ownership
@@ -155,31 +154,31 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             private_placement_address
         );
 
-        // devPoolLockedWallet_1 = new Lockable(
-        //     14 * 1e6 * 10**18,
-        //     dev_pool_address_1
-        // );
-        // devPoolLockedWallet_2 = new Lockable(
-        //     14 * 1e6 * 10**18,
-        //     dev_pool_address_2
-        // );
-        // devPoolLockedWallet_3 = new Lockable(
-        //     14 * 1e6 * 10**18,
-        //     dev_pool_address_3
-        // );
+        devPoolLockedWallet_1 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_1
+        );
+        devPoolLockedWallet_2 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_2
+        );
+        devPoolLockedWallet_3 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_3
+        );
 
-        // strategicPartnerLockedWallet_1 = new Lockable(
-        //     3500 * 1e3 * 10**18,
-        //     strategic_partner_address_1
-        // );
-        // strategicPartnerLockedWallet_2 = new Lockable(
-        //     3500 * 1e3 * 10**18,
-        //     strategic_partner_address_2
-        // );
-        // strategicPartnerLockedWallet_3 = new Lockable(
-        //     3500 * 1e3 * 10**18,
-        //     strategic_partner_address_3
-        // );
+        strategicPartnerLockedWallet_1 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_1
+        );
+        strategicPartnerLockedWallet_2 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_2
+        );
+        strategicPartnerLockedWallet_3 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_3
+        );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
             10500 * 1e3 * 10**18,

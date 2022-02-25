@@ -191,7 +191,7 @@ contract Multiownable {
      * @param newOwners defines array of addresses of new owners
      */
     function transferOwnership(address[] memory newOwners)
-        internal
+        public
         onlyAllOwners
     {
         require(

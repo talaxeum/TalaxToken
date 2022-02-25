@@ -21,7 +21,7 @@ const helper = require("./helpers/truffleTestHelpers");
  * TODO: Calculate rewards from stake index
  */
 
-contract("Stakable_", async (accounts) => {
+contract("Stakable", async (accounts) => {
     /**
      * ? Starting status
      * ? Balance :

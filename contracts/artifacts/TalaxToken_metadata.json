@@ -1155,6 +1155,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "address[]",
+						"name": "newOwners",
+						"type": "address[]"
+					}
+				],
+				"name": "transferOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "unlockDevPoolWallet_1",
 				"outputs": [],
@@ -1352,6 +1365,12 @@
 				"transferFrom(address,address,uint256)": {
 					"details": "See {BEP20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {BEP20}; Requirements: - `sender` and `recipient` cannot be the zero address. - `sender` must have a balance of at least `amount`. - the caller must have allowance for `sender`'s tokens of at least `amount`."
 				},
+				"transferOwnership(address[])": {
+					"details": "Allows owners to change ownership",
+					"params": {
+						"newOwners": "defines array of addresses of new owners"
+					}
+				},
 				"unlockDevPoolWallet_1()": {
 					"details": "LockedWallet: Dev Pool Locked Wallet"
 				},
@@ -1408,11 +1427,11 @@
 	},
 	"sources": {
 		"contracts/Lockable.sol": {
-			"keccak256": "0x8f2ea02b1cc36f5c51909ddad86f2103058cfb6416d009f429f1d7389f77c529",
+			"keccak256": "0x2cf235e953368f24ce9bd26f26c08f23363fea663176bd74b0e4ba67c958fb2e",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://7fef1106a937c99f4c4c4906e2076d5ea31ff5efcf9799f55c82656cdfe67d90",
-				"dweb:/ipfs/QmZ8qtpkwfRinJCypLSWrzuMiZRX5BTQ95kYMHvyVp2iu4"
+				"bzz-raw://157da95e9cde8e5295a2ecd101e9ec503e7b0b0363b39d3bf12e2d7e92a9abea",
+				"dweb:/ipfs/QmRVN3EqWAbbC7MKyF5qhCFguGe2R1qe7xkoBodX6w2b8N"
 			]
 		},
 		"contracts/Stakable.sol": {
@@ -1424,11 +1443,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0xabeb56ea474750ba854e93cb5bff6a71995e37de43a10115ad61b3e3270d07f7",
+			"keccak256": "0xc6f8fe08853426b11180533bfb47b4ccd5308f46f29fc23a9376d97389e35209",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://4c0ebab010c003412404b1f29c0f47dcf3b1e9f3b911079e146147357d517956",
-				"dweb:/ipfs/QmYBLeM69UNhFpRo1jetoT7KNZuZz1mJvsKGGxBvEaSv4a"
+				"bzz-raw://cebf1f1eeb6aa1800ff74b417316603a41f9455ab5cbc022399ef748230de29a",
+				"dweb:/ipfs/QmYLm2fQB51nRvCoJ2yaC2yS2bS6VP9Qpje5BStNzHatYr"
 			]
 		},
 		"contracts/src/Context.sol": {
@@ -1448,11 +1467,11 @@
 			]
 		},
 		"contracts/src/Multiownable.sol": {
-			"keccak256": "0x6f03865213aab7ee6cabec0ef7ab136695b119cf9c76640965be56c3e260f5cd",
+			"keccak256": "0x3486d12af99dd447825ff5c54ed21b946de5cbd7fe10b685f609186f34baa600",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://78741a2c0d377e220981e47c0624ebbeefe386a904cade8c425e890933363ae3",
-				"dweb:/ipfs/Qmb1k2gykrCbx5boGQr1MuoTw7bm9xRTnL6uY58ojeEKmL"
+				"bzz-raw://501dceef23881a96eeb4b4649e70479b9f5283950c3523cf3a1472e99592aae1",
+				"dweb:/ipfs/QmWJzdDBwoaDqyC1mh4WTeqaNatfPZQ98k4GxZVFgb91ob"
 			]
 		},
 		"contracts/src/SafeMath.sol": {

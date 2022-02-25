@@ -9,5 +9,5 @@ To compile the Smart Contract:
 To test the Smart Contract:
 
 ```solidity
-    truffle test
+    truffle test ./test/[filename].js
 ```
