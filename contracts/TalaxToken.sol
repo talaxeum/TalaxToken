@@ -89,24 +89,26 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
          * Addresses initialization
          */
 
-        init_owners.push(0x0Fa15f7550eC226C2a963f9cEB18aed8FD182075); //owner_1
-        init_owners.push(0x324505Aef2a89cd458824d4Fa225010329fd949A); //owner_2
-        init_owners.push(0xa9a58CF0a08B26FC832935870A329C99968f8Ec9); //owner_3
+        init_owners.push(0x7537116370d3261e17819347c84fb502eE3DE568); //owner_1
+        init_owners.push(0x7B0956Ac989a3BF2e29bb884e07A09fCb2f66394); //owner_2
+        init_owners.push(0x5Cd00c0eF965Ab4A1abC225D7fb5379584c79C50); //owner_3
 
-        public_sale_address = 0x681c7F8845ad51f10af85aeAF116371953024899;
-        private_sale_address = 0x681c7F8845ad51f10af85aeAF116371953024899;
+        public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+        private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
 
-        dev_pool_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        dev_pool_address_2 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        dev_pool_address_3 = 0x681c7F8845ad51f10af85aeAF116371953024899;
+        private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
 
-        strategic_partner_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        strategic_partner_address_2 = 0x681c7F8845ad51f10af85aeAF116371953024899;
-        strategic_partner_address_3 = 0x681c7F8845ad51f10af85aeAF116371953024899;
+        dev_pool_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
+        dev_pool_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
+        dev_pool_address_3 = 0x126974fa373267d86fAB6d6871Afe62ccB68e810;
 
-        team_and_project_coordinator_address_1 = 0xC65AC7C6aFf4C149d1EC12865D58FE60f29A705B;
-        team_and_project_coordinator_address_2 = 0x681c7F8845ad51f10af85aeAF116371953024899;
-        team_and_project_coordinator_address_3 = 0x681c7F8845ad51f10af85aeAF116371953024899;
+        strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
+        strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
+        strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
+
+        team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
+        team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
+        team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
         /**
          * @notice Transfer Ownership
