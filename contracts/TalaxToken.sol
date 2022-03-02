@@ -52,14 +52,12 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
      * address liquidity_reserve_address;
      */
 
-    address dev_pool_address_1;
-    address dev_pool_address_2;
-    address dev_pool_address_3;
-
-    address strategic_partner_address_1;
-    address strategic_partner_address_2;
-    address strategic_partner_address_3;
-
+    // address dev_pool_address_1;
+    // address dev_pool_address_2;
+    // address dev_pool_address_3;
+    // address strategic_partner_address_1;
+    // address strategic_partner_address_2;
+    // address strategic_partner_address_3;
     address team_and_project_coordinator_address_1;
     address team_and_project_coordinator_address_2;
     address team_and_project_coordinator_address_3;
@@ -69,12 +67,12 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
      */
     Lockable public privatePlacementLockedWallet;
 
-    Lockable public devPoolLockedWallet_1;
-    Lockable public devPoolLockedWallet_2;
-    Lockable public devPoolLockedWallet_3;
-    Lockable public strategicPartnerLockedWallet_1;
-    Lockable public strategicPartnerLockedWallet_2;
-    Lockable public strategicPartnerLockedWallet_3;
+    // Lockable public devPoolLockedWallet_1;
+    // Lockable public devPoolLockedWallet_2;
+    // Lockable public devPoolLockedWallet_3;
+    // Lockable public strategicPartnerLockedWallet_1;
+    // Lockable public strategicPartnerLockedWallet_2;
+    // Lockable public strategicPartnerLockedWallet_3;
     Lockable public teamAndProjectCoordinatorLockedWallet_1;
     Lockable public teamAndProjectCoordinatorLockedWallet_2;
     Lockable public teamAndProjectCoordinatorLockedWallet_3;
@@ -101,11 +99,9 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         dev_pool_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
         dev_pool_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
         dev_pool_address_3 = 0x126974fa373267d86fAB6d6871Afe62ccB68e810;
-
         strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
         strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
         strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
-
         team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;

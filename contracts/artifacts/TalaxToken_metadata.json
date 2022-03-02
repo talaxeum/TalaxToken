@@ -1421,7 +1421,7 @@
 		},
 		"optimizer": {
 			"enabled": true,
-			"runs": 200
+			"runs": 150
 		},
 		"remappings": []
 	},
@@ -1443,11 +1443,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0xc6f8fe08853426b11180533bfb47b4ccd5308f46f29fc23a9376d97389e35209",
+			"keccak256": "0x77086e19afab411874492ff04fb0bc766f549803e0574de2883753f8ba823ced",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://cebf1f1eeb6aa1800ff74b417316603a41f9455ab5cbc022399ef748230de29a",
-				"dweb:/ipfs/QmYLm2fQB51nRvCoJ2yaC2yS2bS6VP9Qpje5BStNzHatYr"
+				"bzz-raw://bde72fe7f3f27f6aaa213d2eddc4ae57b51ec862262793421874464dbe559d12",
+				"dweb:/ipfs/QmTXVbDmgJtGJEyJyR2whQkJ5aieHTfRMpt7rg3i75U8DP"
 			]
 		},
 		"contracts/src/Context.sol": {

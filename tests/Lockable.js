@@ -12,7 +12,7 @@ const helper = require("./helpers/truffleTestHelpers");
 contract("Lockable", async (accounts) => {
     it("Not yet Claimable Test", async () => {
         talax = await TalaxToken.deployed();
-        owner = accounts[9];
+        owner = "0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F";
 
         let balance = await talax.balanceOf(owner);
         console.log("Starting Balance: ", balance.toString());
@@ -49,7 +49,7 @@ contract("Lockable", async (accounts) => {
 
     it("Claim after the Designated Time Test", async () => {
         talax = await TalaxToken.deployed();
-        owner = accounts[9];
+        owner = "0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F";
 
         let balance = await talax.balanceOf(owner);
         console.log("Starting Balance: ", balance.toString());
