@@ -19,8 +19,8 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
 
     uint16 public _taxFee;
 
-    uint256 public _totalSupply;
     uint8 private _decimals;
+    uint256 private _totalSupply;
     string private _symbol;
     string private _name;
 
@@ -131,31 +131,31 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             private_placement_address
         );
 
-        // devPoolLockedWallet_1 = new Lockable(
-        //     14 * 1e6 * 10**18,
-        //     dev_pool_address_1
-        // );
-        // devPoolLockedWallet_2 = new Lockable(
-        //     14 * 1e6 * 10**18,
-        //     dev_pool_address_2
-        // );
-        // devPoolLockedWallet_3 = new Lockable(
-        //     14 * 1e6 * 10**18,
-        //     dev_pool_address_3
-        // );
+        devPoolLockedWallet_1 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_1
+        );
+        devPoolLockedWallet_2 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_2
+        );
+        devPoolLockedWallet_3 = new Lockable(
+            14 * 1e6 * 10**18,
+            dev_pool_address_3
+        );
 
-        // strategicPartnerLockedWallet_1 = new Lockable(
-        //     3500 * 1e3 * 10**18,
-        //     strategic_partner_address_1
-        // );
-        // strategicPartnerLockedWallet_2 = new Lockable(
-        //     3500 * 1e3 * 10**18,
-        //     strategic_partner_address_2
-        // );
-        // strategicPartnerLockedWallet_3 = new Lockable(
-        //     3500 * 1e3 * 10**18,
-        //     strategic_partner_address_3
-        // );
+        strategicPartnerLockedWallet_1 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_1
+        );
+        strategicPartnerLockedWallet_2 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_2
+        );
+        strategicPartnerLockedWallet_3 = new Lockable(
+            3500 * 1e3 * 10**18,
+            strategic_partner_address_3
+        );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
             10500 * 1e3 * 10**18,
