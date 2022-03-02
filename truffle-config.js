@@ -45,7 +45,8 @@ module.exports = {
             host: "127.0.0.1", // Localhost (default: none)
             port: 7545, // Standard BSC port (default: none)
             network_id: "*", // Any network (default: none)
-            gas: 6500000,
+            gas: 3000000,
+            gasPrice: 20000000000,
         },
         // testnet: {
         // 	provider: () =>
@@ -111,12 +112,14 @@ module.exports = {
                 // See the solidity docs for advice about optimization and evmVersion
                 optimizer: {
                     enabled: true,
-                    runs: 150,
+                    runs: 200,
                 },
                 //  evmVersion: "byzantium"
             },
         },
     },
+
+    plugins: ["truffle-contract-size"],
 
     // Truffle DB is currently disabled by default; to enable it, change enabled:
     // false to enabled: true. The default storage location can also be

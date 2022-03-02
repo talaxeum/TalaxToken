@@ -10,6 +10,10 @@ const helper = require("./helpers/truffleTestHelpers");
  */
 
 contract("Lockable", async (accounts) => {
+    // TalaxToken.defaults({
+    //     gasPrice:0,
+    // });
+
     it("Not yet Claimable Test", async () => {
         talax = await TalaxToken.deployed();
         owner = "0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F";

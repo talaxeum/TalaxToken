@@ -315,6 +315,25 @@
 				"type": "fallback"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "_stakingPackage",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "_taxFee",
 				"outputs": [
@@ -519,45 +538,6 @@
 					}
 				],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "devPoolLockedWallet_1",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "devPoolLockedWallet_2",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "devPoolLockedWallet_3",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -809,19 +789,6 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "privatePlacementLockedWallet",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -903,90 +870,6 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "index",
-						"type": "uint256"
-					}
-				],
-				"name": "stakingPackage",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "stakingReward",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "stakingRewardAmount",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "strategicPartnerLockedWallet_1",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "strategicPartnerLockedWallet_2",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "strategicPartnerLockedWallet_3",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [],
 				"name": "symbol",
 				"outputs": [
@@ -994,58 +877,6 @@
 						"internalType": "string",
 						"name": "",
 						"type": "string"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "taxFee",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "teamAndProjectCoordinatorLockedWallet_1",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "teamAndProjectCoordinatorLockedWallet_2",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "teamAndProjectCoordinatorLockedWallet_3",
-				"outputs": [
-					{
-						"internalType": "contract Lockable",
-						"name": "",
-						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -1341,17 +1172,8 @@
 				"name()": {
 					"details": "Returns the token name."
 				},
-				"stakingPackage(uint256)": {
-					"details": "See _stakingPackage being used in 'index'."
-				},
-				"stakingReward()": {
-					"details": "See _stakingReward."
-				},
 				"symbol()": {
 					"details": "Returns the token symbol."
-				},
-				"taxFee()": {
-					"details": "See _taxFee."
 				},
 				"thisAddress()": {
 					"details": "See address of this smart contract."
@@ -1397,9 +1219,6 @@
 			},
 			"kind": "user",
 			"methods": {
-				"privatePlacementLockedWallet()": {
-					"notice": "Lockable Object"
-				},
 				"stake(uint256,uint256)": {
 					"notice": "Add functionality like burn to the _stake afunction"
 				},
@@ -1421,7 +1240,7 @@
 		},
 		"optimizer": {
 			"enabled": true,
-			"runs": 150
+			"runs": 200
 		},
 		"remappings": []
 	},
@@ -1443,11 +1262,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x77086e19afab411874492ff04fb0bc766f549803e0574de2883753f8ba823ced",
+			"keccak256": "0xb9bad133b623a1f7bfa7e8daddc37b4de39f0dcaf898982de8efbdcecd8f8c91",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://bde72fe7f3f27f6aaa213d2eddc4ae57b51ec862262793421874464dbe559d12",
-				"dweb:/ipfs/QmTXVbDmgJtGJEyJyR2whQkJ5aieHTfRMpt7rg3i75U8DP"
+				"bzz-raw://05234358b2808abef824decdbdce2572fcacbf47cfc1b465b733b3848530a687",
+				"dweb:/ipfs/QmeuWsccfRHPy5sXRUuYc4fD1ASdTS79ULriQtk4goSZ2R"
 			]
 		},
 		"contracts/src/Context.sol": {
