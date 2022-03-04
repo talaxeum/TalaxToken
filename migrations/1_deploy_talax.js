@@ -1,5 +1,5 @@
-const Migrations = artifacts.require("TalaxToken");
+const TalaxToken = artifacts.require("TalaxToken");
 
 module.exports = function (deployer) {
-  deployer.deploy(Migrations);
+  deployer.deploy(TalaxToken);
 };
