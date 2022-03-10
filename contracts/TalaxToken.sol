@@ -38,6 +38,8 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
      * address liquidity_reserve_address;
      */
 
+    address private public_sale_address;
+    address private private_sale_address;
     address private private_placement_address;
     address private dev_pool_address_1;
     address private dev_pool_address_2;
@@ -86,6 +88,8 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         init_owners.push(0x7B0956Ac989a3BF2e29bb884e07A09fCb2f66394); //owner_2
         init_owners.push(0x5Cd00c0eF965Ab4A1abC225D7fb5379584c79C50); //owner_3
 
+        public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+        private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
         private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
         dev_pool_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
         dev_pool_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
@@ -1009,77 +1013,77 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     /**
      * @dev LockedWallet: Dev Pool Locked Wallet
      */
-    // function unlockDevPoolWallet_1() external {
-    //     require(
-    //         msg.sender == devPoolLockedWallet_1.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
-    //         devPoolReleaseRate()
-    //     );
+    function unlockDevPoolWallet_1() external {
+        require(
+            msg.sender == devPoolLockedWallet_1.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
+            devPoolReleaseRate()
+        );
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockDevPoolWallet_2() external {
-    //     require(
-    //         msg.sender == devPoolLockedWallet_2.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
-    //         devPoolReleaseRate()
-    //     );
+    function unlockDevPoolWallet_2() external {
+        require(
+            msg.sender == devPoolLockedWallet_2.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
+            devPoolReleaseRate()
+        );
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockDevPoolWallet_3() external {
-    //     require(
-    //         msg.sender == devPoolLockedWallet_3.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
-    //         devPoolReleaseRateAlternate()
-    //     );
+    function unlockDevPoolWallet_3() external {
+        require(
+            msg.sender == devPoolLockedWallet_3.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
+            devPoolReleaseRateAlternate()
+        );
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
     /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
-    // function unlockStrategicPartnerWallet_1() external {
-    //     require(
-    //         msg.sender == strategicPartnerLockedWallet_1.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = strategicPartnerLockedWallet_1
-    //         .releaseClaimable(strategicPartnerReleaseRate());
+    function unlockStrategicPartnerWallet_1() external {
+        require(
+            msg.sender == strategicPartnerLockedWallet_1.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_1
+            .releaseClaimable(strategicPartnerReleaseRate());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockStrategicPartnerWallet_2() external {
-    //     require(
-    //         msg.sender == strategicPartnerLockedWallet_2.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = strategicPartnerLockedWallet_2
-    //         .releaseClaimable(strategicPartnerReleaseRate());
+    function unlockStrategicPartnerWallet_2() external {
+        require(
+            msg.sender == strategicPartnerLockedWallet_2.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_2
+            .releaseClaimable(strategicPartnerReleaseRate());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockStrategicPartnerWallet_3() external {
-    //     require(
-    //         msg.sender == strategicPartnerLockedWallet_3.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = strategicPartnerLockedWallet_3
-    //         .releaseClaimable(strategicPartnerReleaseRateAlternate());
+    function unlockStrategicPartnerWallet_3() external {
+        require(
+            msg.sender == strategicPartnerLockedWallet_3.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_3
+            .releaseClaimable(strategicPartnerReleaseRateAlternate());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
     /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
