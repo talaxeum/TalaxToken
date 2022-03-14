@@ -252,7 +252,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
     /**
      * @dev this is the release rate for partial token release
      */
-    function privatePlacementReleaseRate()
+    function privatePlacementReleaseAmount()
         internal
         pure
         returns (uint256[43] memory)
@@ -304,7 +304,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
-    function devPoolReleaseRate() internal pure returns (uint256[43] memory) {
+    function devPoolReleaseAmount() internal pure returns (uint256[43] memory) {
         return [
             SafeMath.mul(1 * 1e6, 1e18),
             0,
@@ -352,7 +352,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
-    function devPoolReleaseRateAlternate()
+    function devPoolReleaseAmountAlternate()
         internal
         pure
         returns (uint256[43] memory)
@@ -404,7 +404,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
-    function strategicPartnerReleaseRate()
+    function strategicPartnerReleaseAmount()
         internal
         pure
         returns (uint256[43] memory)
@@ -456,7 +456,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
-    function strategicPartnerReleaseRateAlternate()
+    function strategicPartnerReleaseAmountAlternate()
         internal
         pure
         returns (uint256[43] memory)
@@ -508,7 +508,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
-    function teamAndProjectCoordinatorReleaseRate()
+    function teamAndProjectCoordinatorReleaseAmount()
         internal
         pure
         returns (uint256[43] memory)
@@ -560,7 +560,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         ];
     }
 
-    function teamAndProjectCoordinatorReleaseRateAlternate()
+    function teamAndProjectCoordinatorReleaseAmountAlternate()
         internal
         pure
         returns (uint256[43] memory)
@@ -1005,7 +1005,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = privatePlacementLockedWallet
-            .releaseClaimable(privatePlacementReleaseRate());
+            .releaseClaimable(privatePlacementReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
@@ -1019,7 +1019,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
-            devPoolReleaseRate()
+            devPoolReleaseAmount()
         );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
@@ -1031,7 +1031,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
-            devPoolReleaseRate()
+            devPoolReleaseAmount()
         );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
@@ -1043,7 +1043,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
-            devPoolReleaseRateAlternate()
+            devPoolReleaseAmountAlternate()
         );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
@@ -1058,7 +1058,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_1
-            .releaseClaimable(strategicPartnerReleaseRate());
+            .releaseClaimable(strategicPartnerReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
@@ -1069,7 +1069,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_2
-            .releaseClaimable(strategicPartnerReleaseRate());
+            .releaseClaimable(strategicPartnerReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
@@ -1080,7 +1080,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_3
-            .releaseClaimable(strategicPartnerReleaseRateAlternate());
+            .releaseClaimable(strategicPartnerReleaseAmountAlternate());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
@@ -1094,7 +1094,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
-            .releaseClaimable(teamAndProjectCoordinatorReleaseRate());
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
@@ -1105,7 +1105,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
-            .releaseClaimable(teamAndProjectCoordinatorReleaseRate());
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
@@ -1116,7 +1116,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
-            .releaseClaimable(teamAndProjectCoordinatorReleaseRateAlternate());
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmountAlternate());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }

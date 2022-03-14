@@ -35,7 +35,7 @@ contract Lockable {
      *  @dev 		Main Functions
      *  @return 	Claimable amount from Locked Wallet
      */
-    function _calculateClaimableAmount(uint256[43] memory rate_)
+    function _calculateClaimableAmount(uint256[43] memory amount_)
         internal
         returns (uint256)
     {
@@ -43,7 +43,7 @@ contract Lockable {
         uint256 claimable;
 
         for (uint256 i = _latestClaimMonth; i <= months; i++) {
-            claimable = SafeMath.add(claimable, rate_[i]);
+            claimable = SafeMath.add(claimable, amount_[i]);
         }
 
         _latestClaimMonth = months + 1;
@@ -55,13 +55,13 @@ contract Lockable {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function releaseClaimable(uint256[43] memory rate_)
+    function releaseClaimable(uint256[43] memory amount_)
         external
         returns (uint256)
     {
         require(_amount > 0, "TokenTimelock: no tokens left");
 
-        uint256 claimableLockedAmount = _calculateClaimableAmount(rate_);
+        uint256 claimableLockedAmount = _calculateClaimableAmount(amount_);
 
         require(
             claimableLockedAmount > 0,
