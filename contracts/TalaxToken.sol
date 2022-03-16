@@ -3,12 +3,12 @@ pragma solidity 0.8.11;
 
 import "./src/Context.sol";
 import "./src/IBEP20.sol";
-import "./src/Multiownable.sol";
+import "./src/Ownable.sol";
 import "./src/SafeMath.sol";
 import "./Lockable.sol";
 import "./Stakable.sol";
 
-contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
+contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     using SafeMath for uint256;
 
     mapping(address => uint256) private _balances;
@@ -30,7 +30,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
      * Addresses
      */
 
-    address[] private init_owners;
+    address private gnosisSafeAddress;
 
     /**
      * Local (in this smart contract)
@@ -83,10 +83,10 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         /**
          * Addresses initialization
          */
-
-        init_owners.push(0x7537116370d3261e17819347c84fb502eE3DE568); //owner_1
-        init_owners.push(0x7B0956Ac989a3BF2e29bb884e07A09fCb2f66394); //owner_2
-        init_owners.push(0x5Cd00c0eF965Ab4A1abC225D7fb5379584c79C50); //owner_3
+        // gnosisSafeAddress = ;
+        // 0x7537116370d3261e17819347c84fb502eE3DE568 //owner_1
+        // 0x7B0956Ac989a3BF2e29bb884e07A09fCb2f66394 //owner_2
+        // 0x5Cd00c0eF965Ab4A1abC225D7fb5379584c79C50 //owner_3
 
         public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
         private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
@@ -101,11 +101,6 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
-        /**
-         * @dev Transfer Ownership
-         */
-
-        transferOwnership(init_owners);
 
         /**
          * Amount Initialization
@@ -241,8 +236,8 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         return _totalSupply;
     }
 
-    function getOwner() external view override returns (address[] memory) {
-        return getAllOwners();
+    function getOwner() external view override returns (address) {
+        return owner();
     }
 
     /**
@@ -744,7 +739,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         emit Approval(owner, spender, amount);
     }
 
-    function _mintLiquidityReserve(uint256 amount_) internal onlyAllOwners {
+    function _mintLiquidityReserve(uint256 amount_) internal onlyOwner {
         require(amount_ != 0, "Amount mint cannot be 0");
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
@@ -918,17 +913,17 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
      * @dev Change '_taxFee' with 'taxFee_'
      */
 
-    function mintStakingReward(uint256 amount_) external onlyAllOwners {
+    function mintStakingReward(uint256 amount_) external onlyOwner {
         require(amount_ != 0, "Amount mint cannot be 0");
         _stakingReward = _stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
     }
 
-    function mintLiquidityReserve(uint256 amount_) public onlyAllOwners {
+    function mintLiquidityReserve(uint256 amount_) public onlyOwner {
         _mintLiquidityReserve(amount_);
     }
 
-    function burnStakingReward(uint256 amount_) external onlyAllOwners {
+    function burnStakingReward(uint256 amount_) external onlyOwner {
         require(
             amount_ < _stakingReward,
             "TalaxToken: Amount burnt larger than Staking Reward"
@@ -937,7 +932,7 @@ contract TalaxToken is Context, IBEP20, Multiownable, Stakable {
         _totalSupply = _totalSupply.sub(amount_);
     }
 
-    function changeTaxFee(uint16 taxFee_) external onlyAllOwners {
+    function changeTaxFee(uint16 taxFee_) external onlyOwner {
         _taxFee = taxFee_;
         emit ChangeTax(msg.sender, taxFee_);
     }
