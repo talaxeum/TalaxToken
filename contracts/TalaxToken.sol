@@ -108,7 +108,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
-
         /**
          * Amount Initialization
          */
@@ -117,10 +116,16 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         _balances[address(this)] = 52500 * 1e3 * 10**18;
 
         // Public Sale
-        _balances[0x5470c8FF25EC05980fc7C2967D076B8012298fE7] = 42 * 1e6 * 10**18;
+        _balances[0x5470c8FF25EC05980fc7C2967D076B8012298fE7] =
+            42 *
+            1e6 *
+            10**18;
 
         // Private Sale
-        _balances[0x75837E79215250C45331b92c35B7Be506eD015AC] = 6993 * 1e3 * 10**18;
+        _balances[0x75837E79215250C45331b92c35B7Be506eD015AC] =
+            6993 *
+            1e3 *
+            10**18;
 
         //Public Sale, Private Sale, Private Placement, Staking Reward
         _totalSupply = _totalSupply.sub(
@@ -176,7 +181,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             team_and_project_coordinator_address_3
         );
 
-
         // Dev Pool, Strategic Partner, Team and Project Coordinator
         _totalSupply = _totalSupply.sub(
             84000 * 1e3 * 10**18,
@@ -196,13 +200,15 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      * Modifier
      */
 
-    modifier timeLock(){
-        require(block.timestamp >= _timeLockBlocktime, "Administrative Function has been called in the last 48 hours, please wait for " + string((_timeLockBlocktime - block.timestamp) / 1 hours) + "hours");
+    modifier timeLock() {
+        require(
+            block.timestamp >= _timeLockBlocktime,
+            "Administrative functions cannot be called in this TimeLock period (48 hours), please try again later."
+        );
 
         _;
         _timeLockBlocktime = block.timestamp + 48 hours;
     }
-
 
     /**
      * @notice EVENTS
@@ -262,6 +268,31 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     /**
      * @notice INTERNAL FUNCTIONS
      */
+
+    /**
+     * @dev Converts a `uint256` to its ASCII `string` decimal representation.
+     */
+    function toString(uint256 value) internal pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT licence
+        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
 
     /**
      * @dev this is the release rate for partial token release
@@ -645,14 +676,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         address recipient,
         uint256 amount
     ) internal {
-        require(
-            sender != address(0),
-            "TalaxToken: sender zero address"
-        );
-        require(
-            recipient != address(0),
-            "TalaxToken: recipient zero address"
-        );
+        require(sender != address(0), "TalaxToken: sender zero address");
+        require(recipient != address(0), "TalaxToken: recipient zero address");
 
         uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
         uint256 taxedAmount = SafeMath.sub(amount, tax);
@@ -714,10 +739,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      * - `account` must have at least `amount` tokens.
      */
     function _burn(address account, uint256 amount) internal {
-        require(
-            account != address(0),
-            "TalaxToken: burn from zero address"
-        );
+        require(account != address(0), "TalaxToken: burn from zero address");
 
         _balances[account] = _balances[account].sub(
             amount,
@@ -745,20 +767,18 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         address spender,
         uint256 amount
     ) internal {
-        require(
-            owner != address(0),
-            "TalaxToken: approve from zero address"
-        );
-        require(
-            spender != address(0),
-            "TalaxToken: approve to zero address"
-        );
+        require(owner != address(0), "TalaxToken: approve from zero address");
+        require(spender != address(0), "TalaxToken: approve to zero address");
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
 
-    function _mintLiquidityReserve(uint256 amount_) internal onlyOwner {
+    function _mintLiquidityReserve(uint256 amount_)
+        internal
+        onlyOwner
+        timeLock
+    {
         require(amount_ != 0, "Amount mint cannot be 0");
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
@@ -932,17 +952,17 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      * @dev Change '_taxFee' with 'taxFee_'
      */
 
-    function mintStakingReward(uint256 amount_) external onlyOwner {
+    function mintStakingReward(uint256 amount_) external onlyOwner timeLock {
         require(amount_ != 0, "Amount mint cannot be 0");
         _stakingReward = _stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
     }
 
-    function mintLiquidityReserve(uint256 amount_) public onlyOwner {
+    function mintLiquidityReserve(uint256 amount_) public onlyOwner timeLock {
         _mintLiquidityReserve(amount_);
     }
 
-    function burnStakingReward(uint256 amount_) external onlyOwner {
+    function burnStakingReward(uint256 amount_) external onlyOwner timeLock {
         require(
             amount_ < _stakingReward,
             "TalaxToken: Amount burnt larger than Staking Reward"
@@ -951,9 +971,13 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         _totalSupply = _totalSupply.sub(amount_);
     }
 
-    function changeTaxFee(uint16 taxFee_) external onlyOwner {
+    function changeTaxFee(uint16 taxFee_) external onlyOwner timeLock {
         _taxFee = taxFee_;
         emit ChangeTax(msg.sender, taxFee_);
+    }
+
+    function changePenaltyFee(uint256 penaltyFee_) external onlyOwner timeLock {
+        _changePenaltyFee(penaltyFee_);
     }
 
     /**
@@ -1130,7 +1154,9 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
-            .releaseClaimable(teamAndProjectCoordinatorReleaseAmountAlternate());
+            .releaseClaimable(
+                teamAndProjectCoordinatorReleaseAmountAlternate()
+            );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
