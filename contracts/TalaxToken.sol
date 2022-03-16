@@ -11,6 +11,11 @@ import "./Stakable.sol";
 contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     using SafeMath for uint256;
 
+    /**
+     * TimeLock Counter
+     */
+    uint256 private _timeLockBlocktime;
+
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -66,6 +71,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     Lockable private teamAndProjectCoordinatorLockedWallet_3;
 
     constructor() {
+        _timeLockBlocktime = 0;
+
         _name = "TALAXEUM";
         _symbol = "TALAX";
         _decimals = 18;
@@ -184,6 +191,18 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     receive() external payable {
         _addThirdOfValue(msg.value);
     }
+
+    /**
+     * Modifier
+     */
+
+    modifier timeLock(){
+        require(block.timestamp >= _timeLockBlocktime, "Administrative Function has been called in the last 48 hours, please wait for " + string((_timeLockBlocktime - block.timestamp) / 1 hours) + "hours");
+
+        _;
+        _timeLockBlocktime = block.timestamp + 48 hours;
+    }
+
 
     /**
      * @notice EVENTS
