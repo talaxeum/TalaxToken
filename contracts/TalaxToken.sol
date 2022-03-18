@@ -90,10 +90,8 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         /**
          * Addresses initialization
          */
-        // gnosisSafeAddress = ;
-        // 0x7537116370d3261e17819347c84fb502eE3DE568 //owner_1
-        // 0x7B0956Ac989a3BF2e29bb884e07A09fCb2f66394 //owner_2
-        // 0x5Cd00c0eF965Ab4A1abC225D7fb5379584c79C50 //owner_3
+        gnosisSafeAddress = 0xaf899859529ef3B03DFaf3FE5E3a7A25C980D470;
+        transferOwnership(gnosisSafeAddress);
 
         public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
         private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
@@ -104,6 +102,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
         strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
         strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
+        // team_and_project_coordinator_address_1 = 0x84435c6FD8de0E75D6b3dC108F4345344a91a268; //for testing only
         team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
@@ -203,7 +202,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     modifier timeLock() {
         require(
             block.timestamp >= _timeLockBlocktime,
-            "Administrative functions cannot be called in this TimeLock period (48 hours), please try again later."
+            "Timelock: Administrative functions cannot be called in this TimeLock period (48 hours), please try again later."
         );
 
         _;
@@ -263,6 +262,13 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
 
     function getOwner() external view override returns (address) {
         return owner();
+    }
+
+    /**
+     * @dev Returns the tax fee.
+     */
+    function taxFee() external view returns (uint256) {
+        return _taxFee;
     }
 
     /**

@@ -16,13 +16,15 @@ contract("Lockable", async (accounts) => {
 
     it("Not yet Claimable Test", async () => {
         talax = await TalaxToken.deployed();
-        owner = "0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F";
+        owner = accounts[1];
 
         let balance = await talax.balanceOf(owner);
         console.log("Starting Balance: ", balance.toString());
 
         try {
-            await talax.unlockTeamAndProjectCoordinatorWallet_1({ from: owner });
+            await talax.unlockTeamAndProjectCoordinatorWallet_1({
+                from: owner,
+            });
         } catch (error) {
             console.log(error.reason);
             assert.equal(
@@ -38,14 +40,16 @@ contract("Lockable", async (accounts) => {
 
     it("Wrong Owner Claim Test", async () => {
         talax = await TalaxToken.deployed();
-        stranger = accounts[1];
+        stranger = accounts[0];
 
         try {
-            await talax.unlockTeamAndProjectCoordinatorWallet_1({ from: stranger });
+            await talax.unlockTeamAndProjectCoordinatorWallet_1({
+                from: stranger,
+            });
         } catch (error) {
             assert.equal(
                 error.reason,
-                "TalaxToken: Only claimable by User of this address",
+                "TalaxToken: Wallet Owner Only",
                 "Failed to notice wrong owner claim from DevPool"
             );
         }
@@ -53,16 +57,13 @@ contract("Lockable", async (accounts) => {
 
     it("Claim after the Designated Time Test", async () => {
         talax = await TalaxToken.deployed();
-        owner = "0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F";
+        owner = accounts[1];
 
         let balance = await talax.balanceOf(owner);
         console.log("Starting Balance: ", balance.toString());
 
         await helper.advanceTimeAndBlock(3600 * 24 * 120);
         await talax.unlockTeamAndProjectCoordinatorWallet_1({ from: owner });
-
-        // latestClaim = await talax.devPoolLatestClaim();
-        // console.log("latestClaim Value(Latest Month): ",latestClaim.toString());
 
         balance = await talax.balanceOf(owner);
         console.log("Balance after Claim: ", balance.toString());

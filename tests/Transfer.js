@@ -108,7 +108,7 @@ contract("Transfer", async (accounts) => {
         } catch (err) {
             assert.equal(
                 err.reason,
-                "TalaxToken: transfer to the zero address"
+                "TalaxToken: recipient zero address"
             );
         }
     });

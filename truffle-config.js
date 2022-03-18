@@ -43,7 +43,7 @@ module.exports = {
         //
         development: {
             host: "127.0.0.1", // Localhost (default: none)
-            port: 8545, // Standard BSC port (default: none)
+            port: 7545, // Standard BSC port (default: none)
             network_id: "*", // Any network (default: none)
         },
         // testnet: {
@@ -110,7 +110,7 @@ module.exports = {
                 // See the solidity docs for advice about optimization and evmVersion
                 optimizer: {
                     enabled: true,
-                    runs: 100,
+                    runs: 200,
                 },
                 //  evmVersion: "byzantium"
             },
