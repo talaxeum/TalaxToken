@@ -14,7 +14,9 @@ contract Stakable {
     constructor() {
         // This push is needed so we avoid index 0 causing bug of index-1
         stakeholders.push();
-        _stakingPenalty = 5;
+
+        //Staking penalty in percentage
+        _stakingPenalty = 3;
     }
 
     /**
@@ -138,6 +140,7 @@ contract Stakable {
     }
 
     function _changePenaltyFee(uint256 amount_) internal {
+        require(amount_ <= 5, "Stakable: Penalty fee cannot exceed 5 percent.");
         _stakingPenalty = amount_;
         emit PenaltyChanged(amount_);
     }
@@ -194,7 +197,7 @@ contract Stakable {
         return summary;
     }
 
-    function calculateStakingPenalty(uint256 amount, uint256 reward)
+    function calculateStakingWithPenalty(uint256 amount, uint256 reward)
         internal
         view
         returns (uint256, uint256)
@@ -244,7 +247,7 @@ contract Stakable {
          */
 
         if (current_stake.releaseTime < block.timestamp) {
-            calculateStakingPenalty(amount, reward);
+            return calculateStakingWithPenalty(amount, reward);
         }
 
         uint256 stakeDuration = current_stake.releaseTime - current_stake.since;
@@ -297,7 +300,7 @@ contract Stakable {
          */
 
         if (current_stake.releaseTime < block.timestamp) {
-            calculateStakingPenalty(amount, reward);
+            return calculateStakingWithPenalty(amount, reward);
         }
 
         delete stakeholders[user_index].address_stakes[index];
