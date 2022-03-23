@@ -207,8 +207,8 @@ contract Stakable {
         }
 
         return (
-            SafeMath.sub(amount, SafeMath.mul(amount, _stakingPenalty)),
-            SafeMath.sub(reward, SafeMath.mul(reward, _stakingPenalty))
+            SafeMath.sub(amount, SafeMath.mul(amount, SafeMath.div(_stakingPenalty, 100))),
+            SafeMath.sub(reward, SafeMath.mul(reward, SafeMath.div(_stakingPenalty, 100)))
         );
     }
 
