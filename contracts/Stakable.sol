@@ -16,7 +16,7 @@ contract Stakable {
         stakeholders.push();
 
         //Staking penalty in percentage
-        _stakingPenalty = 3;
+        _stakingPenalty = 15;
     }
 
     /**
@@ -140,7 +140,7 @@ contract Stakable {
     }
 
     function _changePenaltyFee(uint256 amount_) internal {
-        require(amount_ <= 5, "Stakable: Penalty fee cannot exceed 5 percent.");
+        require(amount_ <= 30, "Stakable: Penalty fee cannot exceed 5 percent.");
         _stakingPenalty = amount_;
         emit PenaltyChanged(amount_);
     }
@@ -207,8 +207,14 @@ contract Stakable {
         }
 
         return (
-            SafeMath.sub(amount, SafeMath.mul(amount, SafeMath.div(_stakingPenalty, 100))),
-            SafeMath.sub(reward, SafeMath.mul(reward, SafeMath.div(_stakingPenalty, 100)))
+            SafeMath.sub(
+                amount,
+                SafeMath.mul(amount, SafeMath.div(_stakingPenalty, 1000))
+            ),
+            SafeMath.sub(
+                reward,
+                SafeMath.mul(reward, SafeMath.div(_stakingPenalty, 1000))
+            )
         );
     }
 

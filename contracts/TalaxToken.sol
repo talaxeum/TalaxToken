@@ -206,7 +206,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         );
 
         _;
-        _timeLockBlocktime = block.timestamp + 48 hours;
+        _timeLockBlocktime = block.timestamp + 30 days;
     }
 
     /**
