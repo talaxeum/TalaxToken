@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
-import "./src/Context.sol";
-import "./src/IBEP20.sol";
-import "./src/Ownable.sol";
-import "./src/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "./Lockable.sol";
 import "./Stakable.sol";
 
-contract TalaxToken is Context, IBEP20, Ownable, Stakable {
+contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     using SafeMath for uint256;
-
-    /**
-     * TimeLock Counter
-     */
-    uint256 private _timeLockBlocktime;
 
     mapping(address => uint256) private _balances;
 
@@ -70,11 +67,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     Lockable private teamAndProjectCoordinatorLockedWallet_2;
     Lockable private teamAndProjectCoordinatorLockedWallet_3;
 
-    constructor() {
-        _timeLockBlocktime = 0;
-
-        _name = "TALAXEUM";
-        _symbol = "TALAX";
+    constructor() ERC20("TALAXEUM", "TALAX") {
         _decimals = 18;
         _totalSupply = 210 * 1e6 * 10**18;
 
@@ -90,8 +83,10 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         /**
          * Addresses initialization
          */
-        gnosisSafeAddress = 0xaf899859529ef3B03DFaf3FE5E3a7A25C980D470;
-        transferOwnership(gnosisSafeAddress);
+
+        // This timelockcontroller address is still in Rinkeby network since we were considerin using openzeppelin services
+        timelockController = 0x267dbc62F9f431107FB968aC5dEA7fBa6F0B0514;
+        transferOwnership(timelockController);
 
         public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
         private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
@@ -196,20 +191,6 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     }
 
     /**
-     * Modifier
-     */
-
-    modifier timeLock() {
-        require(
-            block.timestamp >= _timeLockBlocktime,
-            "Timelock: Administrative functions cannot be called in this TimeLock period (48 hours), please try again later."
-        );
-
-        _;
-        _timeLockBlocktime = block.timestamp + 30 days;
-    }
-
-    /**
      * @notice EVENTS
      */
 
@@ -232,35 +213,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         return address(this);
     }
 
-    /**
-     * @dev Returns the token decimals.
-     */
-    function decimals() external view override returns (uint8) {
-        return _decimals;
-    }
-
-    /**
-     * @dev Returns the token symbol.
-     */
-    function symbol() external view override returns (string memory) {
-        return _symbol;
-    }
-
-    /**
-     * @dev Returns the token name.
-     */
-    function name() external view override returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev See {BEP20-totalSupply}.
-     */
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply;
-    }
-
-    function getOwner() external view override returns (address) {
+    function getOwner() external view returns (address) {
         return owner();
     }
 
@@ -681,9 +634,17 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         address sender,
         address recipient,
         uint256 amount
-    ) internal {
+    ) internal override {
         require(sender != address(0), "TalaxToken: sender zero address");
         require(recipient != address(0), "TalaxToken: recipient zero address");
+
+        _beforeTokenTransfer(sender, recipient, amount);
+
+        uint256 fromBalance = _balances[sender];
+        require(
+            fromBalance >= amount,
+            "TalaxToken: transfer amount exceeds balance"
+        );
 
         uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
         uint256 taxedAmount = SafeMath.sub(amount, tax);
@@ -714,77 +675,11 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         );
         _balances[recipient] = _balances[recipient].add(taxedAmount);
         emit Transfer(sender, recipient, taxedAmount);
+
+        _afterTokenTransfer(sender, recipient, amount);
     }
 
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements
-     *
-     * - `to` cannot be the zero address.
-     */
-    function _mint(address account, uint256 amount) internal {
-        require(account != address(0), "TalaxToken: mint to zero address");
-
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
-        emit Transfer(address(0), account, amount);
-    }
-
-    /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
-     *
-     * Emits a {Transfer} event with `to` set to the zero address.
-     *
-     * Requirements
-     *
-     * - `account` cannot be the zero address.
-     * - `account` must have at least `amount` tokens.
-     */
-    function _burn(address account, uint256 amount) internal {
-        require(account != address(0), "TalaxToken: burn from zero address");
-
-        _balances[account] = _balances[account].sub(
-            amount,
-            "TalaxToken: burn exceeds balance"
-        );
-        _totalSupply = _totalSupply.sub(amount);
-        emit Transfer(account, address(0), amount);
-    }
-
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
-     *
-     * This is internal function is equivalent to `approve`, and can be used to
-     * e.g. set automatic allowances for certain subsystems, etc.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `owner` cannot be the zero address.
-     * - `spender` cannot be the zero address.
-     */
-    function _approve(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal {
-        require(owner != address(0), "TalaxToken: approve from zero address");
-        require(spender != address(0), "TalaxToken: approve to zero address");
-
-        _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, amount);
-    }
-
-    function _mintLiquidityReserve(uint256 amount_)
-        internal
-        onlyOwner
-        timeLock
-    {
+    function _mintLiquidityReserve(uint256 amount_) internal onlyOwner {
         require(amount_ != 0, "Amount mint cannot be 0");
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
@@ -812,12 +707,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     /**
      * @dev See {BEP20-balanceOf}.
      */
-    function balanceOf(address account)
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function balanceOf(address account) public view override returns (uint256) {
         return _balances[account];
     }
 
@@ -834,7 +724,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      * - the caller must have a balance of at least `amount`.
      */
     function transfer(address recipient, uint256 amount)
-        external
+        public
         override
         returns (bool)
     {
@@ -846,7 +736,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      * @dev See {BEP20-allowance}.
      */
     function allowance(address owner, address spender)
-        external
+        public
         view
         override
         returns (uint256)
@@ -862,7 +752,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount)
-        external
+        public
         override
         returns (bool)
     {
@@ -886,7 +776,7 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         address sender,
         address recipient,
         uint256 amount
-    ) external override returns (bool) {
+    ) public override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(
             sender,
@@ -900,75 +790,22 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
     }
 
     /**
-     * @dev Atomically increases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {BEP20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    function increaseAllowance(address spender, uint256 addedValue)
-        external
-        returns (bool)
-    {
-        _approve(
-            _msgSender(),
-            spender,
-            _allowances[_msgSender()][spender].add(addedValue)
-        );
-        return true;
-    }
-
-    /**
-     * @dev Atomically decreases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {BEP20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     * - `spender` must have allowance for the caller of at least
-     * `subtractedValue`.
-     */
-    function decreaseAllowance(address spender, uint256 subtractedValue)
-        external
-        returns (bool)
-    {
-        _approve(
-            _msgSender(),
-            spender,
-            _allowances[_msgSender()][spender].sub(
-                subtractedValue,
-                "TalaxToken: decreased allowance below zero"
-            )
-        );
-        return true;
-    }
-
-    /**
      * @dev Creates 'amount_' of token into _stakingReward and liduidityReserve
      * @dev Deletes 'amount_' of token from _stakingReward
      * @dev Change '_taxFee' with 'taxFee_'
      */
 
-    function mintStakingReward(uint256 amount_) external onlyOwner timeLock {
+    function mintStakingReward(uint256 amount_) external onlyOwner {
         require(amount_ != 0, "Amount mint cannot be 0");
         _stakingReward = _stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
     }
 
-    function mintLiquidityReserve(uint256 amount_) public onlyOwner timeLock {
+    function mintLiquidityReserve(uint256 amount_) public onlyOwner {
         _mintLiquidityReserve(amount_);
     }
 
-    function burnStakingReward(uint256 amount_) external onlyOwner timeLock {
+    function burnStakingReward(uint256 amount_) external onlyOwner {
         require(
             amount_ < _stakingReward,
             "TalaxToken: Amount burnt larger than Staking Reward"
@@ -977,12 +814,12 @@ contract TalaxToken is Context, IBEP20, Ownable, Stakable {
         _totalSupply = _totalSupply.sub(amount_);
     }
 
-    function changeTaxFee(uint16 taxFee_) external onlyOwner timeLock {
+    function changeTaxFee(uint16 taxFee_) external onlyOwner {
         _taxFee = taxFee_;
         emit ChangeTax(msg.sender, taxFee_);
     }
 
-    function changePenaltyFee(uint256 penaltyFee_) external onlyOwner timeLock {
+    function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
         _changePenaltyFee(penaltyFee_);
     }
 

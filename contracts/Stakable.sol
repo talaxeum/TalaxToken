@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
-import "./src/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Stakable {
     /**
@@ -145,14 +145,8 @@ contract Stakable {
         emit PenaltyChanged(amount_);
     }
 
-    function testCalculateDuration(uint256 index_, address user_)
-        public
-        view
-        returns (uint256)
-    {
-        StakingSummary memory summary = stakeSummary(user_);
-
-        return (block.timestamp - summary.stakes[index_].since);
+    function penaltyFee() public view returns(uint256){
+        return _stakingPenalty;
     }
 
     function calculateStakingDuration(uint256 since_)

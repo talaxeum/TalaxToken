@@ -331,6 +331,37 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "burn",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "burnFrom",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
 						"name": "amount_",
 						"type": "uint256"
 					}
@@ -570,6 +601,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "penaltyFee",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "renounceOwnership",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -670,19 +714,8 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "index_",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "user_",
-						"type": "address"
-					}
-				],
-				"name": "testCalculateDuration",
+				"inputs": [],
+				"name": "taxFee",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -903,23 +936,26 @@
 				"balanceOf(address)": {
 					"details": "See {BEP20-balanceOf}."
 				},
+				"burn(uint256)": {
+					"details": "Destroys `amount` tokens from the caller. See {ERC20-_burn}."
+				},
+				"burnFrom(address,uint256)": {
+					"details": "Destroys `amount` tokens from `account`, deducting from the caller's allowance. See {ERC20-_burn} and {ERC20-allowance}. Requirements: - the caller must have allowance for ``accounts``'s tokens of at least `amount`."
+				},
 				"decimals()": {
-					"details": "Returns the token decimals."
+					"details": "Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the value {ERC20} uses, unless this function is overridden; NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}."
 				},
 				"decreaseAllowance(address,uint256)": {
-					"details": "Atomically decreases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {BEP20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address. - `spender` must have allowance for the caller of at least `subtractedValue`."
-				},
-				"getOwner()": {
-					"details": "Returns the bep token owner."
+					"details": "Atomically decreases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address. - `spender` must have allowance for the caller of at least `subtractedValue`."
 				},
 				"increaseAllowance(address,uint256)": {
-					"details": "Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {BEP20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address."
+					"details": "Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address."
 				},
 				"mintStakingReward(uint256)": {
 					"details": "Creates 'amount_' of token into _stakingReward and liduidityReserveDeletes 'amount_' of token from _stakingRewardChange '_taxFee' with 'taxFee_'"
 				},
 				"name()": {
-					"details": "Returns the token name."
+					"details": "Returns the name of the token."
 				},
 				"owner()": {
 					"details": "Returns the address of the current owner."
@@ -928,13 +964,16 @@
 					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
 				},
 				"symbol()": {
-					"details": "Returns the token symbol."
+					"details": "Returns the symbol of the token, usually a shorter version of the name."
+				},
+				"taxFee()": {
+					"details": "Returns the tax fee."
 				},
 				"thisAddress()": {
 					"details": "See address of this smart contract."
 				},
 				"totalSupply()": {
-					"details": "See {BEP20-totalSupply}."
+					"details": "See {IERC20-totalSupply}."
 				},
 				"transfer(address,uint256)": {
 					"details": "See {BEP20-transfer}. Requirements: - `recipient` cannot be the zero address. - the caller must have a balance of at least `amount`."
@@ -997,60 +1036,84 @@
 		"remappings": []
 	},
 	"sources": {
+		"@openzeppelin/contracts/access/Ownable.sol": {
+			"keccak256": "0x24e0364e503a9bbde94c715d26573a76f14cd2a202d45f96f52134ab806b67b9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://e12cbaa7378fd9b62280e4e1d164bedcb4399ce238f5f98fc0eefb7e50577981",
+				"dweb:/ipfs/QmXRoFGUgfsaRkoPT5bxNMtSayKTQ8GZATLPXf69HcRA51"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/ERC20.sol": {
+			"keccak256": "0xdadd41acb749920eccf40aeaa8d291adf9751399a7343561bad13e7a8d99be0b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://12af4ac016f9fdf3be5d15824f4292272aa11f6b2e0192a0f7320f5ad49bbbf0",
+				"dweb:/ipfs/QmRXMpdqCgA3TYuYxBodqs5p9jGbnMW6xa2gvjppvq4TWk"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0xbbc8ac883ac3c0078ce5ad3e288fbb3ffcc8a30c3a98c0fda0114d64fc44fca2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://87a7a5d2f6f63f84598af02b8c50ca2df2631cb8ba2453e8d95fcb17e4be9824",
+				"dweb:/ipfs/QmR76hqtAcRqoFj33tmNjcWTLrgNsAaakYwnKZ8zoJtKei"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol": {
+			"keccak256": "0x0d19410453cda55960a818e02bd7c18952a5c8fe7a3036e81f0d599f34487a7b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4c0f62d3d5bef22b5ca00cc3903e7de6152cb68d2d22401a463f373cda54c00f",
+				"dweb:/ipfs/QmSfzjZux7LC7NW2f7rjCXTHeFMUCWERqDkhpCTBy7kxTe"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+			"keccak256": "0x8de418a5503946cabe331f35fe242d3201a73f67f77aaeb7110acb1f30423aca",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a376d3dda2cb70536c0a45c208b29b34ac560c4cb4f513a42079f96ba47d2dd",
+				"dweb:/ipfs/QmZQg6gn1sUpM8wHzwNvSnihumUCAhxD119MpXeKp8B9s8"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92",
+				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
+			]
+		},
+		"@openzeppelin/contracts/utils/math/SafeMath.sol": {
+			"keccak256": "0xa2f576be637946f767aa56601c26d717f48a0aff44f82e46f13807eea1009a21",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://973868f808e88e21a1a0a01d4839314515ee337ad096286c88e41b74dcc11fc2",
+				"dweb:/ipfs/QmfYuZxRfx2J2xdk4EXN7jKg4bUYEMTaYk9BAw9Bqn4o2Y"
+			]
+		},
 		"contracts/Lockable.sol": {
-			"keccak256": "0xebfcad10ceddbde912806a8d639c0fd8547ef647bd43517b2e1bb465c98fc420",
+			"keccak256": "0x47fce6523fb06a90a0eb5504ac95c51537609fe28d51a2635b90b39ccf21ac80",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://14a094305aea0b2fb34a88ec0d9100203dc1f1ab501529c0b6a2fc7416ded0aa",
-				"dweb:/ipfs/QmY2JgkFej1LyTgwtrR9HAEFjoqHZ2bCTfAUqCTTPsy93x"
+				"bzz-raw://3684bd519fbcbbd5cda954c395719a250700c05f5df19f98960188aa11d8f86a",
+				"dweb:/ipfs/Qmd6Lm9kyW6j29fDteAnGDMs1acxruf2fujAhvdzNBkHfw"
 			]
 		},
 		"contracts/Stakable.sol": {
-			"keccak256": "0x170de0d4db4a24283efe97f8b990f226f530a81fe5345748ab981dde5fe452d0",
+			"keccak256": "0x5409be8ed21a84b7460a4fd742b54ab4c6ac8062c0e2235e5280863128eaa577",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://38d3242aa6a670a1a707ad7eff466d459d8218607d6fbcb4d21af1fb2a9a5f39",
-				"dweb:/ipfs/QmWZyXueKYj7SLuMUoKYYgt8PujBJuNy9MHYGXo3NZ9au2"
+				"bzz-raw://4a4e8fbe17588d7b270414573c2deecb2ad3fac91ab641b3335c9c714389793a",
+				"dweb:/ipfs/QmYKNqUkZFEcokVQax2mwM8V5R12oxMv3gUGcZ9wB8EFrP"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0xc12295c75c57e43fabfa9489f50284b8bc3c4495b74471b81e3266c3dda2acc5",
+			"keccak256": "0x62aa97a8521365ace8df64c1403fd2b335743efd1ac4fd19b251b5ffd23c0fa3",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://20e6c5428fec8a62c9b8a8969cf3225e504548d55eaf599e98499233f3853446",
-				"dweb:/ipfs/QmbLh98tmtkigV9asuYKmjA3N24YoX2jv4LvxiShxBgLE8"
-			]
-		},
-		"contracts/src/Context.sol": {
-			"keccak256": "0x01a4620f87841deb1ed89bc8d496e1fe55bb761860b5caffb4d7bb37e858daae",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://e6816580e7d2fb79319f5bd067006b23b8df7d1071ce0e6287631808bc9fa063",
-				"dweb:/ipfs/QmXXPT2capxxeMeR8DwVBRc2f6PAFwTK9zikAtvYRDuWC7"
-			]
-		},
-		"contracts/src/IBEP20.sol": {
-			"keccak256": "0x8bb39b9ed6ede95659193d7172234fc1769b7e78f91cc770944362577ea53375",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://47138e0ce5c9087335afef84d7ffb0025f217e5f1c4955e2e00c937e08876284",
-				"dweb:/ipfs/QmT4saS8i33tQnon7zYUy64YgnZVstN7gU4R7RBNqmwEKC"
-			]
-		},
-		"contracts/src/Ownable.sol": {
-			"keccak256": "0x441d97c325f49569dfaa93aa98a7b0e18d83c9322f9019c75bc2d3b3eadaa07a",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://69b1cf4e4b1946b4b235fc38a234bd4c42e0d3aa0a6f681df720945f8c7988d3",
-				"dweb:/ipfs/QmePMkXA5wG2KrW2MWqiozNVgU2txMKHC5HeCFw6JN8g91"
-			]
-		},
-		"contracts/src/SafeMath.sol": {
-			"keccak256": "0x48dd4b2fbb2593a14f12e43718768f59039beee161378683ae242c488d26618b",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://36a6804cf690a61ac7e28ca12f3f584413ef5321a0e54c4130b8a9652292a08c",
-				"dweb:/ipfs/QmaGRrYqMxYrqqnqUGDQPWGHy7omFMGJiKgBiGb28ZT1AS"
+				"bzz-raw://ee35ac37899657caabd0b76b33d6f6a2c43e2421653ff9543708245b2641e101",
+				"dweb:/ipfs/QmTjXHmH7XQ3J8z2mSkiTnJ6f9Mfd5LrjsBdjCQT7B4pv8"
 			]
 		}
 	},
