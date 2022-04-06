@@ -1,4 +1,5 @@
 const TalaxToken = artifacts.require("TalaxToken");
+const Lockable = artifacts.require("Lockable");
 const { assert } = require("chai");
 const truffleAssert = require("truffle-assertions");
 const helper = require("./helpers/truffleTestHelpers");
@@ -22,6 +23,9 @@ contract("Lockable", async (accounts) => {
         console.log("Starting Balance: ", balance.toString());
 
         try {
+            let test = await talax.getsender1({from: accounts[1]});
+            console.log(test.toString());
+            console.log(talax.address.toString());
             await talax.unlockTeamAndProjectCoordinatorWallet_1({
                 from: owner,
             });
@@ -29,7 +33,7 @@ contract("Lockable", async (accounts) => {
             console.log(error.reason);
             assert.equal(
                 error.reason,
-                "TalaxToken: There's nothing to claim yet",
+                "Lockable: There's nothing to claim yet",
                 "Failed to notice a 0 withdrawal from Owner"
             );
         }
@@ -49,7 +53,7 @@ contract("Lockable", async (accounts) => {
         } catch (error) {
             assert.equal(
                 error.reason,
-                "TalaxToken: Wallet Owner Only",
+                "Lockable: Wallet Owner Only",
                 "Failed to notice wrong owner claim from DevPool"
             );
         }
@@ -67,5 +71,12 @@ contract("Lockable", async (accounts) => {
 
         balance = await talax.balanceOf(owner);
         console.log("Balance after Claim: ", balance.toString());
+    });
+
+    it("Claim from wrong user", async () => {
+        talax = await TalaxToken.deployed();
+        lockable = await Lockable.deployed();
+        owner = accounts[1];
+        stranger = accounts[0];
     });
 });

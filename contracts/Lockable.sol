@@ -14,11 +14,15 @@ contract Lockable {
     uint256 private _latestClaimMonth;
 
     constructor(uint256 amount_, address beneficiary_) {
-        require(amount_ > 0, "TokenTimeLock: Amount must greater than zero");
+        require(amount_ > 0, "Lockable: Amount must greater than zero");
         _amount = amount_;
         _beneficiary = beneficiary_;
         _startLockedWallet = block.timestamp;
     }
+
+    /**
+     * @dev modifier functions
+     */
 
     /**
      * @dev Helper functions
@@ -29,6 +33,10 @@ contract Lockable {
 
     function beneficiary() external view returns (address) {
         return _beneficiary;
+    }
+
+    function sender() external view returns (address) {
+        return msg.sender;
     }
 
     /**
@@ -48,7 +56,7 @@ contract Lockable {
 
         _latestClaimMonth = months + 1;
 
-        require(claimable != 0, "TokenTimeLock: There's nothing to claim yet");
+        require(claimable != 0, "Lockable: There's nothing to claim yet");
         return claimable;
     }
 
@@ -59,19 +67,20 @@ contract Lockable {
         external
         returns (uint256)
     {
-        require(_amount > 0, "TokenTimelock: no tokens left");
+        require(_amount > 0, "Lockable: no tokens left");
+        require(
+            tx.origin == _beneficiary,
+            "Lockable: caller have to be beneficiary"
+        );
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(amount_);
 
-        require(
-            claimableLockedAmount > 0,
-            "TokenTimelock: no tokens to release"
-        );
+        require(claimableLockedAmount > 0, "Lockable: no tokens to release");
 
         _amount = SafeMath.sub(
             _amount,
             claimableLockedAmount,
-            "TokenTimeLock: Cannot substract total amount with claimable"
+            "Lockable: Cannot substract total amount with claimable"
         );
 
         return claimableLockedAmount;
