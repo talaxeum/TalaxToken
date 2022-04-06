@@ -23,8 +23,6 @@ contract("Lockable", async (accounts) => {
         console.log("Starting Balance: ", balance.toString());
 
         try {
-            let test = await talax.getsender1({from: accounts[1]});
-            console.log(test.toString());
             console.log(talax.address.toString());
             await talax.unlockTeamAndProjectCoordinatorWallet_1({
                 from: owner,
@@ -53,7 +51,7 @@ contract("Lockable", async (accounts) => {
         } catch (error) {
             assert.equal(
                 error.reason,
-                "Lockable: Wallet Owner Only",
+                "TalaxToken: Wallet Owner Only",
                 "Failed to notice wrong owner claim from DevPool"
             );
         }
@@ -71,12 +69,5 @@ contract("Lockable", async (accounts) => {
 
         balance = await talax.balanceOf(owner);
         console.log("Balance after Claim: ", balance.toString());
-    });
-
-    it("Claim from wrong user", async () => {
-        talax = await TalaxToken.deployed();
-        lockable = await Lockable.deployed();
-        owner = accounts[1];
-        stranger = accounts[0];
     });
 });

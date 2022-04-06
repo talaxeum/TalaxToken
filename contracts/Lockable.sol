@@ -8,6 +8,7 @@ contract Lockable {
 
     // beneficiary of tokens after they are released
     address private immutable _beneficiary;
+    address public owner;
 
     uint256 private _startLockedWallet;
 
@@ -18,11 +19,20 @@ contract Lockable {
         _amount = amount_;
         _beneficiary = beneficiary_;
         _startLockedWallet = block.timestamp;
+        owner = msg.sender;
     }
 
     /**
      * @dev modifier functions
      */
+
+    modifier onlyTalax() {
+        require(
+            msg.sender == owner,
+            "Lockable: caller have to be TalaxToken Smart Contract"
+        );
+        _;
+    }
 
     /**
      * @dev Helper functions
@@ -65,6 +75,7 @@ contract Lockable {
      */
     function releaseClaimable(uint256[43] memory amount_)
         external
+        onlyTalax
         returns (uint256)
     {
         require(_amount > 0, "Lockable: no tokens left");
