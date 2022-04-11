@@ -79,10 +79,6 @@ contract Lockable {
         returns (uint256)
     {
         require(_amount > 0, "Lockable: no tokens left");
-        require(
-            tx.origin == _beneficiary,
-            "Lockable: caller have to be beneficiary"
-        );
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(amount_);
 

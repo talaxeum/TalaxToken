@@ -17,9 +17,9 @@ contract Stakable {
         // This push is needed so we avoid index 0 causing bug of index-1
         stakeholders.push();
 
-        //Staking penalty in percentage
+        //Staking penalty and Airdrop in 0.1 times percentage
         _stakingPenalty = 15;
-        _airdrop = 10;
+        _airdrop = 100;
     }
 
     /**
@@ -80,6 +80,7 @@ contract Stakable {
     );
 
     event PenaltyChanged(uint256 amount);
+    event AirdropChanged(uint256 amount);
 
     /**
      * @notice _addStakeholder takes care of adding a stakeholder to the stakeholders array
@@ -150,10 +151,19 @@ contract Stakable {
     function _changePenaltyFee(uint256 amount_) internal {
         require(
             amount_ <= 30,
-            "Stakable: Penalty fee cannot exceed 5 percent."
+            "Stakable: Penalty fee cannot exceed 3 percent."
         );
         _stakingPenalty = amount_;
         emit PenaltyChanged(amount_);
+    }
+
+    function _changeAirdropPercentage(uint256 amount_) internal {
+        require(
+            amount_ <= 200,
+            "Stakable: Airdrop Percentage cannot exceed 20 percent."
+        );
+        _airdrop = amount_;
+        emit AirdropChanged(amount_);
     }
 
     function penaltyFee() public view returns (uint256) {

@@ -998,6 +998,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         _changePenaltyFee(penaltyFee_);
     }
 
+    function changeAirdropPercentage(uint256 airdrop_) external onlyOwner {
+        _changeAirdropPercentage(airdrop_);
+    }
+
     /**
      * Add functionality like burn to the _stake afunction
      *
