@@ -4,12 +4,14 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Stakable {
+    using SafeMath for uint256;
     /**
      * @notice Constructor since this contract is not ment to be used without inheritance
      * push once to stakeholders for it to work proplerly
      */
 
     uint256 private _stakingPenalty;
+    uint256 private _airdrop;
 
     constructor() {
         // This push is needed so we avoid index 0 causing bug of index-1
@@ -17,6 +19,7 @@ contract Stakable {
 
         //Staking penalty in percentage
         _stakingPenalty = 15;
+        _airdrop = 10;
     }
 
     /**
@@ -31,6 +34,7 @@ contract Stakable {
         uint256 since;
         // This claimable field is new and used to tell how big of a reward is currently available
         uint256 claimable;
+        uint256 claimable_airdrop;
         uint256 rewardAPY;
         uint256 releaseTime;
     }
@@ -39,6 +43,7 @@ contract Stakable {
      */
     struct Stakeholder {
         address user;
+        uint256 latestClaimDrop;
         Stake[] address_stakes;
     }
 
@@ -86,6 +91,8 @@ contract Stakable {
         uint256 userIndex = stakeholders.length - 1;
         // Assign the address to the new index
         stakeholders[userIndex].user = staker;
+        // Assign current timestamp to latestCLaimDrop
+        stakeholders[userIndex].latestClaimDrop = block.timestamp;
         // Add index to the stakeHolders
         stakes[staker] = userIndex;
         return userIndex;
@@ -125,6 +132,7 @@ contract Stakable {
                 _amount,
                 timestamp,
                 0,
+                0,
                 _rewardRate,
                 (_stakePeriod + timestamp)
             )
@@ -140,13 +148,33 @@ contract Stakable {
     }
 
     function _changePenaltyFee(uint256 amount_) internal {
-        require(amount_ <= 30, "Stakable: Penalty fee cannot exceed 5 percent.");
+        require(
+            amount_ <= 30,
+            "Stakable: Penalty fee cannot exceed 5 percent."
+        );
         _stakingPenalty = amount_;
         emit PenaltyChanged(amount_);
     }
 
-    function penaltyFee() public view returns(uint256){
+    function penaltyFee() public view returns (uint256) {
         return _stakingPenalty;
+    }
+
+    function _blockTime() public view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function _testCalculateDuration(address user, uint256 index)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 user_index = stakes[user];
+        Stake memory current_stake = stakeholders[user_index].address_stakes[
+            index
+        ];
+
+        return current_stake.releaseTime - current_stake.since;
     }
 
     function calculateStakingDuration(uint256 since_)
@@ -225,14 +253,9 @@ contract Stakable {
     {
         // Grab user_index which is the index to use to grab the Stake[]
         uint256 user_index = stakes[msg.sender];
-        Stake memory current_stake = stakeholders[user_index].address_stakes[
+        Stake storage current_stake = stakeholders[user_index].address_stakes[
             index
         ];
-
-        // require(
-        //     current_stake.releaseTime <= block.timestamp,
-        //     "Stakable: Cannot withdraw before the release time"
-        // );
 
         require(
             current_stake.amount >= amount,
@@ -241,18 +264,34 @@ contract Stakable {
 
         // Calculate available Reward first before we start modifying data
         uint256 reward = calculateStakeReward(current_stake, amount);
+        uint256 stakeDuration = current_stake.releaseTime - current_stake.since;
 
         /**
          * @notice This is penalty given for early withdrawal before the designated time
          */
 
         if (current_stake.releaseTime < block.timestamp) {
+            current_stake.amount -= amount;
+
+            if (current_stake.amount == 0) {
+                delete stakeholders[user_index].address_stakes[index];
+            } else {
+                stakeholders[user_index]
+                    .address_stakes[index]
+                    .amount = current_stake.amount;
+                // Reset timer of stake
+                stakeholders[user_index].address_stakes[index].since = block
+                    .timestamp;
+                stakeholders[user_index].address_stakes[index].releaseTime =
+                    block.timestamp +
+                    stakeDuration;
+            }
+
             return calculateStakingWithPenalty(amount, reward);
         }
 
-        uint256 stakeDuration = current_stake.releaseTime - current_stake.since;
         // Remove by subtracting the money unstaked
-        current_stake.amount = current_stake.amount - amount;
+        current_stake.amount -= amount;
         // If stake is empty, 0, then remove it from the array of stakes
         if (current_stake.amount == 0) {
             delete stakeholders[user_index].address_stakes[index];
@@ -277,14 +316,9 @@ contract Stakable {
     {
         // Grab user_index which is the index to use to grab the Stake[]
         uint256 user_index = stakes[msg.sender];
-        Stake memory current_stake = stakeholders[user_index].address_stakes[
+        Stake storage current_stake = stakeholders[user_index].address_stakes[
             index
         ];
-
-        // require(
-        //     current_stake.releaseTime <= block.timestamp,
-        //     "Stakable: Cannot withdraw before the release time"
-        // );
 
         require(
             current_stake.amount > 0,
@@ -300,6 +334,8 @@ contract Stakable {
          */
 
         if (current_stake.releaseTime < block.timestamp) {
+            current_stake.amount -= amount;
+            delete stakeholders[user_index].address_stakes[index];
             return calculateStakingWithPenalty(amount, reward);
         }
 
@@ -330,10 +366,42 @@ contract Stakable {
                 summary.stakes[s].amount
             );
             summary.stakes[s].claimable = availableReward;
-            totalStakeAmount = totalStakeAmount + summary.stakes[s].amount;
+            totalStakeAmount += summary.stakes[s].amount;
         }
 
         summary.total_amount = totalStakeAmount;
         return summary;
+    }
+
+    function _claimAirdrop(address _staker) internal returns (uint256) {
+        uint256 totalAirdrop;
+
+        Stakeholder storage stakeholder = stakeholders[stakes[_staker]];
+        uint256 monthAirdrop = (block.timestamp - stakeholder.latestClaimDrop)
+            .div(28 days);
+
+        require(
+            monthAirdrop >= 1,
+            "Stakable: Airdrop can only be claimed in a month timespan"
+        );
+
+        require(
+            stakeholder.address_stakes.length > 0,
+            "Stakable: This address does not have any stakes"
+        );
+
+        for (uint256 i = 0; i < stakeholder.address_stakes.length; i++) {
+            if (stakeholder.address_stakes[i].amount <= 0) {
+                continue;
+            }
+            uint256 value = (stakeholder.address_stakes[i].amount * _airdrop) /
+                100;
+            totalAirdrop += value;
+            stakeholder.address_stakes[i].claimable_airdrop = value;
+        }
+
+        stakeholder.latestClaimDrop = block.timestamp;
+
+        return totalAirdrop;
     }
 }

@@ -17,16 +17,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     mapping(address => mapping(address => uint256)) private _allowances;
 
-    mapping(uint256 => uint256) public _stakingPackage;
+    uint256 private _totalSupply;
+
+    string private _name;
+    string private _symbol;
+
+    mapping(uint256 => uint256) internal _stakingPackage;
+    uint256 public _stakingReward;
+    bool public _airdropStatus;
 
     uint16 public _taxFee;
-
-    uint8 private _decimals;
-    uint256 private _totalSupply;
-    string private _symbol;
-    string private _name;
-
-    uint256 private _stakingReward;
 
     /**
      * Addresses
@@ -68,11 +68,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     Lockable private teamAndProjectCoordinatorLockedWallet_3;
 
     constructor() ERC20("TALAXEUM", "TALAX") {
-        _decimals = 18;
-        _totalSupply = 210 * 1e6 * 10**18;
+        _totalSupply = 210 * 1e6 * 1e18;
+        _name = "TALAXEUM";
+        _symbol = "TALAX";
 
         // later divided by 100 to make percentage
         _taxFee = 1;
+
+        _airdropStatus = true;
 
         // in percentage
         _stakingPackage[30 days] = 5;
@@ -80,13 +83,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         _stakingPackage[180 days] = 7;
         _stakingPackage[365 days] = 8;
 
+        // testing purposes
+        _balances[msg.sender] = 10 * 1e6 * 1e18;
+
         /**
          * Addresses initialization
          */
-
-        // This timelockcontroller address is still in Rinkeby network since we were considerin using openzeppelin services
-        timelockController = 0x267dbc62F9f431107FB968aC5dEA7fBa6F0B0514;
-        transferOwnership(timelockController);
 
         public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
         private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
@@ -106,24 +108,21 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
          * Amount Initialization
          */
 
-        _stakingReward = 17514 * 1e3 * 10**18;
-        _balances[address(this)] = 52500 * 1e3 * 10**18;
+        _stakingReward = 17514 * 1e3 * 1e18;
+        _balances[address(this)] = 52500 * 1e3 * 1e18;
 
         // Public Sale
-        _balances[0x5470c8FF25EC05980fc7C2967D076B8012298fE7] =
-            42 *
-            1e6 *
-            10**18;
+        _balances[0x5470c8FF25EC05980fc7C2967D076B8012298fE7] = 42 * 1e6 * 1e18;
 
         // Private Sale
         _balances[0x75837E79215250C45331b92c35B7Be506eD015AC] =
             6993 *
             1e3 *
-            10**18;
+            1e18;
 
         //Public Sale, Private Sale, Private Placement, Staking Reward
         _totalSupply = _totalSupply.sub(
-            73500 * 1e3 * 10**18,
+            73500 * 1e3 * 1e18,
             "TalaxToken: Cannot transfer more than total supply"
         );
 
@@ -132,54 +131,58 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
          */
 
         privatePlacementLockedWallet = new Lockable(
-            6993 * 1e3 * 10**18,
+            6993 * 1e3 * 1e18,
             private_placement_address
         );
 
         devPoolLockedWallet_1 = new Lockable(
-            14 * 1e6 * 10**18,
+            14 * 1e6 * 1e18,
             dev_pool_address_1
         );
         devPoolLockedWallet_2 = new Lockable(
-            14 * 1e6 * 10**18,
+            14 * 1e6 * 1e18,
             dev_pool_address_2
         );
         devPoolLockedWallet_3 = new Lockable(
-            14 * 1e6 * 10**18,
+            14 * 1e6 * 1e18,
             dev_pool_address_3
         );
 
         strategicPartnerLockedWallet_1 = new Lockable(
-            3500 * 1e3 * 10**18,
+            3500 * 1e3 * 1e18,
             strategic_partner_address_1
         );
         strategicPartnerLockedWallet_2 = new Lockable(
-            3500 * 1e3 * 10**18,
+            3500 * 1e3 * 1e18,
             strategic_partner_address_2
         );
         strategicPartnerLockedWallet_3 = new Lockable(
-            3500 * 1e3 * 10**18,
+            3500 * 1e3 * 1e18,
             strategic_partner_address_3
         );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-            10500 * 1e3 * 10**18,
+            10500 * 1e3 * 1e18,
             team_and_project_coordinator_address_1
         );
         teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-            10500 * 1e3 * 10**18,
+            10500 * 1e3 * 1e18,
             team_and_project_coordinator_address_2
         );
         teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-            10500 * 1e3 * 10**18,
+            10500 * 1e3 * 1e18,
             team_and_project_coordinator_address_3
         );
 
         // Dev Pool, Strategic Partner, Team and Project Coordinator
         _totalSupply = _totalSupply.sub(
-            84000 * 1e3 * 10**18,
+            84000 * 1e3 * 1e18,
             "TalaxToken: Cannot transfer more than total supply"
         );
+
+        // This timelockcontroller address is still in Rinkeby network since we were considering using openzeppelin services
+        timelockController = 0x267dbc62F9f431107FB968aC5dEA7fBa6F0B0514;
+        transferOwnership(timelockController);
     }
 
     fallback() external payable {
@@ -195,12 +198,22 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      */
 
     event ChangeTax(address indexed who, uint256 amount);
+    event ChangeAirdropStatus(address indexed who, bool status);
 
     event AddPrivatePlacement(address indexed from, address indexed who);
     event DeletePrivatePlacement(address indexed from, address indexed who);
 
     event AddStrategicPartner(address indexed from, address indexed who);
     event DeleteStrategicPartner(address indexed from, address indexed who);
+
+    /**
+     * @notice MODIFIERS
+     */
+
+    modifier checkAirdropStatus() {
+        require(_airdropStatus == true, "TalaxToken: Airdrop is not available");
+        _;
+    }
 
     /**
      * @notice ACCESSORS
@@ -631,16 +644,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      * - `sender` must have a balance of at least `amount`.
      */
     function _transfer(
-        address sender,
-        address recipient,
+        address from,
+        address to,
         uint256 amount
     ) internal override {
-        require(sender != address(0), "TalaxToken: sender zero address");
-        require(recipient != address(0), "TalaxToken: recipient zero address");
+        require(from != address(0), "TalaxToken: from zero address");
+        require(to != address(0), "TalaxToken: to zero address");
 
-        _beforeTokenTransfer(sender, recipient, amount);
+        _beforeTokenTransfer(from, to, amount);
 
-        uint256 fromBalance = _balances[sender];
+        uint256 fromBalance = _balances[from];
         require(
             fromBalance >= amount,
             "TalaxToken: transfer amount exceeds balance"
@@ -669,18 +682,17 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
         _balances[address(this)] = _balances[address(this)].add(liquidityFee);
 
-        _balances[sender] = _balances[sender].sub(
+        _balances[from] = _balances[from].sub(
             amount,
             "TalaxToken: transfer exceeds balance"
         );
-        _balances[recipient] = _balances[recipient].add(taxedAmount);
-        emit Transfer(sender, recipient, taxedAmount);
+        _balances[to] = _balances[to].add(taxedAmount);
+        emit Transfer(from, to, taxedAmount);
 
-        _afterTokenTransfer(sender, recipient, amount);
+        _afterTokenTransfer(from, to, amount);
     }
 
-    function _mintLiquidityReserve(uint256 amount_) internal onlyOwner {
-        require(amount_ != 0, "Amount mint cannot be 0");
+    function _mintLiquidityReserve(uint256 amount_) internal {
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
     }
@@ -701,39 +713,75 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     }
 
     /**
-     * @notice EXTERNAL FUNCTIONS
+     * @notice ERC20 FUNCTIONS
      */
 
     /**
-     * @dev See {BEP20-balanceOf}.
+     * @dev Returns the name of the token.
+     */
+    function name() public view override returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev Returns the symbol of the token, usually a shorter version of the
+     * name.
+     */
+    function symbol() public view override returns (string memory) {
+        return _symbol;
+    }
+
+    /**
+     * @dev Returns the number of decimals used to get its user representation.
+     * For example, if `decimals` equals `2`, a balance of `505` tokens should
+     * be displayed to a user as `5.05` (`505 / 10 ** 2`).
+     *
+     * Tokens usually opt for a value of 18, imitating the relationship between
+     * Ether and Wei. This is the value {ERC20} uses, unless this function is
+     * overridden;
+     *
+     * NOTE: This information is only used for _display_ purposes: it in
+     * no way affects any of the arithmetic of the contract, including
+     * {IERC20-balanceOf} and {IERC20-transfer}.
+     */
+    function decimals() public pure override returns (uint8) {
+        return 18;
+    }
+
+    /**
+     * @dev See {IERC20-totalSupply}.
+     */
+    function totalSupply() public view override returns (uint256) {
+        return _totalSupply;
+    }
+
+    /**
+     * @dev See {IERC20-balanceOf}.
      */
     function balanceOf(address account) public view override returns (uint256) {
         return _balances[account];
     }
 
-    function liquidityReserveBalance() external view returns (uint256) {
-        return this.balanceOf(address(this));
-    }
-
     /**
-     * @dev See {BEP20-transfer}.
+     * @dev See {IERC20-transfer}.
      *
      * Requirements:
      *
-     * - `recipient` cannot be the zero address.
+     * - `to` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(address recipient, uint256 amount)
+    function transfer(address to, uint256 amount)
         public
         override
         returns (bool)
     {
-        _transfer(_msgSender(), recipient, amount);
+        address owner = _msgSender();
+        _transfer(owner, to, amount);
         return true;
     }
 
     /**
-     * @dev See {BEP20-allowance}.
+     * @dev See {IERC20-allowance}.
      */
     function allowance(address owner, address spender)
         public
@@ -745,7 +793,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     }
 
     /**
-     * @dev See {BEP20-approve}.
+     * @dev See {IERC20-approve}.
+     *
+     * NOTE: If `amount` is the maximum `uint256`, the allowance is not updated on
+     * `transferFrom`. This is semantically equivalent to an infinite approval.
      *
      * Requirements:
      *
@@ -756,37 +807,155 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         override
         returns (bool)
     {
-        _approve(_msgSender(), spender, amount);
+        address owner = _msgSender();
+        _approve(owner, spender, amount);
         return true;
     }
 
     /**
-     * @dev See {BEP20-transferFrom}.
+     * @dev See {IERC20-transferFrom}.
      *
      * Emits an {Approval} event indicating the updated allowance. This is not
-     * required by the EIP. See the note at the beginning of {BEP20};
+     * required by the EIP. See the note at the beginning of {ERC20}.
+     *
+     * NOTE: Does not update the allowance if the current allowance
+     * is the maximum `uint256`.
      *
      * Requirements:
-     * - `sender` and `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     * - the caller must have allowance for `sender`'s tokens of at least
+     *
+     * - `from` and `to` cannot be the zero address.
+     * - `from` must have a balance of at least `amount`.
+     * - the caller must have allowance for ``from``'s tokens of at least
      * `amount`.
      */
     function transferFrom(
-        address sender,
-        address recipient,
+        address from,
+        address to,
         uint256 amount
     ) public override returns (bool) {
-        _transfer(sender, recipient, amount);
-        _approve(
-            sender,
-            _msgSender(),
-            _allowances[sender][_msgSender()].sub(
-                amount,
-                "TalaxToken: transfer exceeds allowance"
-            )
-        );
+        address spender = _msgSender();
+        _spendAllowance(from, spender, amount);
+        _transfer(from, to, amount);
         return true;
+    }
+
+    /**
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
+    function increaseAllowance(address spender, uint256 addedValue)
+        public
+        override
+        returns (bool)
+    {
+        address owner = _msgSender();
+        _approve(owner, spender, allowance(owner, spender) + addedValue);
+        return true;
+    }
+
+    /**
+     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     * - `spender` must have allowance for the caller of at least
+     * `subtractedValue`.
+     */
+    function decreaseAllowance(address spender, uint256 subtractedValue)
+        public
+        override
+        returns (bool)
+    {
+        address owner = _msgSender();
+        uint256 currentAllowance = allowance(owner, spender);
+        require(
+            currentAllowance >= subtractedValue,
+            "ERC20: decreased allowance below zero"
+        );
+        unchecked {
+            _approve(owner, spender, currentAllowance - subtractedValue);
+        }
+
+        return true;
+    }
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+
+    /**
+     * @dev Destroys `amount` tokens from `account`, reducing the
+     * total supply.
+     *
+     * Emits a {Transfer} event with `to` set to the zero address.
+     *
+     * Requirements:
+     *
+     * - `account` cannot be the zero address.
+     * - `account` must have at least `amount` tokens.
+     */
+    function _burn(address account, uint256 amount) internal override {
+        require(account != address(0), "ERC20: burn from the zero address");
+
+        _beforeTokenTransfer(account, address(0), amount);
+
+        uint256 accountBalance = _balances[account];
+        require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
+        unchecked {
+            _balances[account] = accountBalance - amount;
+        }
+        _totalSupply -= amount;
+
+        emit Transfer(account, address(0), amount);
+
+        _afterTokenTransfer(account, address(0), amount);
+    }
+
+    /**
+     * @dev Updates `owner` s allowance for `spender` based on spent `amount`.
+     *
+     * Does not update the allowance amount in case of infinite allowance.
+     * Revert if not enough allowance is available.
+     *
+     * Might emit an {Approval} event.
+     */
+    function _spendAllowance(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal override {
+        uint256 currentAllowance = allowance(owner, spender);
+        if (currentAllowance != type(uint256).max) {
+            require(
+                currentAllowance >= amount,
+                "ERC20: insufficient allowance"
+            );
+            unchecked {
+                _approve(owner, spender, currentAllowance - amount);
+            }
+        }
+    }
+
+    /**
+     * @notice EXTERNAL FUNCTIONS
+     */
+
+    function liquidityReserveBalance() external view returns (uint256) {
+        return this.balanceOf(address(this));
     }
 
     /**
@@ -802,6 +971,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
+        require(amount_ > 0, "Amount mint cannot be 0");
         _mintLiquidityReserve(amount_);
     }
 
@@ -817,6 +987,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     function changeTaxFee(uint16 taxFee_) external onlyOwner {
         _taxFee = taxFee_;
         emit ChangeTax(msg.sender, taxFee_);
+    }
+
+    function changeAirdropStatus(bool status_) external onlyOwner {
+        _airdropStatus = status_;
+        emit ChangeAirdropStatus(msg.sender, status_);
     }
 
     function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
@@ -845,7 +1020,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         // Burn the amount of tokens on the sender
         _burn(_msgSender(), _amount);
         // Stake amount goes to liquidity reserve
-        _balances[address(this)].add(_amount);
+        _balances[address(this)] = _balances[address(this)].add(_amount);
     }
 
     /**
@@ -860,9 +1035,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
         _mintLiquidityReserve(reward_);
-        _balances[address(this)].sub(amount_);
-        _balances[address(this)].sub(reward_);
-        _mint(_msgSender(), amount_ + reward_);
+        _balances[address(this)] = _balances[address(this)].sub(amount_);
+        _balances[address(this)] = _balances[address(this)].sub(reward_);
+        _totalSupply += amount_ + reward_;
+        _balances[_msgSender()] += amount_ + reward_;
     }
 
     function withdrawAllStake(uint256 stake_index) external {
@@ -871,9 +1047,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
         _mintLiquidityReserve(reward_);
-        _balances[address(this)].sub(amount_);
-        _balances[address(this)].sub(reward_);
-        _mint(_msgSender(), amount_ + reward_);
+        _balances[address(this)] = _balances[address(this)].sub(amount_);
+        _balances[address(this)] = _balances[address(this)].sub(reward_);
+        _totalSupply += amount_ + reward_;
+        _balances[_msgSender()] += amount_ + reward_;
+    }
+
+    function claimAirdrop() external checkAirdropStatus {
+        uint256 airdrop = _claimAirdrop(msg.sender);
+        _balances[address(this)] = _balances[address(this)].sub(airdrop);
+        _balances[msg.sender] = _balances[msg.sender].add(airdrop);
     }
 
     /**
@@ -1002,5 +1185,17 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
             );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function testCalculateDuration(address user, uint256 index)
+        public
+        view
+        returns (uint256)
+    {
+        return _testCalculateDuration(user, index);
+    }
+
+    function blockTime() public view returns (uint256) {
+        return _blockTime();
     }
 }
