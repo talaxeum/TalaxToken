@@ -335,4 +335,41 @@ contract("Stakable", async (accounts) => {
             console.log(summary.stakes[s]);
         }
     });
+
+    it("Cannot claim airdrop within the same month", async () => {
+        talax = await TalaxToken.deployed();
+
+        let owner = accounts[0];
+
+        try {
+            await talax.claimAirdrop({ from: owner });
+        } catch (error) {
+            assert.equal(
+                error.reason,
+                "Stakable: Airdrop can only be claimed in a month timespan",
+                "Failed to notice a airdrop error"
+            );
+        }
+    });
+
+    it("Calculate airdrop again", async () => {
+        talax = await TalaxToken.deployed();
+
+        let owner = accounts[0];
+
+        let balance = await talax.balanceOf(owner);
+        console.log(balance.toString());
+
+        await helper.advanceTimeAndBlock(3600 * 24 * 28);
+
+        await talax.claimAirdrop({ from: owner });
+
+        balance = await talax.balanceOf(owner);
+        console.log(balance.toString());
+
+        let summary = await talax.hasStake(owner);
+        for (s = 0; s < summary.stakes.length; s++) {
+            console.log(summary.stakes[s]);
+        }
+    });
 });
