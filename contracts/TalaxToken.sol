@@ -40,8 +40,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      * address liquidity_reserve_address;
      */
 
-    address private public_sale_address;
-    address private private_sale_address;
+    // address private public_sale_address;
+    // address private private_sale_address;
     address private private_placement_address;
     address private dev_pool_address_1;
     address private dev_pool_address_2;
@@ -83,15 +83,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         _stakingPackage[180 days] = 7;
         _stakingPackage[365 days] = 8;
 
-        // testing purposes
-        _balances[msg.sender] = 10 * 1e6 * 1e18;
-
         /**
          * Addresses initialization
          */
 
-        public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
-        private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
+        // public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+        // private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
         private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
         dev_pool_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
         dev_pool_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
@@ -103,6 +100,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
+
+        timelockController = 0x267dbc62F9f431107FB968aC5dEA7fBa6F0B0514;
 
         /**
          * Amount Initialization
@@ -119,12 +118,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
             6993 *
             1e3 *
             1e18;
-
-        //Public Sale, Private Sale, Private Placement, Staking Reward
-        _totalSupply = _totalSupply.sub(
-            73500 * 1e3 * 1e18,
-            "TalaxToken: Cannot transfer more than total supply"
-        );
 
         /**
          * Locked Wallet Initialization
@@ -174,18 +167,19 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
             team_and_project_coordinator_address_3
         );
 
+        //Public Sale, Private Sale, Private Placement, Staking Reward
         // Dev Pool, Strategic Partner, Team and Project Coordinator
         _totalSupply = _totalSupply.sub(
-            84000 * 1e3 * 1e18,
+            157500 * 1e3 * 1e18,
             "TalaxToken: Cannot transfer more than total supply"
         );
 
         // This timelockcontroller address is still in Rinkeby network since we were considering using openzeppelin services
-        timelockController = 0x267dbc62F9f431107FB968aC5dEA7fBa6F0B0514;
         transferOwnership(timelockController);
     }
 
     fallback() external payable {
+        // Add any ethers send to this address to team and project coordinators addresses
         _addThirdOfValue(msg.value);
     }
 
@@ -692,11 +686,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         _afterTokenTransfer(from, to, amount);
     }
 
-    function _mintLiquidityReserve(uint256 amount_) internal {
-        _balances[address(this)] = _balances[address(this)].add(amount_);
-        _totalSupply = _totalSupply.add(amount_);
-    }
-
     function _addThirdOfValue(uint256 amount_) internal {
         uint256 thirdOfValue = SafeMath.div(amount_, 3);
         _balances[team_and_project_coordinator_address_1] = _balances[
@@ -955,7 +944,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      */
 
     function liquidityReserveBalance() external view returns (uint256) {
-        return this.balanceOf(address(this));
+        return balanceOf(address(this));
     }
 
     /**
@@ -968,11 +957,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         require(amount_ != 0, "Amount mint cannot be 0");
         _stakingReward = _stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
+        emit Transfer(address(0), address(this), amount_);
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
         require(amount_ > 0, "Amount mint cannot be 0");
-        _mintLiquidityReserve(amount_);
+        _balances[address(this)] = _balances[address(this)].add(amount_);
+        _totalSupply = _totalSupply.add(amount_);
+        emit Transfer(address(0), address(this), amount_);
     }
 
     function burnStakingReward(uint256 amount_) external onlyOwner {
@@ -982,16 +974,27 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         );
         _stakingReward = _stakingReward.sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
+        emit Transfer(address(this), address(0), amount_);
+    }
+
+    function burnLiquidityReserve(uint256 amount_) external onlyOwner {
+        require(
+            amount_ < _balances[address(this)],
+            "TalaxToken: Amount burnt larger than balance"
+        );
+        _balances[address(this)] = _balances[address(this)].sub(amount_);
+        _totalSupply = _totalSupply.sub(amount_);
+        emit Transfer(address(this), address(0), amount_);
     }
 
     function changeTaxFee(uint16 taxFee_) external onlyOwner {
         _taxFee = taxFee_;
-        emit ChangeTax(msg.sender, taxFee_);
+        emit ChangeTax(_msgSender(), taxFee_);
     }
 
     function changeAirdropStatus(bool status_) external onlyOwner {
         _airdropStatus = status_;
-        emit ChangeAirdropStatus(msg.sender, status_);
+        emit ChangeAirdropStatus(_msgSender(), status_);
     }
 
     function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
@@ -1038,7 +1041,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        _mintLiquidityReserve(reward_);
+        mintLiquidityReserve(reward_);
         _balances[address(this)] = _balances[address(this)].sub(amount_);
         _balances[address(this)] = _balances[address(this)].sub(reward_);
         _totalSupply += amount_ + reward_;
@@ -1050,7 +1053,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        _mintLiquidityReserve(reward_);
+        mintLiquidityReserve(reward_);
         _balances[address(this)] = _balances[address(this)].sub(amount_);
         _balances[address(this)] = _balances[address(this)].sub(reward_);
         _totalSupply += amount_ + reward_;
@@ -1058,9 +1061,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     }
 
     function claimAirdrop() external checkAirdropStatus {
-        uint256 airdrop = _claimAirdrop(msg.sender);
+        uint256 airdrop = _claimAirdrop(_msgSender());
         _balances[address(this)] = _balances[address(this)].sub(airdrop);
-        _balances[msg.sender] = _balances[msg.sender].add(airdrop);
+        _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
     }
 
     /**
@@ -1068,7 +1071,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      */
     function unlockPrivatePlacementWallet() external {
         require(
-            msg.sender == privatePlacementLockedWallet.beneficiary(),
+            _msgSender() == privatePlacementLockedWallet.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
 
@@ -1083,7 +1086,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      */
     function unlockDevPoolWallet_1() external {
         require(
-            msg.sender == devPoolLockedWallet_1.beneficiary(),
+            _msgSender() == devPoolLockedWallet_1.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
@@ -1095,7 +1098,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockDevPoolWallet_2() external {
         require(
-            msg.sender == devPoolLockedWallet_2.beneficiary(),
+            _msgSender() == devPoolLockedWallet_2.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
@@ -1107,7 +1110,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockDevPoolWallet_3() external {
         require(
-            msg.sender == devPoolLockedWallet_3.beneficiary(),
+            _msgSender() == devPoolLockedWallet_3.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
@@ -1122,7 +1125,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      */
     function unlockStrategicPartnerWallet_1() external {
         require(
-            msg.sender == strategicPartnerLockedWallet_1.beneficiary(),
+            _msgSender() == strategicPartnerLockedWallet_1.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_1
@@ -1133,7 +1136,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockStrategicPartnerWallet_2() external {
         require(
-            msg.sender == strategicPartnerLockedWallet_2.beneficiary(),
+            _msgSender() == strategicPartnerLockedWallet_2.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_2
@@ -1144,7 +1147,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockStrategicPartnerWallet_3() external {
         require(
-            msg.sender == strategicPartnerLockedWallet_3.beneficiary(),
+            _msgSender() == strategicPartnerLockedWallet_3.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_3
@@ -1158,7 +1161,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      */
     function unlockTeamAndProjectCoordinatorWallet_1() external {
         require(
-            msg.sender == teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
+            _msgSender() == teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
@@ -1169,7 +1172,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockTeamAndProjectCoordinatorWallet_2() external {
         require(
-            msg.sender == teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
+            _msgSender() == teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
@@ -1180,7 +1183,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockTeamAndProjectCoordinatorWallet_3() external {
         require(
-            msg.sender == teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
+            _msgSender() == teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
