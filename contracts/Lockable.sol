@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract Lockable {
     uint256 private _amount;
 
+    address public owner;
     // beneficiary of tokens after they are released
     address private immutable _beneficiary;
-    address public owner;
 
     uint256 private _startLockedWallet;
 

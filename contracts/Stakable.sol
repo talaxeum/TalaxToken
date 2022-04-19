@@ -19,7 +19,7 @@ contract Stakable {
 
         //Staking penalty and Airdrop in 0.1 times percentage
         _stakingPenalty = 15;
-        _airdrop = 100;
+        _airdrop = 80;
     }
 
     /**
@@ -168,23 +168,6 @@ contract Stakable {
 
     function penaltyFee() public view returns (uint256) {
         return _stakingPenalty;
-    }
-
-    function _blockTime() public view returns (uint256) {
-        return block.timestamp;
-    }
-
-    function _testCalculateDuration(address user, uint256 index)
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 user_index = stakes[user];
-        Stake memory current_stake = stakeholders[user_index].address_stakes[
-            index
-        ];
-
-        return current_stake.releaseTime - current_stake.since;
     }
 
     function calculateStakingDuration(uint256 since_)
@@ -388,7 +371,7 @@ contract Stakable {
 
         Stakeholder storage stakeholder = stakeholders[stakes[_staker]];
         uint256 monthAirdrop = (block.timestamp - stakeholder.latestClaimDrop)
-            .div(28 days);
+            .div(7 days);
 
         require(
             monthAirdrop >= 1,

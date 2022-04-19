@@ -431,6 +431,19 @@
 						"type": "uint256"
 					}
 				],
+				"name": "burnLiquidityReserve",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount_",
+						"type": "uint256"
+					}
+				],
 				"name": "burnStakingReward",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -1262,11 +1275,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x3ee69036462501ab6019d892c97c6f479ebd2a66b2e1f0ed9f868af638bc08c4",
+			"keccak256": "0xa697f5e535895dc25673eadcf840c03a3053c5844ddd4bf88e7bb2c129c9aaae",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://e2295cd3da03cb5735fc48244bb2d07f2fc9c3555bae4c4c3cf245ed7e6d7e40",
-				"dweb:/ipfs/QmTDvQ7ewahmbby63o1ttYTxbuxcyf6ZJbXP8cVbe3QZc6"
+				"bzz-raw://f10e6e6cf3ddd3bc5e5e8923e8035e5d0f4557405aedea1851bc038da8541bea",
+				"dweb:/ipfs/QmT9f6tfQ38hD49PpRE4wNxz64ZVYCif1ZAZFFddgPSLdj"
 			]
 		}
 	},

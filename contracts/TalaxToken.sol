@@ -75,9 +75,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         // later divided by 100 to make percentage
         _taxFee = 1;
 
-        _airdropStatus = true;
+        _airdropStatus = false;
 
-        // in percentage
+        // Staking APY in percentage
         _stakingPackage[30 days] = 5;
         _stakingPackage[90 days] = 6;
         _stakingPackage[180 days] = 7;
