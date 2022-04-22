@@ -224,11 +224,11 @@ contract Stakable {
         return (
             SafeMath.sub(
                 amount,
-                SafeMath.mul(amount, SafeMath.div(_stakingPenalty, 1000))
+                SafeMath.div(SafeMath.mul(amount, _stakingPenalty), 1000)
             ),
             SafeMath.sub(
                 reward,
-                SafeMath.mul(reward, SafeMath.div(_stakingPenalty, 1000))
+                SafeMath.div(SafeMath.mul(reward, _stakingPenalty), 1000)
             )
         );
     }
@@ -263,7 +263,7 @@ contract Stakable {
          * @notice This is penalty given for early withdrawal before the designated time
          */
 
-        if (current_stake.releaseTime < block.timestamp) {
+        if (current_stake.releaseTime > block.timestamp) {
             current_stake.amount -= amount;
 
             if (current_stake.amount == 0) {
@@ -326,7 +326,7 @@ contract Stakable {
          * @notice This is penalty given for early withdrawal before the designated time
          */
 
-        if (current_stake.releaseTime < block.timestamp) {
+        if (current_stake.releaseTime > block.timestamp) {
             current_stake.amount -= amount;
             delete stakeholders[user_index].address_stakes[index];
             return calculateStakingWithPenalty(amount, reward);

@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "./Multilockable.sol";
 import "./Lockable.sol";
 import "./Stakable.sol";
 
@@ -78,10 +79,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         _airdropStatus = false;
 
         // Staking APY in percentage
-        _stakingPackage[30 days] = 5;
         _stakingPackage[90 days] = 6;
         _stakingPackage[180 days] = 7;
-        _stakingPackage[365 days] = 8;
+        _stakingPackage[360 days] = 8;
 
         /**
          * Addresses initialization
@@ -96,12 +96,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
         strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
         strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
-        // team_and_project_coordinator_address_1 = 0x84435c6FD8de0E75D6b3dC108F4345344a91a268; //for testing only
+        // team_and_project_coordinator_address_1 = 0x84555c6FD8de0E75D6b3dC108F5545344a91a268; //for testing only
         team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
-        timelockController = 0x267dbc62F9f431107FB968aC5dEA7fBa6F0B0514;
+        // timelockController = 0x267dbc62F9f551107FB968aC5dEA7fBa6F0B0514;
 
         /**
          * Amount Initialization
@@ -175,7 +175,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         );
 
         // This timelockcontroller address is still in Rinkeby network since we were considering using openzeppelin services
-        transferOwnership(timelockController);
+        // transferOwnership(timelockController);
     }
 
     fallback() external payable {
@@ -263,33 +263,109 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     /**
      * @dev this is the release rate for partial token release
      */
+    // function privateSaleReleaseAmount()
+    //     internal
+    //     pure
+    //     returns (uint256[55] memory)
+    // {
+    //     return [
+    //         SafeMath.mul(489300, 1e18),
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         SafeMath.mul(366975, 1e18),
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0,
+    //         0
+    //     ];
+    // }
+
     function privatePlacementReleaseAmount()
         internal
         pure
-        returns (uint256[43] memory)
+        returns (uint256[55] memory)
     {
         return [
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
             0,
             0,
             0,
             0,
             0,
-            0,
-            0,
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(500 * 1e16, 6993),
-            SafeMath.div(493 * 1e16, 6993),
             0,
             0,
             0,
@@ -315,255 +391,123 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         ];
     }
 
-    function devPoolReleaseAmount() internal pure returns (uint256[43] memory) {
+    function devPoolReleaseAmount() internal pure returns (uint256[55] memory) {
         return [
-            SafeMath.mul(1 * 1e6, 1e18),
             0,
             0,
             0,
-            SafeMath.mul(1 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(1 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(1 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18)
-        ];
-    }
-
-    function devPoolReleaseAmountAlternate()
-        internal
-        pure
-        returns (uint256[43] memory)
-    {
-        return [
-            SafeMath.mul(1 * 1e6, 1e18),
             0,
             0,
             0,
-            SafeMath.mul(1 * 1e6, 1e18),
             0,
             0,
-            SafeMath.mul(1 * 1e6, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(154175, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
+            SafeMath.mul(650961, 1e18),
             0,
             0,
-            SafeMath.mul(1 * 1e6, 1e18),
             0,
-            0,
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18)
+            0
         ];
     }
 
     function strategicPartnerReleaseAmount()
         internal
         pure
-        returns (uint256[43] memory)
+        returns (uint256[55] memory)
     {
         return [
-            SafeMath.mul(333333, 1e18),
-            0,
-            0,
-            0,
-            SafeMath.mul(333333, 1e18),
-            0,
-            0,
-            SafeMath.mul(333333, 1e18),
-            0,
-            0,
-            SafeMath.mul(333333, 1e18),
-            0,
-            0,
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18),
-            SafeMath.mul(72222, 1e18)
-        ];
-    }
-
-    function strategicPartnerReleaseAmountAlternate()
-        internal
-        pure
-        returns (uint256[43] memory)
-    {
-        return [
-            SafeMath.mul(333334, 1e18),
-            0,
-            0,
-            0,
-            SafeMath.mul(333334, 1e18),
-            0,
-            0,
-            SafeMath.mul(333334, 1e18),
-            0,
-            0,
-            SafeMath.mul(333334, 1e18),
-            0,
-            0,
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18),
-            SafeMath.mul(72223, 1e18)
-        ];
-    }
-
-    function teamAndProjectCoordinatorReleaseAmount()
-        internal
-        pure
-        returns (uint256[43] memory)
-    {
-        return [
-            SafeMath.mul(1166667, 1e18),
-            0,
-            0,
-            0,
-            SafeMath.mul(1 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(1 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(1 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            SafeMath.mul(333333, 1e18),
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
             0,
             0,
             0,
@@ -571,51 +515,63 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         ];
     }
 
-    function teamAndProjectCoordinatorReleaseAmountAlternate()
+    function teamAndProjectCoordinatorReleaseAmount()
         internal
         pure
-        returns (uint256[43] memory)
+        returns (uint256[55] memory)
     {
         return [
-            SafeMath.mul(1166666, 1e18),
+            SafeMath.mul(105000, 1e18),
             0,
             0,
             0,
-            SafeMath.mul(10 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(10 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(10 * 1e6, 1e18),
-            0,
-            0,
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
-            SafeMath.mul(333334, 1e18),
+            SafeMath.mul(315000, 1e18),
             0,
             0,
             0,
+            SafeMath.mul(315000, 1e18),
             0,
             0,
             0,
+            SafeMath.mul(315000, 1e18),
             0,
+            0,
+            0,
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
             0,
             0,
             0,
@@ -1114,7 +1070,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
-            devPoolReleaseAmountAlternate()
+            devPoolReleaseAmount()
         );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
@@ -1151,7 +1107,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_3
-            .releaseClaimable(strategicPartnerReleaseAmountAlternate());
+            .releaseClaimable(strategicPartnerReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
@@ -1161,7 +1117,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
      */
     function unlockTeamAndProjectCoordinatorWallet_1() external {
         require(
-            _msgSender() == teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
+            _msgSender() ==
+                teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
@@ -1172,7 +1129,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockTeamAndProjectCoordinatorWallet_2() external {
         require(
-            _msgSender() == teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
+            _msgSender() ==
+                teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
@@ -1183,26 +1141,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
 
     function unlockTeamAndProjectCoordinatorWallet_3() external {
         require(
-            _msgSender() == teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
+            _msgSender() ==
+                teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
             "TalaxToken: Wallet Owner Only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
-            .releaseClaimable(
-                teamAndProjectCoordinatorReleaseAmountAlternate()
-            );
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function testCalculateDuration(address user, uint256 index)
-        public
-        view
-        returns (uint256)
-    {
-        return _testCalculateDuration(user, index);
-    }
-
-    function blockTime() public view returns (uint256) {
-        return _blockTime();
     }
 }

@@ -53,14 +53,14 @@ contract Lockable {
      *  @dev 		Main Functions
      *  @return 	Claimable amount from Locked Wallet
      */
-    function _calculateClaimableAmount(uint256[43] memory amount_)
+    function _calculateClaimableAmount(uint256[55] memory amount_)
         internal
         returns (uint256)
     {
         uint256 months = (block.timestamp - _startLockedWallet) / 30 days;
         uint256 claimable;
 
-        for (uint256 i = _latestClaimMonth; i <= months; i++) {
+        for (uint256 i = _latestClaimMonth; i <= 55; i++) {
             claimable = SafeMath.add(claimable, amount_[i]);
         }
 
@@ -73,7 +73,7 @@ contract Lockable {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function releaseClaimable(uint256[43] memory amount_)
+    function releaseClaimable(uint256[55] memory amount_)
         external
         onlyTalax
         returns (uint256)
