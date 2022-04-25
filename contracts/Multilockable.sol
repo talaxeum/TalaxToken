@@ -7,22 +7,24 @@ contract Multilockable {
     using SafeMath for uint256;
     address public owner;
     uint256 private totalUser;
+    uint256 private totalAmount;
 
     uint256 private phase_1_total;
     uint256 private phase_2_total;
 
     struct LockedWallet {
         uint256 amount;
+        bool phase_1_claimed;
         uint256 startLockedWallet;
-        uint256 latestClaimMonth;
         uint256 latestClaimDay;
     }
 
     // beneficiary of tokens after they are released
-    mapping(address => LockedWallet) private _beneficiary;
+    mapping(address => LockedWallet) private beneficiary;
 
-    constructor() {
+    constructor(uint256 amount_) {
         owner = msg.sender;
+        totalAmount = amount_;
         phase_1_total = 1467900 * 1e18;
         phase_2_total = 36195 * 1e18;
     }
@@ -39,65 +41,86 @@ contract Multilockable {
         _;
     }
 
+    function hasMultilockable() public view returns (LockedWallet memory) {
+        require(
+            beneficiary[msg.sender].amount != 0,
+            "Multilockable: You don't have any balance for private sale"
+        );
+        return beneficiary[msg.sender];
+    }
+
     /**
      *  @dev 		Main Functions
      *  @return 	Claimable amount from Locked Wallet
      */
-    function _calculateClaimableAmount(address user_)
+    function _calculateClaimableAmount(address user)
         internal
         returns (uint256)
     {
-        uint256 period = (block.timestamp -
-            _beneficiary[user_].startLockedWallet) / 30 days;
         uint256 claimable;
 
-        if (period < 16) {
+        uint256 dayCounter = (block.timestamp -
+            beneficiary[user].startLockedWallet) / 24 hours;
+
+        if (dayCounter < 16 * 30 days) {
+            if (beneficiary[user].phase_1_claimed == false) {
+                claimable = claimable.add(
+                    SafeMath.div(
+                        SafeMath.mul(phase_1_total, beneficiary[user].amount),
+                        14679000
+                    )
+                );
+                beneficiary[user].phase_1_claimed = true;
+            }
+        } else if (dayCounter >= 16 * 30 days && dayCounter < 28 * 30 days) {
+            if (beneficiary[user].phase_1_claimed == false) {
+                claimable = claimable.add(
+                    SafeMath.div(
+                        SafeMath.mul(phase_1_total, beneficiary[user].amount),
+                        14679000
+                    )
+                );
+                beneficiary[user].phase_1_claimed = true;
+            }
+
             for (
-                uint256 i = _beneficiary[user_].latestClaimMonth;
-                i < period;
-                i++
+                uint256 j = beneficiary[user].latestClaimDay;
+                j <= dayCounter;
+                j++
             ) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(phase_1_total, _beneficiary[user_].amount),
+                        SafeMath.mul(phase_2_total, beneficiary[user].amount),
                         14679000
                     )
                 );
             }
-
-            _beneficiary[user_].latestClaimMonth = period + 1;
         }
-        if (period >= 16 && period < 28) {
-            uint256 daily = (block.timestamp -
-                _beneficiary[user_].startLockedWallet) / 24 hours;
-
-            for (uint256 j = _beneficiary[user_].latestClaimDay; j <= 30; j++) {
-                claimable = claimable.add(
-                    SafeMath.div(
-                        SafeMath.mul(phase_2_total, _beneficiary[user_].amount),
-                        14679000
-                    )
-                );
-            }
-
-            _beneficiary[user_].latestClaimDay = daily + 1;
-
-            if (daily == 30) {
-                _beneficiary[user_].latestClaimDay = 1;
-                _beneficiary[user_].latestClaimMonth = period + 1;
-            }
-        }
+        beneficiary[user].latestClaimDay = dayCounter + 1;
 
         require(claimable != 0, "Multilockable: There's nothing to claim yet");
         return claimable;
     }
 
-    function addBeneficiary(uint256 amount_, address user_) external onlyTalax {
-        _beneficiary[user_].amount = amount_;
-        _beneficiary[user_].startLockedWallet = block.timestamp;
-        _beneficiary[user_].latestClaimDay = 1;
+    function _addBeneficiary(address user_, uint256 amount_)
+        external
+        onlyTalax
+    {
+        require(
+            amount_ <= totalAmount,
+            "Multilockable: not enough balance to add a new user"
+        );
+        require(
+            beneficiary[user_].amount == 0,
+            "Multilockable: This user already registered"
+        );
+        beneficiary[user_].amount = amount_;
+        beneficiary[user_].phase_1_claimed = false;
+        beneficiary[user_].startLockedWallet = block.timestamp;
+        beneficiary[user_].latestClaimDay = 1;
 
         totalUser += 1;
+        totalAmount -= amount_;
     }
 
     /**
@@ -108,10 +131,7 @@ contract Multilockable {
         onlyTalax
         returns (uint256)
     {
-        require(
-            _beneficiary[user_].amount > 0,
-            "Multilockable: no tokens left"
-        );
+        require(beneficiary[user_].amount > 0, "Multilockable: no tokens left");
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(user_);
 
@@ -120,8 +140,8 @@ contract Multilockable {
             "Multilockable: no tokens to release"
         );
 
-        _beneficiary[user_].amount = SafeMath.sub(
-            _beneficiary[user_].amount,
+        beneficiary[user_].amount = SafeMath.sub(
+            beneficiary[user_].amount,
             claimableLockedAmount,
             "Multilockable: Cannot substract total amount with claimable"
         );

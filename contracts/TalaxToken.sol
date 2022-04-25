@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import "./Multilockable.sol";
-import "./Lockable.sol";
 import "./Stakable.sol";
+import "./Lockable.sol";
+import "./Multilockable.sol";
 
 contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     using SafeMath for uint256;
@@ -53,6 +53,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     address private team_and_project_coordinator_address_1;
     address private team_and_project_coordinator_address_2;
     address private team_and_project_coordinator_address_3;
+
+    /**
+     * Multilockable Object
+     */
+
+    Multilockable private privateSaleLockedWallet;
 
     /**
      * Lockable Object
@@ -111,13 +117,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         _balances[address(this)] = 52500 * 1e3 * 1e18;
 
         // Public Sale
-        _balances[0x5470c8FF25EC05980fc7C2967D076B8012298fE7] = 42 * 1e6 * 1e18;
-
-        // Private Sale
-        _balances[0x75837E79215250C45331b92c35B7Be506eD015AC] =
-            6993 *
+        _balances[0x5470c8FF25EC05980fc7C2967D076B8012298fE7] =
+            2310 *
             1e3 *
             1e18;
+
+        // Private Sale
+        privateSaleLockedWallet = new Multilockable(14679 * 1e3 * 1e18);
 
         /**
          * Locked Wallet Initialization
@@ -129,15 +135,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
         );
 
         devPoolLockedWallet_1 = new Lockable(
-            14 * 1e6 * 1e18,
+            24668 * 1e3 * 1e18,
             dev_pool_address_1
         );
         devPoolLockedWallet_2 = new Lockable(
-            14 * 1e6 * 1e18,
+            24668 * 1e3 * 1e18,
             dev_pool_address_2
         );
         devPoolLockedWallet_3 = new Lockable(
-            14 * 1e6 * 1e18,
+            24668 * 1e3 * 1e18,
             dev_pool_address_3
         );
 
@@ -263,70 +269,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
     /**
      * @dev this is the release rate for partial token release
      */
-    // function privateSaleReleaseAmount()
-    //     internal
-    //     pure
-    //     returns (uint256[55] memory)
-    // {
-    //     return [
-    //         SafeMath.mul(489300, 1e18),
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         SafeMath.mul(366975, 1e18),
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0,
-    //         0
-    //     ];
-    // }
-
     function privatePlacementReleaseAmount()
         internal
         pure
@@ -1149,5 +1091,21 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable {
             .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    /**
+     * @dev Multilockable
+     */
+    function addBeneficiary(address user, uint256 amount) external onlyOwner {
+        require(amount > 0, "TalaxToken: Cannot add beneficiary with 0 amount");
+        privateSaleLockedWallet._addBeneficiary(user, amount);
+    }
+
+    function unlockPrivateSale() external {
+        uint256 releasedAmount = privateSaleLockedWallet.releaseClaimable(
+            _msgSender()
+        );
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(releasedAmount);
     }
 }

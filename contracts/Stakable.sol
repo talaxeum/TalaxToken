@@ -199,19 +199,6 @@ contract Stakable {
                 calculateStakingDuration(_current_stake.since)) / 1e26;
     }
 
-    function stakeSummary(address user_)
-        public
-        view
-        returns (StakingSummary memory)
-    {
-        StakingSummary memory summary = StakingSummary(
-            0,
-            stakeholders[stakes[user_]].address_stakes
-        );
-
-        return summary;
-    }
-
     function calculateStakingWithPenalty(uint256 amount, uint256 reward)
         internal
         view
