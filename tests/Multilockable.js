@@ -13,7 +13,15 @@ const helper = require("./helpers/truffleTestHelpers");
 contract("Multilockable", async (accounts) => {
     it("Add new beneficiary", async () => {
         talax = await TalaxToken.deployed();
+        owner = accounts[0];
+
         beneficiary = accounts[9];
+        await talax.addBeneficiary(beneficiary, 10 * 1e6);
+
+        let summary = await talax.hasMultilockable({ from: beneficiary });
+        console.log(summary);
+        // let balance = await web3.eth.getBalance(owner);
+        // console.log(balance.toString());
     });
 
     it("First claim", async () => {

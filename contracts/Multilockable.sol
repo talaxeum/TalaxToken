@@ -5,14 +5,13 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Multilockable {
     using SafeMath for uint256;
-    address public owner;
     uint256 private totalUser;
     uint256 private totalAmount;
 
     uint256 private phase_1_total;
     uint256 private phase_2_total;
 
-    struct LockedWallet {
+    struct Multilock {
         uint256 amount;
         bool phase_1_claimed;
         uint256 startLockedWallet;
@@ -20,11 +19,10 @@ contract Multilockable {
     }
 
     // beneficiary of tokens after they are released
-    mapping(address => LockedWallet) private beneficiary;
+    mapping(address => Multilock) private beneficiary;
 
-    constructor(uint256 amount_) {
-        owner = msg.sender;
-        totalAmount = amount_;
+    constructor() {
+        totalAmount = 14679 * 1e3 * 1e18;
         phase_1_total = 1467900 * 1e18;
         phase_2_total = 36195 * 1e18;
     }
@@ -33,15 +31,7 @@ contract Multilockable {
      * @dev modifier functions
      */
 
-    modifier onlyTalax() {
-        require(
-            msg.sender == owner,
-            "Multilockable: caller have to be TalaxToken Smart Contract"
-        );
-        _;
-    }
-
-    function hasMultilockable() public view returns (LockedWallet memory) {
+    function hasMultilockable() external view returns (Multilock memory) {
         require(
             beneficiary[msg.sender].amount != 0,
             "Multilockable: You don't have any balance for private sale"
@@ -59,10 +49,11 @@ contract Multilockable {
     {
         uint256 claimable;
 
-        uint256 dayCounter = (block.timestamp -
+        uint256 lockDuration = (block.timestamp -
             beneficiary[user].startLockedWallet) / 24 hours;
 
-        if (dayCounter < 16 * 30 days) {
+        //Phase 1 of locked wallet release - monthly
+        if (lockDuration < 16 * 30 days) {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
@@ -72,7 +63,9 @@ contract Multilockable {
                 );
                 beneficiary[user].phase_1_claimed = true;
             }
-        } else if (dayCounter >= 16 * 30 days && dayCounter < 28 * 30 days) {
+        }
+        //Phase 2 of locked wallet release - daily
+        else if (lockDuration >= 16 * 30 days && lockDuration < 28 * 30 days) {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
@@ -83,29 +76,24 @@ contract Multilockable {
                 beneficiary[user].phase_1_claimed = true;
             }
 
-            for (
-                uint256 j = beneficiary[user].latestClaimDay;
-                j <= dayCounter;
-                j++
-            ) {
-                claimable = claimable.add(
+            uint256 sinceLatestClaim = lockDuration -
+                beneficiary[user].latestClaimDay;
+            claimable =
+                sinceLatestClaim *
+                claimable.add(
                     SafeMath.div(
                         SafeMath.mul(phase_2_total, beneficiary[user].amount),
                         14679000
                     )
                 );
-            }
         }
-        beneficiary[user].latestClaimDay = dayCounter + 1;
+        beneficiary[user].latestClaimDay = lockDuration + 1;
 
         require(claimable != 0, "Multilockable: There's nothing to claim yet");
         return claimable;
     }
 
-    function _addBeneficiary(address user_, uint256 amount_)
-        external
-        onlyTalax
-    {
+    function _addBeneficiary(address user_, uint256 amount_) internal {
         require(
             amount_ <= totalAmount,
             "Multilockable: not enough balance to add a new user"
@@ -126,11 +114,7 @@ contract Multilockable {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function releaseClaimable(address user_)
-        external
-        onlyTalax
-        returns (uint256)
-    {
+    function releaseClaimable(address user_) internal returns (uint256) {
         require(beneficiary[user_].amount > 0, "Multilockable: no tokens left");
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(user_);
