@@ -1,5 +1,4 @@
 const TalaxToken = artifacts.require("TalaxToken");
-const Lockable = artifacts.require("Lockable");
 const { assert } = require("chai");
 const truffleAssert = require("truffle-assertions");
 const helper = require("./helpers/truffleTestHelpers");

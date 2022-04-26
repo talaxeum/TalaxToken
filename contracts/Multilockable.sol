@@ -12,6 +12,7 @@ contract Multilockable {
     uint256 private phase_2_total;
 
     struct Multilock {
+        uint256 lockedAmount;
         uint256 amount;
         bool phase_1_claimed;
         uint256 startLockedWallet;
@@ -50,27 +51,34 @@ contract Multilockable {
         uint256 claimable;
 
         uint256 lockDuration = (block.timestamp -
-            beneficiary[user].startLockedWallet) / 24 hours;
+            beneficiary[user].startLockedWallet) / 1 days;
 
         //Phase 1 of locked wallet release - monthly
-        if (lockDuration < 16 * 30 days) {
+        if (lockDuration < 16 * 30) {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(phase_1_total, beneficiary[user].amount),
-                        14679000
+                        SafeMath.mul(
+                            phase_1_total,
+                            beneficiary[user].lockedAmount
+                        ),
+                        totalAmount
                     )
                 );
                 beneficiary[user].phase_1_claimed = true;
             }
+            beneficiary[user].latestClaimDay = 15 * 30;
         }
         //Phase 2 of locked wallet release - daily
-        else if (lockDuration >= 16 * 30 days && lockDuration < 28 * 30 days) {
+        else if (lockDuration >= 16 * 30 && lockDuration < 28 * 30) {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(phase_1_total, beneficiary[user].amount),
-                        14679000
+                        SafeMath.mul(
+                            phase_1_total,
+                            beneficiary[user].lockedAmount
+                        ),
+                        totalAmount
                     )
                 );
                 beneficiary[user].phase_1_claimed = true;
@@ -82,12 +90,15 @@ contract Multilockable {
                 sinceLatestClaim *
                 claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(phase_2_total, beneficiary[user].amount),
-                        14679000
+                        SafeMath.mul(
+                            phase_2_total,
+                            beneficiary[user].lockedAmount
+                        ),
+                        totalAmount
                     )
                 );
+            beneficiary[user].latestClaimDay = lockDuration;
         }
-        beneficiary[user].latestClaimDay = lockDuration + 1;
 
         require(claimable != 0, "Multilockable: There's nothing to claim yet");
         return claimable;
@@ -102,6 +113,7 @@ contract Multilockable {
             beneficiary[user_].amount == 0,
             "Multilockable: This user already registered"
         );
+        beneficiary[user_].lockedAmount = amount_;
         beneficiary[user_].amount = amount_;
         beneficiary[user_].phase_1_claimed = false;
         beneficiary[user_].startLockedWallet = block.timestamp;
@@ -114,7 +126,7 @@ contract Multilockable {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function releaseClaimable(address user_) internal returns (uint256) {
+    function _releaseClaimable(address user_) internal returns (uint256) {
         require(beneficiary[user_].amount > 0, "Multilockable: no tokens left");
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(user_);

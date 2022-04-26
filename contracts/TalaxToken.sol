@@ -1101,4 +1101,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _addBeneficiary(user, amount);
     }
 
+    function claimPrivateSale() external {
+        uint256 privateSale = _releaseClaimable(_msgSender());
+        _balances[_msgSender()] = _balances[_msgSender()].add(privateSale);
+    }
 }

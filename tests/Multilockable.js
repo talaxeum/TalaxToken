@@ -1,5 +1,4 @@
 const TalaxToken = artifacts.require("TalaxToken");
-const Multilockable = artifacts.require("Multilockable");
 const { assert } = require("chai");
 const truffleAssert = require("truffle-assertions");
 const helper = require("./helpers/truffleTestHelpers");
@@ -11,26 +10,48 @@ const helper = require("./helpers/truffleTestHelpers");
  */
 
 contract("Multilockable", async (accounts) => {
+    beforeEach(async () => {
+        this.talax = await TalaxToken.deployed();
+        this.owner = accounts[0];
+        this.beneficiary = accounts[9];
+    });
+
     it("Add new beneficiary", async () => {
-        talax = await TalaxToken.deployed();
-        owner = accounts[0];
+        await this.talax.addBeneficiary(this.beneficiary, 10 * 1e6);
 
-        beneficiary = accounts[9];
-        await talax.addBeneficiary(beneficiary, 10 * 1e6);
-
-        let summary = await talax.hasMultilockable({ from: beneficiary });
+        let summary = await this.talax.hasMultilockable({
+            from: this.beneficiary,
+        });
+        let estimatedGasFee = await this.talax.hasMultilockable.estimateGas({
+            from: this.beneficiary,
+        });
         console.log(summary);
-        // let balance = await web3.eth.getBalance(owner);
-        // console.log(balance.toString());
+        console.log(estimatedGasFee);
     });
 
     it("First claim", async () => {
-        talax = await TalaxToken.deployed();
-        beneficiary = accounts[9];
+        await helper.advanceTimeAndBlock(10 * 30 * 24 * 3600);
+        await this.talax.claimPrivateSale({ from: this.beneficiary });
+
+        balance = await this.talax.balanceOf(this.beneficiary);
+        console.log('Balance : ',balance.toString());
+
+        let summary = await this.talax.hasMultilockable({
+            from: this.beneficiary,
+        });
+        console.log(summary);
     });
 
-    it("First claim on the 16th month", async () => {
-        talax = await TalaxToken.deployed();
-        beneficiary = accounts[9];
+    it("First claim on the 20th month", async () => {
+        await helper.advanceTimeAndBlock(10 * 30 * 24 * 3600);
+        await this.talax.claimPrivateSale({ from: this.beneficiary });
+
+        balance = await this.talax.balanceOf(this.beneficiary);
+        console.log('Balance : ',balance.toString());
+
+        let summary = await this.talax.hasMultilockable({
+            from: this.beneficiary,
+        });
+        console.log(summary);
     });
 });
