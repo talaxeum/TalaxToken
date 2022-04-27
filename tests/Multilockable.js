@@ -25,8 +25,9 @@ contract("Multilockable", async (accounts) => {
         let estimatedGasFee = await this.talax.hasMultilockable.estimateGas({
             from: this.beneficiary,
         });
-        console.log(summary);
-        console.log(estimatedGasFee);
+        console.log("Summary : ", summary);
+        console.log("Estimated Gas Fee", estimatedGasFee);
+        console.log("---------------------------------");
     });
 
     it("First claim", async () => {
@@ -34,12 +35,17 @@ contract("Multilockable", async (accounts) => {
         await this.talax.claimPrivateSale({ from: this.beneficiary });
 
         balance = await this.talax.balanceOf(this.beneficiary);
-        console.log('Balance : ',balance.toString());
+        console.log("Balance : ", balance.toString());
 
         let summary = await this.talax.hasMultilockable({
             from: this.beneficiary,
         });
-        console.log(summary);
+        let estimatedGasFee = await this.talax.hasMultilockable.estimateGas({
+            from: this.beneficiary,
+        });
+        console.log("Summary : ", summary);
+        console.log("Estimated Gas Fee", estimatedGasFee);
+        console.log("---------------------------------");
     });
 
     it("First claim on the 20th month", async () => {
@@ -47,11 +53,32 @@ contract("Multilockable", async (accounts) => {
         await this.talax.claimPrivateSale({ from: this.beneficiary });
 
         balance = await this.talax.balanceOf(this.beneficiary);
-        console.log('Balance : ',balance.toString());
+        console.log("Balance : ", balance.toString());
 
         let summary = await this.talax.hasMultilockable({
             from: this.beneficiary,
         });
-        console.log(summary);
+        let estimatedGasFee = await this.talax.hasMultilockable.estimateGas({
+            from: this.beneficiary,
+        });
+        console.log("Summary : ", summary);
+        console.log("Estimated Gas Fee", estimatedGasFee);
+        console.log("---------------------------------");
+    });
+
+    it("Add new beneficiary - 2", async () => {
+        let beneficiary_2 = accounts[8];
+        await this.talax.addBeneficiary(beneficiary_2, 20 * 1e6);
+        await this.talax.claimPrivateSale({ from: beneficiary_2 });
+
+        let summary = await this.talax.hasMultilockable({
+            from: beneficiary_2,
+        });
+        let estimatedGasFee = await this.talax.hasMultilockable.estimateGas({
+            from: beneficiary_2,
+        });
+        console.log("Summary : ", summary);
+        console.log("Estimated Gas Fee", estimatedGasFee);
+        console.log("---------------------------------");
     });
 });
