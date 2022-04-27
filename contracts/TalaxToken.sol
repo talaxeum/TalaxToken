@@ -55,21 +55,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     address private team_and_project_coordinator_address_3;
 
     /**
-     * Multilockable Object
-     */
-
-    Multilockable private privateSaleLockedWallet;
-
-    /**
      * Lockable Object
      */
-    // Lockable private privatePlacementLockedWallet;
-    // Lockable private devPoolLockedWallet_1;
-    // Lockable private devPoolLockedWallet_2;
-    // Lockable private devPoolLockedWallet_3;
-    // Lockable private strategicPartnerLockedWallet_1;
-    // Lockable private strategicPartnerLockedWallet_2;
-    // Lockable private strategicPartnerLockedWallet_3;
+    Lockable private privatePlacementLockedWallet;
+    Lockable private devPoolLockedWallet_1;
+    Lockable private devPoolLockedWallet_2;
+    Lockable private devPoolLockedWallet_3;
+    Lockable private strategicPartnerLockedWallet_1;
+    Lockable private strategicPartnerLockedWallet_2;
+    Lockable private strategicPartnerLockedWallet_3;
     Lockable private teamAndProjectCoordinatorLockedWallet_1;
     Lockable private teamAndProjectCoordinatorLockedWallet_2;
     Lockable private teamAndProjectCoordinatorLockedWallet_3;
@@ -93,17 +87,17 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
          * Addresses initialization
          */
 
-        // public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
-        // private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
-        // private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
-        // dev_pool_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
-        // dev_pool_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
-        // dev_pool_address_3 = 0x126974fa373267d86fAB6d6871Afe62ccB68e810;
-        // strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
-        // strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
-        // strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
-        team_and_project_coordinator_address_1 = 0x84435c6FD8de0E75D6b3dC108F4345344a91a268; //for testing only
-        // team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
+        public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+        private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
+        private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
+        dev_pool_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
+        dev_pool_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
+        dev_pool_address_3 = 0x126974fa373267d86fAB6d6871Afe62ccB68e810;
+        strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
+        strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
+        strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
+        // team_and_project_coordinator_address_1 = 0x84435c6FD8de0E75D6b3dC108F4345344a91a268; //for testing only
+        team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
@@ -129,36 +123,36 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
          * Locked Wallet Initialization
          */
 
-        // privatePlacementLockedWallet = new Lockable(
-        //     6993 * 1e3 * 1e18,
-        //     private_placement_address
-        // );
+        privatePlacementLockedWallet = new Lockable(
+            6993 * 1e3 * 1e18,
+            private_placement_address
+        );
 
-        // devPoolLockedWallet_1 = new Lockable(
-        //     24668 * 1e3 * 1e18,
-        //     dev_pool_address_1
-        // );
-        // devPoolLockedWallet_2 = new Lockable(
-        //     24668 * 1e3 * 1e18,
-        //     dev_pool_address_2
-        // );
-        // devPoolLockedWallet_3 = new Lockable(
-        //     24668 * 1e3 * 1e18,
-        //     dev_pool_address_3
-        // );
+        devPoolLockedWallet_1 = new Lockable(
+            24668 * 1e3 * 1e18,
+            dev_pool_address_1
+        );
+        devPoolLockedWallet_2 = new Lockable(
+            24668 * 1e3 * 1e18,
+            dev_pool_address_2
+        );
+        devPoolLockedWallet_3 = new Lockable(
+            24668 * 1e3 * 1e18,
+            dev_pool_address_3
+        );
 
-        // strategicPartnerLockedWallet_1 = new Lockable(
-        //     3500 * 1e3 * 1e18,
-        //     strategic_partner_address_1
-        // );
-        // strategicPartnerLockedWallet_2 = new Lockable(
-        //     3500 * 1e3 * 1e18,
-        //     strategic_partner_address_2
-        // );
-        // strategicPartnerLockedWallet_3 = new Lockable(
-        //     3500 * 1e3 * 1e18,
-        //     strategic_partner_address_3
-        // );
+        strategicPartnerLockedWallet_1 = new Lockable(
+            3500 * 1e3 * 1e18,
+            strategic_partner_address_1
+        );
+        strategicPartnerLockedWallet_2 = new Lockable(
+            3500 * 1e3 * 1e18,
+            strategic_partner_address_2
+        );
+        strategicPartnerLockedWallet_3 = new Lockable(
+            3500 * 1e3 * 1e18,
+            strategic_partner_address_3
+        );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
             10500 * 1e3 * 1e18,
@@ -967,107 +961,107 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
-    // function unlockPrivatePlacementWallet() external {
-    //     require(
-    //         _msgSender() == privatePlacementLockedWallet.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
+    function unlockPrivatePlacementWallet() external {
+        require(
+            _msgSender() == privatePlacementLockedWallet.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
 
-    //     uint256 timeLockedAmount = privatePlacementLockedWallet
-    //         .releaseClaimable(privatePlacementReleaseAmount());
+        uint256 timeLockedAmount = privatePlacementLockedWallet
+            .releaseClaimable(privatePlacementReleaseAmount());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
     /**
      * @dev LockedWallet: Dev Pool Locked Wallet
      */
-    // function unlockDevPoolWallet_1() external {
-    //     require(
-    //         _msgSender() == devPoolLockedWallet_1.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
-    //         devPoolReleaseAmount()
-    //     );
+    function unlockDevPoolWallet_1() external {
+        require(
+            _msgSender() == devPoolLockedWallet_1.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
+            devPoolReleaseAmount()
+        );
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockDevPoolWallet_2() external {
-    //     require(
-    //         _msgSender() == devPoolLockedWallet_2.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
-    //         devPoolReleaseAmount()
-    //     );
+    function unlockDevPoolWallet_2() external {
+        require(
+            _msgSender() == devPoolLockedWallet_2.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
+            devPoolReleaseAmount()
+        );
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockDevPoolWallet_3() external {
-    //     require(
-    //         _msgSender() == devPoolLockedWallet_3.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
-    //         devPoolReleaseAmount()
-    //     );
+    function unlockDevPoolWallet_3() external {
+        require(
+            _msgSender() == devPoolLockedWallet_3.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
+            devPoolReleaseAmount()
+        );
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
     /**
      * @dev LockedWallet: Team And Project Coordinator Locked Wallet
      */
-    // function unlockStrategicPartnerWallet_1() external {
-    //     require(
-    //         _msgSender() == strategicPartnerLockedWallet_1.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = strategicPartnerLockedWallet_1
-    //         .releaseClaimable(strategicPartnerReleaseAmount());
+    function unlockStrategicPartnerWallet_1() external {
+        require(
+            _msgSender() == strategicPartnerLockedWallet_1.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_1
+            .releaseClaimable(strategicPartnerReleaseAmount());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockStrategicPartnerWallet_2() external {
-    //     require(
-    //         _msgSender() == strategicPartnerLockedWallet_2.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = strategicPartnerLockedWallet_2
-    //         .releaseClaimable(strategicPartnerReleaseAmount());
+    function unlockStrategicPartnerWallet_2() external {
+        require(
+            _msgSender() == strategicPartnerLockedWallet_2.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_2
+            .releaseClaimable(strategicPartnerReleaseAmount());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // function unlockStrategicPartnerWallet_3() external {
-    //     require(
-    //         _msgSender() == strategicPartnerLockedWallet_3.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = strategicPartnerLockedWallet_3
-    //         .releaseClaimable(strategicPartnerReleaseAmount());
+    function unlockStrategicPartnerWallet_3() external {
+        require(
+            _msgSender() == strategicPartnerLockedWallet_3.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_3
+            .releaseClaimable(strategicPartnerReleaseAmount());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
-    // /**
-    //  * @dev LockedWallet: Team And Project Coordinator Locked Wallet
-    //  */
-    // function unlockTeamAndProjectCoordinatorWallet_1() external {
-    //     require(
-    //         _msgSender() ==
-    //             teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
-    //         "TalaxToken: Wallet Owner Only"
-    //     );
-    //     uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
-    //         .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
+    /**
+     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
+     */
+    function unlockTeamAndProjectCoordinatorWallet_1() external {
+        require(
+            _msgSender() ==
+                teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
+            "TalaxToken: Wallet Owner Only"
+        );
+        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
 
-    //     _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    // }
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
 
     function unlockTeamAndProjectCoordinatorWallet_2() external {
         require(
