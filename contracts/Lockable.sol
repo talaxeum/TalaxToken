@@ -4,9 +4,11 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Lockable {
+    // owner of this contract
+    address public owner;
+
     uint256 private _amount;
 
-    address public owner;
     // beneficiary of tokens after they are released
     address private immutable _beneficiary;
 
