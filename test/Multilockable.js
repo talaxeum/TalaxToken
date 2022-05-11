@@ -1,6 +1,5 @@
 const TalaxToken = artifacts.require("TalaxToken");
-const { assert } = require("chai");
-const truffleAssert = require("truffle-assertions");
+const { assert, expect } = require("chai");
 const helper = require("./helpers/truffleTestHelpers");
 
 /*
@@ -9,9 +8,9 @@ const helper = require("./helpers/truffleTestHelpers");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 
-contract("Multilockable", async (accounts) => {
+describe("Multilockable", async (accounts) => {
     beforeEach(async () => {
-        this.talax = await TalaxToken.deployed();
+        this.talax = await TalaxToken.new();
         this.owner = accounts[0];
         this.beneficiary = accounts[9];
     });

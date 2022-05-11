@@ -1,6 +1,5 @@
 const TalaxToken = artifacts.require("TalaxToken");
-const { assert } = require("chai");
-const truffleAssert = require("truffle-assertions");
+const { assert, expect } = require("chai");
 const helper = require("./helpers/truffleTestHelpers");
 
 /**
@@ -10,11 +9,15 @@ const helper = require("./helpers/truffleTestHelpers");
  * * Transfer without approval
  */
 
-contract("Transfer", async (accounts) => {
+describe("Transfer", async (accounts) => {
+    beforeEach(async () => {
+        this.talax = await TalaxToken.new();
+    });
+
     it("Simple Transfer", async () => {
         talax = await TalaxToken.deployed();
 
-        supply = await talax.totalSupply.call();
+        supply = await this.talax.totalSupply.call();
         console.log("simple transfer (totalSupply): ", supply.toString());
 
         let owner = accounts[0];
@@ -24,8 +27,8 @@ contract("Transfer", async (accounts) => {
          * Start Balance
          */
 
-        let ownerStartBalance = await talax.balanceOf(owner);
-        let targetStartBalance = await talax.balanceOf(target);
+        let ownerStartBalance = await this.talax.balanceOf(owner);
+        let targetStartBalance = await this.talax.balanceOf(target);
 
         console.log(
             "Simple transfer (ownerStartBalance)",
@@ -41,7 +44,7 @@ contract("Transfer", async (accounts) => {
          */
 
         let transferAmount = 1e15;
-        let transferID = await talax.transfer(target, transferAmount, {
+        let transferID = await this.talax.transfer(target, transferAmount, {
             from: owner,
         });
 
@@ -63,8 +66,8 @@ contract("Transfer", async (accounts) => {
          * End Balance
          */
 
-        let ownerEndBalance = await talax.balanceOf(owner);
-        let targetEndBalance = await talax.balanceOf(target);
+        let ownerEndBalance = await this.talax.balanceOf(owner);
+        let targetEndBalance = await this.talax.balanceOf(target);
 
         console.log(
             "Simple transfer (ownerEndBalance)",
@@ -86,8 +89,8 @@ contract("Transfer", async (accounts) => {
          * Check Balance
          */
 
-        let ownerBalance = await talax.balanceOf(owner);
-        let targetBalance = await talax.balanceOf(target);
+        let ownerBalance = await this.talax.balanceOf(owner);
+        let targetBalance = await this.talax.balanceOf(target);
 
         console.log(
             "Transfer to 0 address (ownerStartBalance)",
@@ -101,15 +104,12 @@ contract("Transfer", async (accounts) => {
         let transferAmount = 1e15;
 
         try {
-            await talax.transfer(
+            await this.talax.transfer(
                 "0x0000000000000000000000000000000000000000",
                 transferAmount
             );
         } catch (err) {
-            assert.equal(
-                err.reason,
-                "TalaxToken: recipient zero address"
-            );
+            assert.equal(err.reason, "TalaxToken: recipient zero address");
         }
     });
 
@@ -123,8 +123,8 @@ contract("Transfer", async (accounts) => {
          * Check Balance
          */
 
-        let ownerBalance = await talax.balanceOf.call(owner);
-        let targetBalance = await talax.balanceOf.call(target);
+        let ownerBalance = await this.talax.balanceOf.call(owner);
+        let targetBalance = await this.talax.balanceOf.call(target);
 
         console.log(
             "Transfer without approval (ownerStartBalance)",
@@ -138,7 +138,7 @@ contract("Transfer", async (accounts) => {
         let transferAmount = 1e15;
 
         try {
-            await talax.transferFrom(owner, target, transferAmount, {
+            await this.talax.transferFrom(owner, target, transferAmount, {
                 from: target,
             });
         } catch (err) {
@@ -152,8 +152,8 @@ contract("Transfer", async (accounts) => {
          * End Balance
          */
 
-        let ownerEndBalance = await talax.balanceOf(owner);
-        let targetEndBalance = await talax.balanceOf(target);
+        let ownerEndBalance = await this.talax.balanceOf(owner);
+        let targetEndBalance = await this.talax.balanceOf(target);
 
         console.log(
             "Transfer without approval (ownerEndBalance)",

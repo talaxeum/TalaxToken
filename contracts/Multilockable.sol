@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.11;
+pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./SafeMath.sol";
 
 contract Multilockable {
     using SafeMath for uint256;
@@ -70,7 +70,7 @@ contract Multilockable {
             beneficiary[user].latestClaimDay = 15 * 30;
         }
         //Phase 2 of locked wallet release - daily
-        else if (lockDuration >= 16 * 30 && lockDuration < 28 * 30) {
+        else if (lockDuration + 1 > 16 * 30 && lockDuration < 28 * 30) {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
@@ -104,23 +104,28 @@ contract Multilockable {
         return claimable;
     }
 
-    function _addBeneficiary(address user_, uint256 amount_) internal {
+    function _addBeneficiary(address[] calldata user_, uint256 amount_)
+        internal
+    {
         require(
-            amount_ <= totalAmount,
+            amount_ < totalAmount + 1,
             "Multilockable: not enough balance to add a new user"
         );
-        require(
-            beneficiary[user_].amount == 0,
-            "Multilockable: This user already registered"
-        );
-        beneficiary[user_].lockedAmount = amount_;
-        beneficiary[user_].amount = amount_;
-        beneficiary[user_].phase_1_claimed = false;
-        beneficiary[user_].startLockedWallet = block.timestamp;
-        beneficiary[user_].latestClaimDay = 1;
 
-        totalUser += 1;
-        totalAmount -= amount_;
+        for (uint256 i = 0; i < user_.length; i++) {
+            require(
+                beneficiary[user_[i]].amount > 0,
+                "Multilockable: This user already registered"
+            );
+            beneficiary[user_[i]].lockedAmount = amount_;
+            beneficiary[user_[i]].amount = amount_;
+            beneficiary[user_[i]].phase_1_claimed = false;
+            beneficiary[user_[i]].startLockedWallet = block.timestamp;
+            beneficiary[user_[i]].latestClaimDay = 1;
+
+            totalUser += 1;
+            totalAmount -= amount_;
+        }
     }
 
     /**

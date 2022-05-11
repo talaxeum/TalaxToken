@@ -1,6 +1,5 @@
 const TalaxToken = artifacts.require("TalaxToken");
-const { assert } = require("chai");
-const truffleAssert = require("truffle-assertions");
+const { assert, expect } = require("chai");
 const helper = require("./helpers/truffleTestHelpers");
 
 /*
@@ -21,7 +20,10 @@ const helper = require("./helpers/truffleTestHelpers");
  * TODO: Calculate rewards from stake index
  */
 
-contract("Stakable", async (accounts) => {
+describe("Stakable", async (accounts) => {
+    beforeEach(async () => {
+        this.talax = await TalaxToken.new();
+    });
     /**
      * ? Starting status
      * ? Balance :
@@ -35,27 +37,26 @@ contract("Stakable", async (accounts) => {
      */
 
     it("Staking 100x2", async () => {
-        talax = await TalaxToken.deployed();
-        supply = await talax.totalSupply();
+        supply = await this.talax.totalSupply();
 
         //? Stake 100 is used to stake 100 tokens twice and see that stake is added correctly and money burned
         let owner = accounts[0];
         let stake_amount = 10 * 1e3;
-        let balance = await talax.balanceOf(owner);
+        let balance = await this.talax.balanceOf(owner);
         console.log(balance.toString());
 
         //? Stake the amount, notice the FROM parameter which specifes what the msg.sender address will be
-        stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
+        stakeID = await this.talax.stake(stake_amount, 30 * 24 * 3600, {
             from: owner,
         });
         //? Stake again on owner because we want hasStake test to assert summary
-        stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
+        stakeID = await this.talax.stake(stake_amount, 30 * 24 * 3600, {
             from: owner,
         });
 
-        stake = await talax.stakeSummary(owner);
+        stake = await this.talax.stakeSummary(owner);
 
-        summary = await talax.hasStake(owner);
+        summary = await this.talax.hasStake(owner);
         // console.log(summary.toString());
 
         //? Assert on the emittedEvent using truffleAssert
@@ -90,16 +91,14 @@ contract("Stakable", async (accounts) => {
      */
 
     it("New stakeholder should have increased index", async () => {
-        talax = await TalaxToken.deployed();
-
         let transferAmount = 100 * 1e3;
         let stake_amount = 10 * 1e3;
 
-        await talax.transfer(accounts[1], transferAmount, {
+        await this.talax.transfer(accounts[1], transferAmount, {
             from: accounts[0],
         });
 
-        let balance = await talax.balanceOf(accounts[1]);
+        let balance = await this.talax.balanceOf(accounts[1]);
         console.log(balance.toString());
 
         assert.equal(
@@ -108,7 +107,7 @@ contract("Stakable", async (accounts) => {
             "Transfer amount is not correct"
         );
 
-        stakeID = await talax.stake(stake_amount, 30 * 24 * 3600, {
+        stakeID = await this.talax.stake(stake_amount, 30 * 24 * 3600, {
             from: accounts[1],
         });
 
@@ -142,10 +141,10 @@ contract("Stakable", async (accounts) => {
      */
 
     it("Cannot stake more than balance", async () => {
-        talax = await TalaxToken.deployed();
-
         try {
-            await talax.stake(10 * 1e3, 30 * 24 * 3600, { from: accounts[2] });
+            await this.talax.stake(10 * 1e3, 30 * 24 * 3600, {
+                from: accounts[2],
+            });
         } catch (err) {
             assert.equal(
                 err.reason,
@@ -166,14 +165,12 @@ contract("Stakable", async (accounts) => {
      */
 
     it("Cannot withdraw bigger amount than current stake index", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
 
         //* Try withdrawing (20 * 1e3) from first stake
         try {
             await helper.advanceTimeAndBlock(3600 * 24 * 30);
-            await talax.withdrawStake(20 * 1e3, 0, { from: owner });
+            await this.talax.withdrawStake(20 * 1e3, 0, { from: owner });
         } catch (error) {
             assert.equal(
                 error.reason,
@@ -195,22 +192,20 @@ contract("Stakable", async (accounts) => {
      */
 
     it("Withdraw 5 from stake", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
         let withdraw_amount = 5 * 1e3;
 
         await helper.advanceTimeAndBlock(3600 * 24 * 30);
 
-        balance = await talax.balanceOf(owner);
+        balance = await this.talax.balanceOf(owner);
         console.log(balance.toString());
 
-        await talax.withdrawStake(withdraw_amount, 0, { from: owner });
+        await this.talax.withdrawStake(withdraw_amount, 0, { from: owner });
 
-        balance = await talax.balanceOf(owner);
+        balance = await this.talax.balanceOf(owner);
         console.log(balance.toString());
 
-        let summary = await talax.hasStake(owner);
+        let summary = await this.talax.hasStake(owner);
         console.log(summary.toString());
 
         assert.equal(
@@ -240,15 +235,13 @@ contract("Stakable", async (accounts) => {
      */
 
     it("Withdraw before designated time", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
 
         let withdrawAmount = 1 * 1e3;
 
-        await talax.withdrawStake(withdrawAmount, 0, { from: owner });
+        await this.talax.withdrawStake(withdrawAmount, 0, { from: owner });
 
-        let summary = await talax.hasStake(owner);
+        let summary = await this.talax.hasStake(owner);
 
         assert.equal(
             summary.stakes[0].amount.toString(),
@@ -258,15 +251,13 @@ contract("Stakable", async (accounts) => {
     });
 
     it("Remove stake if empty", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
         let withdrawAmount = 4 * 1e3;
 
         await helper.advanceTimeAndBlock(3600 * 24 * 30);
-        await talax.withdrawStake(withdrawAmount, 0, { from: owner });
+        await this.talax.withdrawStake(withdrawAmount, 0, { from: owner });
 
-        let summary = await talax.hasStake(owner);
+        let summary = await this.talax.hasStake(owner);
         for (s = 0; s < summary.stakes.length; s++) {
             console.log(summary.stakes[s].toString());
         }
@@ -290,21 +281,19 @@ contract("Stakable", async (accounts) => {
      */
 
     it("Calculate claimable staking amount", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
 
-        let test = await talax.testCalculateDuration(owner, 1);
+        let test = await this.talax.testCalculateDuration(owner, 1);
         console.log(test / (3600 * 24 * 30));
 
-        let summary = await talax.hasStake(owner);
+        let summary = await this.talax.hasStake(owner);
         for (s = 0; s < summary.stakes.length; s++) {
             console.log(summary.stakes[s]);
         }
 
         let stake = summary.stakes[1];
 
-        let blocktime = await talax.blockTime();
+        let blocktime = await this.talax.blockTime();
 
         let duration = (blocktime - stake.since) / (3600 * 24 * 30 * 12);
 
@@ -318,31 +307,27 @@ contract("Stakable", async (accounts) => {
     });
 
     it("Calculate airdrop", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
 
-        let balance = await talax.balanceOf(owner);
+        let balance = await this.talax.balanceOf(owner);
         console.log(balance.toString());
 
-        await talax.claimAirdrop({ from: owner });
+        await this.talax.claimAirdrop({ from: owner });
 
-        balance = await talax.balanceOf(owner);
+        balance = await this.talax.balanceOf(owner);
         console.log(balance.toString());
 
-        let summary = await talax.hasStake(owner);
+        let summary = await this.talax.hasStake(owner);
         for (s = 0; s < summary.stakes.length; s++) {
             console.log(summary.stakes[s]);
         }
     });
 
     it("Cannot claim airdrop within the same month", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
 
         try {
-            await talax.claimAirdrop({ from: owner });
+            await this.talax.claimAirdrop({ from: owner });
         } catch (error) {
             assert.equal(
                 error.reason,
@@ -353,21 +338,19 @@ contract("Stakable", async (accounts) => {
     });
 
     it("Calculate airdrop again", async () => {
-        talax = await TalaxToken.deployed();
-
         let owner = accounts[0];
 
-        let balance = await talax.balanceOf(owner);
+        let balance = await this.talax.balanceOf(owner);
         console.log(balance.toString());
 
         await helper.advanceTimeAndBlock(3600 * 24 * 28);
 
-        await talax.claimAirdrop({ from: owner });
+        await this.talax.claimAirdrop({ from: owner });
 
-        balance = await talax.balanceOf(owner);
+        balance = await this.talax.balanceOf(owner);
         console.log(balance.toString());
 
-        let summary = await talax.hasStake(owner);
+        let summary = await this.talax.hasStake(owner);
         for (s = 0; s < summary.stakes.length; s++) {
             console.log(summary.stakes[s]);
         }

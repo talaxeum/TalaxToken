@@ -1,6 +1,6 @@
 const TalaxToken = artifacts.require("TalaxToken");
-const { assert } = require("chai");
-const truffleAssert = require("truffle-assertions");
+const { assert, expect } = require("chai");
+const { before } = require("lodash");
 const helper = require("./helpers/truffleTestHelpers");
 
 /*
@@ -9,35 +9,36 @@ const helper = require("./helpers/truffleTestHelpers");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 
-contract("Initial", async (accounts) => {
+describe("Initial", async (accounts) => {
+    beforeEach(async () => {
+        this.talax = await TalaxToken.new();
+    });
+
     it("Initial: initial owner", async () => {
-        let talax = await TalaxToken.deployed();
-        owner = await talax.getOwner();
+        owner = await this.talax.getOwner();
         console.log("Owners: ", owner);
 
         assert.equal(accounts[0], owner, "Owner should be gnosis safe address");
     });
 
     it("Initial: transfer owner", async () => {
-        let talax = await TalaxToken.deployed();
-        owner = await talax.getOwner();
+        owner = await this.talax.getOwner();
         console.log("Owners: ", owner);
 
         let newOwners = accounts[1];
 
-        await talax.transferOwnership(newOwners, { from: accounts[0] });
+        await this.talax.transferOwnership(newOwners, { from: accounts[0] });
 
-        owner = await talax.getOwner();
+        owner = await this.talax.getOwner();
         console.log("Owners: ", owner);
     });
 
     it("Initial: change tax fee from not owner", async () => {
-        let talax = await TalaxToken.deployed();
-        owner = await talax.getOwner();
+        owner = await this.talax.getOwner();
         console.log(owner);
 
         try {
-            await talax.changeTaxFee(2, { from: accounts[3] });
+            await this.talax.changeTaxFee(2, { from: accounts[3] });
         } catch (err) {
             console.log(err.reason);
             assert.equal(
@@ -49,39 +50,33 @@ contract("Initial", async (accounts) => {
     });
 
     it("Initial: change tax fee account 1", async () => {
-        let talax = await TalaxToken.deployed();
-
-        owner = await talax.getOwner();
+        owner = await this.talax.getOwner();
         console.log("Owners: ", owner);
 
-        await talax.changeTaxFee(2, { from: accounts[1] });
+        await this.talax.changeTaxFee(2, { from: accounts[1] });
 
-        let tax = await talax.taxFee();
+        let tax = await this.talax.taxFee();
         console.log("Tax: ", tax.toString());
     });
 
     it("Initial: change tax fee account 2", async () => {
-        let talax = await TalaxToken.deployed();
-
-        owner = await talax.getOwner();
+        owner = await this.talax.getOwner();
         console.log("Owners: ", owner);
 
         await helper.advanceTimeAndBlock(2 * 24 * 3600);
-        await talax.changeTaxFee(2, { from: accounts[1] });
+        await this.talax.changeTaxFee(2, { from: accounts[1] });
 
-        let tax = await talax.taxFee();
+        let tax = await this.talax.taxFee();
         console.log("Tax: ", tax.toString());
     });
 
     it("Initial: cannot call 2 administrative functions under 48 hours", async () => {
-        talax = await TalaxToken.deployed();
-
-        thisAddress = await talax.thisAddress();
-        let balance = await talax.balanceOf(thisAddress);
+        thisAddress = await this.talax.thisAddress();
+        let balance = await this.talax.balanceOf(thisAddress);
         console.log("Balance: ", balance.toString());
 
         try {
-            await talax.mintLiquidityReserve(10000, { from: accounts[1] });
+            await this.talax.mintLiquidityReserve(10000, { from: accounts[1] });
         } catch (err) {
             console.log(err.reason);
             assert.equal(
