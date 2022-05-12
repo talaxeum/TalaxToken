@@ -87,8 +87,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
          * Addresses initialization
          */
 
-        public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
-        private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
+        // public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+        // private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
         private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
         dev_pool_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
         dev_pool_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
