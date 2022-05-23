@@ -101,8 +101,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
         team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
-        // timelockController = 0x267dbc62F9f551107FB968aC5dEA7fBa6F0B0514;
-
         /**
          * Amount Initialization
          */
@@ -173,9 +171,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
             157500 * 1e3 * 1e18,
             "TalaxToken: Cannot transfer more than total supply"
         );
-
-        // This timelockcontroller address is still in Rinkeby network since we were considering using openzeppelin services
-        // transferOwnership(timelockController);
     }
 
     fallback() external payable {
