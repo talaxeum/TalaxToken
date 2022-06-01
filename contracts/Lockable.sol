@@ -50,6 +50,14 @@ contract Lockable {
     }
 
     /**
+     * @notice Initiate Locked Wallet
+     */
+
+    function initiateLockedWallet() external {
+        _startLockedWallet = block.timestamp;
+    }
+
+    /**
      *  @dev 		Main Functions
      *  @return 	Claimable amount from Locked Wallet
      */

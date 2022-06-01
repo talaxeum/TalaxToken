@@ -5,37 +5,34 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Multilockable {
     using SafeMath for uint256;
-    uint256 private totalUser;
-    uint256 private totalAmount;
+    uint256 public totalUser;
 
-    uint256 private phase_1_total;
-    uint256 private phase_2_total;
+    uint256 public totalAmount = 14679 * 1e3 * 1e18;
+    uint256 public constant phase_1_total = 1467900 * 1e18;
+    uint256 public constant phase_2_total = 36195 * 1e18;
+
+    uint256 public _startPrivateSale;
 
     struct Multilock {
         uint256 lockedAmount;
         uint256 amount;
         bool phase_1_claimed;
-        uint256 startLockedWallet;
         uint256 latestClaimDay;
     }
 
     // beneficiary of tokens after they are released
     mapping(address => Multilock) private beneficiary;
 
-    constructor() {
-        totalAmount = 14679 * 1e3 * 1e18;
-        phase_1_total = 1467900 * 1e18;
-        phase_2_total = 36195 * 1e18;
-    }
+    constructor() {}
 
-    /**
-     * @dev modifier functions
-     */
+    function _initiatePrivateSale() internal {
+        _startPrivateSale = block.timestamp;
+    }
 
     function hasMultilockable() external view returns (Multilock memory) {
         require(
             beneficiary[msg.sender].amount != 0,
-            "Multilockable: You don't have any balance for private sale"
+            "PrivateSale: You don't have any balance for private sale"
         );
         return beneficiary[msg.sender];
     }
@@ -50,8 +47,7 @@ contract Multilockable {
     {
         uint256 claimable;
 
-        uint256 lockDuration = (block.timestamp -
-            beneficiary[user].startLockedWallet) / 1 days;
+        uint256 lockDuration = (block.timestamp - _startPrivateSale) / 1 days;
 
         //Phase 1 of locked wallet release - monthly
         if (lockDuration < 16 * 30) {
@@ -100,23 +96,22 @@ contract Multilockable {
             beneficiary[user].latestClaimDay = lockDuration;
         }
 
-        require(claimable != 0, "Multilockable: There's nothing to claim yet");
+        require(claimable != 0, "PrivateSale: There's nothing to claim yet");
         return claimable;
     }
 
     function _addBeneficiary(address user_, uint256 amount_) internal {
         require(
             amount_ <= totalAmount,
-            "Multilockable: not enough balance to add a new user"
+            "PrivateSale: not enough balance to add a new user"
         );
         require(
             beneficiary[user_].amount == 0,
-            "Multilockable: This user already registered"
+            "PrivateSale: This user already registered"
         );
         beneficiary[user_].lockedAmount = amount_;
         beneficiary[user_].amount = amount_;
         beneficiary[user_].phase_1_claimed = false;
-        beneficiary[user_].startLockedWallet = block.timestamp;
         beneficiary[user_].latestClaimDay = 1;
 
         totalUser += 1;
@@ -127,19 +122,16 @@ contract Multilockable {
      * @notice Transfers tokens held by timelock to beneficiary.
      */
     function _releaseClaimable(address user_) internal returns (uint256) {
-        require(beneficiary[user_].amount > 0, "Multilockable: no tokens left");
+        require(beneficiary[user_].amount > 0, "PrivateSale: no tokens left");
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(user_);
 
-        require(
-            claimableLockedAmount > 0,
-            "Multilockable: no tokens to release"
-        );
+        require(claimableLockedAmount > 0, "PrivateSale: no tokens to release");
 
         beneficiary[user_].amount = SafeMath.sub(
             beneficiary[user_].amount,
             claimableLockedAmount,
-            "Multilockable: Cannot substract total amount with claimable"
+            "PrivateSale: Cannot substract total amount with claimable"
         );
 
         return claimableLockedAmount;
