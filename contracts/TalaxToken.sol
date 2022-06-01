@@ -31,9 +31,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     uint16 public _taxFee;
 
-    /**
-     * Addresses
-     */
+    /* ------------------------------------------ Addresses ----------------------------------------- */
 
     address private timelockController;
 
@@ -56,9 +54,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     address private team_and_project_coordinator_address_2;
     address private team_and_project_coordinator_address_3;
 
-    /**
-     * Lockable Object
-     */
+    /* ------------------------------------------ Lockable ------------------------------------------ */
+
     Lockable private privatePlacementLockedWallet;
     Lockable private devPoolLockedWallet_1;
     Lockable private devPoolLockedWallet_2;
@@ -184,9 +181,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _addThirdOfValue(msg.value);
     }
 
-    /**
-     * @notice EVENTS
-     */
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                             EVENTS                                             */
+    /* ---------------------------------------------------------------------------------------------- */
 
     event ChangeTax(address indexed who, uint256 amount);
     event ChangeAirdropStatus(address indexed who, bool status);
@@ -202,18 +199,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     event InitiatePrivateSale(address indexed from);
     event InitiateLockedWallet(address indexed from);
 
-    /**
-     * @notice MODIFIERS
-     */
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                            MODIFIERS                                           */
+    /* ---------------------------------------------------------------------------------------------- */
 
     modifier lockedWalletInitiated() {
         require(_lockedWalletStatus == true, "Locked Wallet not started");
         _;
     }
 
-    /**
-     * @notice ACCESSORS
-     */
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                            ACCESSORS                                           */
+    /* ---------------------------------------------------------------------------------------------- */
 
     /**
      * @dev See address of this smart contract.
@@ -233,9 +230,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         return _taxFee;
     }
 
-    /**
-     * @notice INTERNAL FUNCTIONS
-     */
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                       INTERNAL FUNCTIONS                                       */
+    /* ---------------------------------------------------------------------------------------------- */
 
     /**
      * @dev this is the release rate for partial token release
@@ -869,10 +866,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         emit ChangeAirdropPercentage(_msgSender(), airdrop_);
     }
 
-    /**
-     * Add functionality like burn to the _stake afunction
-     *
-     */
+    /* ------------------------ Stake function with burn function ------------------------ */
     function stake(uint256 _amount, uint256 _stakePeriod) external {
         // Make sure staker actually is good for it
         require(
@@ -894,9 +888,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[address(this)] = _balances[address(this)].add(_amount);
     }
 
-    /**
-     * @notice withdrawStake is used to withdraw stakes from the account holder
-     */
+    /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
     function withdrawStake(uint256 amount, uint256 stake_index) external {
         (uint256 amount_, uint256 reward_) = _withdrawStake(
             amount,
@@ -931,9 +923,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
     }
 
-    /**
-     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
-     */
+    /* -------------------------------------------------------------------------- */
+    /*                                Locked Wallet                               */
+    /* -------------------------------------------------------------------------- */
     function initiateLockedWallet() external onlyOwner {
         _lockedWalletStatus = true;
         privatePlacementLockedWallet.initiateLockedWallet();
@@ -949,6 +941,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         emit InitiateLockedWallet(_msgSender());
     }
 
+    /* ---------------------------- Private Placement --------------------------- */
     function unlockPrivatePlacementWallet() external lockedWalletInitiated {
         require(
             _msgSender() == privatePlacementLockedWallet.beneficiary(),
@@ -961,9 +954,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /**
-     * @dev LockedWallet: Dev Pool Locked Wallet
-     */
+    /* -------------------------------- Dev Pool -------------------------------- */
     function unlockDevPoolWallet_1() external lockedWalletInitiated {
         require(
             _msgSender() == devPoolLockedWallet_1.beneficiary(),
@@ -1000,9 +991,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /**
-     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
-     */
+    /* ---------------------------- Strategic Partner --------------------------- */
     function unlockStrategicPartnerWallet_1() external lockedWalletInitiated {
         require(
             _msgSender() == strategicPartnerLockedWallet_1.beneficiary(),
@@ -1036,9 +1025,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /**
-     * @dev LockedWallet: Team And Project Coordinator Locked Wallet
-     */
+    /* ---------------------- Team and Project Coordinator ---------------------- */
     function unlockTeamAndProjectCoordinatorWallet_1()
         external
         lockedWalletInitiated
@@ -1084,9 +1071,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /**
-     * @dev Multilockable
-     */
+    /* -------------------------------------------------------------------------- */
+    /*                                Private Sale                                */
+    /* -------------------------------------------------------------------------- */
     function initiatePrivateSale() external onlyOwner {
         _initiatePrivateSale();
         _privateSaleStatus = true;
