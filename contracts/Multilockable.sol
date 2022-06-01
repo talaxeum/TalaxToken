@@ -6,16 +6,17 @@ import "./SafeMath.sol";
 contract Multilockable {
     using SafeMath for uint256;
     uint256 private totalUser;
-    uint256 private totalAmount;
 
-    uint256 private phase_1_total;
-    uint256 private phase_2_total;
+    uint256 public constant totalAmount = 14679 * 1e3 * 1e18;
+    uint256 public constant phase_1_total = 1467900 * 1e18;
+    uint256 public constant phase_2_total = 36195 * 1e18;
+
+    uint256 public _startPrivateSale;
 
     struct Multilock {
         uint256 lockedAmount;
         uint256 amount;
         bool phase_1_claimed;
-        uint256 startLockedWallet;
         uint256 latestClaimDay;
     }
 
@@ -23,9 +24,7 @@ contract Multilockable {
     mapping(address => Multilock) private beneficiary;
 
     constructor() {
-        totalAmount = 14679 * 1e3 * 1e18;
-        phase_1_total = 1467900 * 1e18;
-        phase_2_total = 36195 * 1e18;
+        startPrivateSale = block.timestamp;
     }
 
     /**
@@ -50,8 +49,7 @@ contract Multilockable {
     {
         uint256 claimable;
 
-        uint256 lockDuration = (block.timestamp -
-            beneficiary[user].startLockedWallet) / 1 days;
+        uint256 lockDuration = (block.timestamp - _startPrivateSale) / 1 days;
 
         //Phase 1 of locked wallet release - monthly
         if (lockDuration < 16 * 30) {
@@ -120,7 +118,6 @@ contract Multilockable {
             beneficiary[user_[i]].lockedAmount = amount_;
             beneficiary[user_[i]].amount = amount_;
             beneficiary[user_[i]].phase_1_claimed = false;
-            beneficiary[user_[i]].startLockedWallet = block.timestamp;
             beneficiary[user_[i]].latestClaimDay = 1;
 
             totalUser += 1;

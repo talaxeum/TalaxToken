@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+pragma solidity 0.8.11;
 
-import "./SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./IBEP20.sol";
 
 contract Stakable {
     using SafeMath for uint256;
@@ -12,6 +13,8 @@ contract Stakable {
 
     uint256 private _stakingPenalty;
     uint256 private _airdrop;
+    address constant talax_address = 0x87d8547D824dD105c84D6018420585016f4CAacf;
+    IBEP20 constant talax_token = IBEP20(talax_address);
 
     constructor() {
         // This push is needed so we avoid index 0 causing bug of index-1
@@ -111,7 +114,7 @@ contract Stakable {
     ) internal {
         // Simple check so that user does not stake 0
         require(_amount > 0, "Stakable: Cannot stake nothing");
-        // require(_amount > 1e18, "Minimum stake is 1 TALAX");
+        talax_token.transfer(talax_address, _amount);
 
         // Mappings in solidity creates all values, but empty, so we can just check the address
         uint256 index = stakes[msg.sender];
