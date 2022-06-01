@@ -202,8 +202,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     event InitiatePrivateSale(address indexed from);
     event InitiateLockedWallet(address indexed from);
 
-
-
     /**
      * @notice MODIFIERS
      */
@@ -550,8 +548,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
         _balances[to] = _balances[to].add(taxedAmount);
         emit Transfer(from, to, taxedAmount);
-
-        _afterTokenTransfer(from, to, amount);
     }
 
     function _addThirdOfValue(uint256 amount_) internal {
@@ -778,8 +774,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _totalSupply -= amount;
 
         emit Transfer(account, address(0), amount);
-
-        _afterTokenTransfer(account, address(0), amount);
     }
 
     /**
@@ -794,7 +788,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         address owner,
         address spender,
         uint256 amount
-    ) internal override {
+    ) internal {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance != type(uint256).max) {
             require(
@@ -868,13 +862,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
         _changePenaltyFee(penaltyFee_);
         emit ChangePenaltyFee(_msgSender(), penaltyFee_);
-
     }
 
     function changeAirdropPercentage(uint256 airdrop_) external onlyOwner {
         _changeAirdropPercentage(airdrop_);
         emit ChangeAirdropPercentage(_msgSender(), airdrop_);
-
     }
 
     /**
@@ -955,7 +947,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         teamAndProjectCoordinatorLockedWallet_2.initiateLockedWallet();
         teamAndProjectCoordinatorLockedWallet_3.initiateLockedWallet();
         emit InitiateLockedWallet(_msgSender());
-
     }
 
     function unlockPrivatePlacementWallet() external lockedWalletInitiated {
