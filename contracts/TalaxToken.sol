@@ -204,7 +204,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /* ---------------------------------------------------------------------------------------------- */
 
     modifier lockedWalletInitiated() {
-        require(_lockedWalletStatus == true, "Locked Wallet not started");
+        require(_lockedWalletStatus == true, "Locked Wallet not yet started");
         _;
     }
 
@@ -508,13 +508,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         address to,
         uint256 amount
     ) internal override {
-        require(from != address(0), "from zero address");
-        require(to != address(0), "to zero address");
+        require(from != address(0), "Transfer from zero address");
+        require(to != address(0), "Transfer to zero address");
 
         _beforeTokenTransfer(from, to, amount);
 
         uint256 fromBalance = _balances[from];
-        require(fromBalance >= amount, "transfer amount exceeds balance");
+        require(fromBalance >= amount, "Balance insufficient");
 
         uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
         uint256 taxedAmount = SafeMath.sub(amount, tax);
@@ -785,7 +785,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         address owner,
         address spender,
         uint256 amount
-    ) internal {
+    ) internal override {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance != type(uint256).max) {
             require(
@@ -874,11 +874,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
                 _stakePeriod == 90 days ||
                 _stakePeriod == 180 days ||
                 _stakePeriod == 365 days,
-            "Staking option not exist"
+            "Staking option doesnt exist"
         );
         require(
             _amount < _balances[_msgSender()],
-            "Cannot stake more than balance"
+            "Balance insufficient"
         );
 
         _stake(_amount, _stakePeriod, _stakingPackage[_stakePeriod]);
@@ -926,7 +926,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /* -------------------------------------------------------------------------- */
     /*                                Locked Wallet                               */
     /* -------------------------------------------------------------------------- */
-    function initiateLockedWallet() external onlyOwner {
+    function initiateLockedWallet_PrivateSale() external onlyOwner {
         _lockedWalletStatus = true;
         privatePlacementLockedWallet.initiateLockedWallet();
         devPoolLockedWallet_1.initiateLockedWallet();
@@ -939,6 +939,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         teamAndProjectCoordinatorLockedWallet_2.initiateLockedWallet();
         teamAndProjectCoordinatorLockedWallet_3.initiateLockedWallet();
         emit InitiateLockedWallet(_msgSender());
+
+        _privateSaleStatus = true;
+        _initiatePrivateSale();
+        emit InitiatePrivateSale(_msgSender());
     }
 
     /* ---------------------------- Private Placement --------------------------- */
@@ -1074,14 +1078,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /* -------------------------------------------------------------------------- */
     /*                                Private Sale                                */
     /* -------------------------------------------------------------------------- */
-    function initiatePrivateSale() external onlyOwner {
-        _initiatePrivateSale();
-        _privateSaleStatus = true;
-        emit InitiatePrivateSale(_msgSender());
-    }
 
     function addBeneficiary(address user, uint256 amount) external onlyOwner {
-        require(_privateSaleStatus == true, "Private Sale not started");
+        require(_privateSaleStatus == true, "Private Sale not yet started");
         require(amount > 0, "Cannot add beneficiary with 0 amount");
         _addBeneficiary(user, amount);
     }
