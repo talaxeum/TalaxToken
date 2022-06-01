@@ -190,12 +190,19 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     event ChangeTax(address indexed who, uint256 amount);
     event ChangeAirdropStatus(address indexed who, bool status);
+    event ChangePenaltyFee(address indexed from, uint256 amount);
+    event ChangeAirdropPercentage(address indexed from, uint256 amount);
 
     event AddPrivatePlacement(address indexed from, address indexed who);
     event DeletePrivatePlacement(address indexed from, address indexed who);
 
     event AddStrategicPartner(address indexed from, address indexed who);
     event DeleteStrategicPartner(address indexed from, address indexed who);
+
+    event InitiatePrivateSale(address indexed from);
+    event InitiateLockedWallet(address indexed from);
+
+
 
     /**
      * @notice MODIFIERS
@@ -860,10 +867,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
         _changePenaltyFee(penaltyFee_);
+        emit ChangePenaltyFee(_msgSender(), penaltyFee_);
+
     }
 
     function changeAirdropPercentage(uint256 airdrop_) external onlyOwner {
         _changeAirdropPercentage(airdrop_);
+        emit ChangeAirdropPercentage(_msgSender(), airdrop_);
+
     }
 
     /**
@@ -943,6 +954,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         teamAndProjectCoordinatorLockedWallet_1.initiateLockedWallet();
         teamAndProjectCoordinatorLockedWallet_2.initiateLockedWallet();
         teamAndProjectCoordinatorLockedWallet_3.initiateLockedWallet();
+        emit InitiateLockedWallet(_msgSender());
+
     }
 
     function unlockPrivatePlacementWallet() external lockedWalletInitiated {
@@ -1086,6 +1099,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function initiatePrivateSale() external onlyOwner {
         _initiatePrivateSale();
         _privateSaleStatus = true;
+        emit InitiatePrivateSale(_msgSender());
     }
 
     function addBeneficiary(address user, uint256 amount) external onlyOwner {
