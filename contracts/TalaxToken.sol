@@ -949,7 +949,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function unlockPrivatePlacementWallet() external lockedWalletInitiated {
         require(
             _msgSender() == privatePlacementLockedWallet.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
 
         uint256 timeLockedAmount = privatePlacementLockedWallet
@@ -962,7 +962,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function unlockDevPoolWallet_1() external lockedWalletInitiated {
         require(
             _msgSender() == devPoolLockedWallet_1.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
             devPoolReleaseAmount()
@@ -974,7 +974,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function unlockDevPoolWallet_2() external lockedWalletInitiated {
         require(
             _msgSender() == devPoolLockedWallet_2.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
             devPoolReleaseAmount()
@@ -986,7 +986,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function unlockDevPoolWallet_3() external lockedWalletInitiated {
         require(
             _msgSender() == devPoolLockedWallet_3.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
             devPoolReleaseAmount()
@@ -999,7 +999,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function unlockStrategicPartnerWallet_1() external lockedWalletInitiated {
         require(
             _msgSender() == strategicPartnerLockedWallet_1.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_1
             .releaseClaimable(strategicPartnerReleaseAmount());
@@ -1010,7 +1010,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function unlockStrategicPartnerWallet_2() external lockedWalletInitiated {
         require(
             _msgSender() == strategicPartnerLockedWallet_2.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_2
             .releaseClaimable(strategicPartnerReleaseAmount());
@@ -1021,7 +1021,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function unlockStrategicPartnerWallet_3() external lockedWalletInitiated {
         require(
             _msgSender() == strategicPartnerLockedWallet_3.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = strategicPartnerLockedWallet_3
             .releaseClaimable(strategicPartnerReleaseAmount());
@@ -1037,7 +1037,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         require(
             _msgSender() ==
                 teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
             .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
@@ -1052,7 +1052,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         require(
             _msgSender() ==
                 teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
             .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
@@ -1067,7 +1067,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         require(
             _msgSender() ==
                 teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
-            "Owner only"
+            "Wallet owner only"
         );
         uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
             .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
