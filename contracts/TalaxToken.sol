@@ -25,9 +25,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     mapping(uint256 => uint256) internal _stakingPackage;
     uint256 public _stakingReward;
-    bool public _lockedWalletStatus;
     bool public _airdropStatus;
-    bool public _privateSaleStatus;
+    bool public lockedWalletStatus;
+    bool public privateSaleStatus;
 
     uint16 public _taxFee;
 
@@ -66,6 +66,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     Lockable private teamAndProjectCoordinatorLockedWallet_1;
     Lockable private teamAndProjectCoordinatorLockedWallet_2;
     Lockable private teamAndProjectCoordinatorLockedWallet_3;
+
+    struct Beneficiary{
+        address user;
+        uint256 amount;
+    }
 
     constructor() ERC20("TALAXEUM", "TALAX") {
         _totalSupply = 210 * 1e6 * 1e18;
@@ -204,7 +209,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /* ---------------------------------------------------------------------------------------------- */
 
     modifier lockedWalletInitiated() {
-        require(_lockedWalletStatus == true, "Locked Wallet not yet started");
+        require(lockedWalletStatus == true, "Locked Wallet not yet started");
         _;
     }
 
@@ -927,7 +932,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /*                                Locked Wallet                               */
     /* -------------------------------------------------------------------------- */
     function initiateLockedWallet_PrivateSale() external onlyOwner {
-        _lockedWalletStatus = true;
+        lockedWalletStatus = true;
         privatePlacementLockedWallet.initiateLockedWallet();
         devPoolLockedWallet_1.initiateLockedWallet();
         devPoolLockedWallet_2.initiateLockedWallet();
@@ -940,7 +945,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         teamAndProjectCoordinatorLockedWallet_3.initiateLockedWallet();
         emit InitiateLockedWallet(_msgSender());
 
-        _privateSaleStatus = true;
+        privateSaleStatus = true;
         _initiatePrivateSale();
         emit InitiatePrivateSale(_msgSender());
     }
@@ -1080,9 +1085,17 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /* -------------------------------------------------------------------------- */
 
     function addBeneficiary(address user, uint256 amount) external onlyOwner {
-        require(_privateSaleStatus == true, "Private Sale not yet started");
+        require(privateSaleStatus == true, "Private Sale not yet started");
         require(amount > 0, "Cannot add beneficiary with 0 amount");
         _addBeneficiary(user, amount);
+    }
+
+    function addMultipleBeneficiary(Beneficiary[] memory benefs) external onlyOwner {
+        require(privateSaleStatus == true, "Private Sale not yet started");
+        require(benefs.length > 0, "Nothing to add");
+        for(uint256 i = 0; i < benefs.length; i++){
+            _addBeneficiary(benefs[i].user, benefs[i].amount);
+        }
     }
 
     function claimPrivateSale() external {

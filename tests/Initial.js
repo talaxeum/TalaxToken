@@ -91,4 +91,28 @@ contract("Initial", async (accounts) => {
             );
         }
     });
+
+    it("Initial: cannot add beneficiary before initializing private sale", async () => {
+        talax = await TalaxToken.deployed();
+
+        try {
+            await talax.addBeneficiary(accounts[5], 10000, { from: accounts[1] });
+        } catch (err) {
+            console.log(err.reason);
+            assert.equal(
+                err.reason,
+                "Private Sale not yet started",
+                "Failed to notice not Timelock functions"
+            );
+        }
+    })
+
+    it("Initial: status changed after initializing", async () => {
+        talax = await TalaxToken.deployed();
+
+        await talax.initiateLockedWallet_PrivateSale({ from: accounts[1] });
+        let status = await talax.privateSaleStatus();
+
+        assert.equal(status, true, "Status should be true");
+    })
 });
