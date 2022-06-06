@@ -118,6 +118,19 @@ contract Multilockable {
         totalAmount -= amount_;
     }
 
+    function _deleteBeneficiary(address user_) internal returns (uint256) {
+        require(
+            beneficiary[user_].amount != 0,
+            "PrivateSale: This user doesnt exist"
+        );
+        totalUser -= 1;
+        totalAmount += beneficiary[user_].amount;
+        uint256 ex_amount = beneficiary[user_].amount;
+
+        delete beneficiary[user_];
+        return ex_amount;
+    }
+
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
