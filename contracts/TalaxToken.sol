@@ -842,7 +842,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     function changeTaxFee(uint16 taxFee_) external onlyOwner {
-        require(taxFee_ < 3, "Tax Fee must less than ");
+        require(taxFee_ < 5, "Tax Fee maximum is 5%");
         _taxFee = taxFee_;
         emit ChangeTax(_msgSender(), taxFee_);
     }
