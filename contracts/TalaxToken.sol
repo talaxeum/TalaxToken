@@ -752,6 +752,7 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         require(amount_ < _devPool, "Insufficient supply");
         require(to_ != address(0), "Invalid address");
         _balances[to_] += amount_;
+        _devPool -= amount_;
     }
 
     /**
