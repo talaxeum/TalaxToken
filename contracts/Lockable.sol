@@ -4,11 +4,9 @@ pragma solidity ^0.8.4;
 import "./SafeMath.sol";
 
 contract Lockable {
-    // owner of this contract
-    address public owner;
-
     uint256 private _amount;
 
+    address public owner;
     // beneficiary of tokens after they are released
     address private immutable _beneficiary;
 
@@ -49,6 +47,14 @@ contract Lockable {
 
     function sender() external view returns (address) {
         return msg.sender;
+    }
+
+    /**
+     * @notice Initiate Locked Wallet
+     */
+
+    function initiateLockedWallet() external {
+        _startLockedWallet = block.timestamp;
     }
 
     /**

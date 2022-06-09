@@ -20,79 +20,71 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
 
     uint256 private _totalSupply;
     uint8 private _decimals;
-    string private _symbol;
+
     string private _name;
-    //----------------
+    string private _symbol;
 
     mapping(uint256 => uint256) internal _stakingPackage;
     uint256 public _stakingReward;
+    uint256 public _devPool;
+    uint256 public _privateSale;
     bool public _airdropStatus;
-    bool public _lockedWalletStatus;
+    bool public lockedWalletStatus;
+    bool public privateSaleStatus;
+
     uint16 public _taxFee;
 
+    /* ------------------------------------------ Addresses ----------------------------------------- */
     /**
-     * Addresses
-     */
-
-    address private timelockController;
-
-    /**
-     * Addresses initialization
-
      * Local (in this smart contract)
-     * address staking_reward_address;
-     * address liquidity_reserve_address;
+     * staking_reward_address;
+     * liquidity_reserve_address;
+     * dev_pool_address;
      */
 
-    // public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
-    // private_sale_address = 0x75837E79215250C45331b92c35B7Be506eD015AC;
-    address constant public private_placement_address =
+    address public constant public_sale_address =
+        0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+    address public constant private_placement_address =
         0x07A20dc6722563783e44BA8EDCA08c774621125E;
-    address constant public dev_pool_address_1 =
+    address public constant dev_pool_address_1 =
         0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
-    address constant public dev_pool_address_2 =
+    address public constant dev_pool_address_2 =
         0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
-    address constant public dev_pool_address_3 =
+    address public constant dev_pool_address_3 =
         0x126974fa373267d86fAB6d6871Afe62ccB68e810;
-    address constant public strategic_partner_address_1 =
+    address public constant strategic_partner_address_1 =
         0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
-    address constant public strategic_partner_address_2 =
+    address public constant strategic_partner_address_2 =
         0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
-    address constant public strategic_partner_address_3 =
+    address public constant strategic_partner_address_3 =
         0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
     // address private team_and_project_coordinator_address_1 = 0x84435c6FD8de0E75D6b3dC108F4345344a91a268; //for testing only
-    address constant public team_and_project_coordinator_address_1 =
+    address public constant team_and_project_coordinator_address_1 =
         0xE61E7a7D16db384433E532fB85724e7f3BdAaE2F;
-    address constant public team_and_project_coordinator_address_2 =
+    address public constant team_and_project_coordinator_address_2 =
         0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
-    address constant public team_and_project_coordinator_address_3 =
+    address public constant team_and_project_coordinator_address_3 =
         0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
-    address public gnosisOwner;
+    Lockable private privatePlacementLockedWallet;
+    Lockable private strategicPartnerLockedWallet_1;
+    Lockable private strategicPartnerLockedWallet_2;
+    Lockable private strategicPartnerLockedWallet_3;
+    Lockable private teamAndProjectCoordinatorLockedWallet_1;
+    Lockable private teamAndProjectCoordinatorLockedWallet_2;
+    Lockable private teamAndProjectCoordinatorLockedWallet_3;
+
+    struct Beneficiary {
+        address user;
+        uint256 amount;
+    }
 
     constructor() {
         _name = "TALAXEUM";
         _symbol = "TALAX";
         _decimals = 18;
         _totalSupply = 210 * 1e6 * 1e18;
-        _balances[gnosisOwner] = _balances[gnosisOwner].add(_totalSupply);
-
-        //Amount Initialization
-        // _stakingReward = 17514 * 1e3 * 1e18;
-        // _balances[address(this)] = 52500 * 1e3 * 1e18;
-
-        // Public Sale
-        // _balances[0x5470c8FF25EC05980fc7C2967D076B8012298fE7] =
-        //     2310 *
-        //     1e3 *
-        //     1e18;
-
-        //Public Sale, Private Sale, Private Placement, Staking Reward
-        // Dev Pool, Strategic Partner, Team and Project Coordinator
-        // _totalSupply = _totalSupply.sub(
-        //     157500 * 1e3 * 1e18,
-        //     "TalaxToken: Cannot transfer more than total supply"
-        // );
+        _balances[msg.sender] = _balances[msg.sender].add(_totalSupply);
 
         // later divided by 100 to make percentage
         _taxFee = 1;
@@ -104,8 +96,62 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         _stakingPackage[180 days] = 7;
         _stakingPackage[360 days] = 8;
 
-        // This timelockcontroller address is still in Rinkeby network since we were considering using openzeppelin services
-        // transferOwnership(timelockController);
+        /**
+         * Amount Initialization
+         */
+
+        _balances[address(this)] = 52500 * 1e3 * 1e18;
+        _stakingReward = 17514 * 1e3 * 1e18;
+        _devPool = 74004 * 1e3 * 1e18;
+
+        // Public Sale
+        _balances[public_sale_address] = 2310 * 1e3 * 1e18;
+
+        // Private Sale
+        // privateSaleLockedWallet = new Multilockable(14679 * 1e3 * 1e18);
+        _privateSale = 14679 * 1e3 * 1e18;
+
+        /**
+         * Locked Wallet Initialization
+         */
+
+        privatePlacementLockedWallet = new Lockable(
+            6993 * 1e3 * 1e18,
+            private_placement_address
+        );
+
+        strategicPartnerLockedWallet_1 = new Lockable(
+            3500 * 1e3 * 1e18,
+            strategic_partner_address_1
+        );
+        strategicPartnerLockedWallet_2 = new Lockable(
+            3500 * 1e3 * 1e18,
+            strategic_partner_address_2
+        );
+        strategicPartnerLockedWallet_3 = new Lockable(
+            3500 * 1e3 * 1e18,
+            strategic_partner_address_3
+        );
+
+        teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
+            10500 * 1e3 * 1e18,
+            team_and_project_coordinator_address_1
+        );
+        teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
+            10500 * 1e3 * 1e18,
+            team_and_project_coordinator_address_2
+        );
+        teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
+            10500 * 1e3 * 1e18,
+            team_and_project_coordinator_address_3
+        );
+
+        //Public Sale, Private Sale, Private Placement, Staking Reward
+        // Dev Pool, Strategic Partner, Team and Project Coordinator
+        _totalSupply = _totalSupply.sub(
+            157500 * 1e3 * 1e18,
+            "Insufficient Total Supply"
+        );
     }
 
     fallback() external payable {
@@ -117,31 +163,242 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         _addThirdOfValue(msg.value);
     }
 
-    /**
-     * @notice EVENTS
-     */
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                             EVENTS                                             */
+    /* ---------------------------------------------------------------------------------------------- */
 
     event ChangeTax(address indexed who, uint256 amount);
     event ChangeAirdropStatus(address indexed who, bool status);
+    event ChangePenaltyFee(address indexed from, uint256 amount);
+    event ChangeAirdropPercentage(address indexed from, uint256 amount);
 
-    event AddPrivateSaleBeneficiary(
+    event AddPrivateSale(
         address indexed from,
-        address[] indexed who
+        address indexed who,
+        uint256 amount
     );
+    event DeletePrivateSale(address indexed from, address indexed who);
 
-    /**
-     * @notice ACCESSORS
-     */
+    event InitiatePrivateSale(address indexed from);
+    event InitiateLockedWallet(address indexed from);
+
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                            MODIFIERS                                           */
+    /* ---------------------------------------------------------------------------------------------- */
+
+    modifier lockedWalletInitiated() {
+        require(lockedWalletStatus == true, "Locked Wallet not yet started");
+        _;
+    }
+
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                            ACCESSORS                                           */
+    /* ---------------------------------------------------------------------------------------------- */
 
     /**
      * @dev See address of this smart contract.
      */
+    function thisAddress() external view returns (address) {
+        return address(this);
+    }
+
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                       INTERNAL FUNCTIONS                                       */
+    /* ---------------------------------------------------------------------------------------------- */
 
     /**
-     * @dev Returns the tax fee.
+     * @dev this is the release rate for partial token release
      */
-    function taxFee() external view returns (uint256) {
-        return _taxFee;
+    function privatePlacementReleaseAmount()
+        internal
+        pure
+        returns (uint256[55] memory)
+    {
+        return [
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(43706, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            SafeMath.mul(524475, 1e18),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ];
+    }
+
+    function strategicPartnerReleaseAmount()
+        internal
+        pure
+        returns (uint256[55] memory)
+    {
+        return [
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(21875, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            SafeMath.mul(87500, 1e18),
+            0,
+            0,
+            0,
+            0
+        ];
+    }
+
+    function teamAndProjectCoordinatorReleaseAmount()
+        internal
+        pure
+        returns (uint256[55] memory)
+    {
+        return [
+            SafeMath.mul(105000, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(315000, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(315000, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(315000, 1e18),
+            0,
+            0,
+            0,
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            SafeMath.mul(262500, 1e18),
+            0,
+            0,
+            0,
+            0
+        ];
     }
 
     /**
@@ -354,31 +611,54 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         address to,
         uint256 amount
     ) internal {
-        require(from != address(0), "TalaxToken: from zero address");
-        require(to != address(0), "TalaxToken: to zero address");
+        require(from != address(0), "Transfer from zero address");
+        require(to != address(0), "Transfer to zero address");
 
         uint256 fromBalance = _balances[from];
-        // avoid >= for gas fee less
-        require(
-            fromBalance > amount + 1,
-            "TalaxToken: transfer amount exceeds balance"
-        );
+        require(fromBalance >= amount, "Insufficient Balance");
 
         uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
         uint256 taxedAmount = SafeMath.sub(amount, tax);
 
+        uint256 teamFeeOfThird = SafeMath.div(
+            SafeMath.div(SafeMath.mul(taxedAmount, 2), 10),
+            3
+        );
+
         uint256 liquidityFee = SafeMath.div(SafeMath.mul(taxedAmount, 8), 10);
 
-        _addThirdOfValue(SafeMath.div(SafeMath.mul(taxedAmount, 2), 10));
+        _balances[team_and_project_coordinator_address_1] = _balances[
+            team_and_project_coordinator_address_1
+        ].add(teamFeeOfThird);
+
+        _balances[team_and_project_coordinator_address_2] = _balances[
+            team_and_project_coordinator_address_2
+        ].add(teamFeeOfThird);
+
+        _balances[team_and_project_coordinator_address_3] = _balances[
+            team_and_project_coordinator_address_3
+        ].add(teamFeeOfThird);
 
         _balances[address(this)] = _balances[address(this)].add(liquidityFee);
 
-        _balances[from] = _balances[from].sub(
-            amount,
-            "TalaxToken: transfer exceeds balance"
-        );
+        _balances[from] = _balances[from].sub(amount, "Insufficient Balance");
         _balances[to] = _balances[to].add(taxedAmount);
         emit Transfer(from, to, taxedAmount);
+    }
+
+    function _addThirdOfValue(uint256 amount_) internal {
+        uint256 thirdOfValue = SafeMath.div(amount_, 3);
+        _balances[team_and_project_coordinator_address_1] = _balances[
+            team_and_project_coordinator_address_1
+        ].add(thirdOfValue);
+
+        _balances[team_and_project_coordinator_address_2] = _balances[
+            team_and_project_coordinator_address_2
+        ].add(thirdOfValue);
+
+        _balances[team_and_project_coordinator_address_3] = _balances[
+            team_and_project_coordinator_address_3
+        ].add(thirdOfValue);
     }
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
@@ -464,53 +744,14 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
     }
 
     /**
-     * @notice INTERNAL FUNCTIONS
-     */
-
-    /**
-     * @dev Moves tokens `amount` from `sender` to `recipient`.
-     *
-     * This is internal function is equivalent to {transfer}, and can be used to
-     * e.g. implement automatic token fees, slashing mechanisms, etc.
-     *
-     * Emits a {Transfer} event.
-     *
-     * Requirements:
-     *
-     * - `sender` cannot be the zero address.
-     * - `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     */
-
-    function _addThirdOfValue(uint256 amount_) internal {
-        uint256 thirdOfValue = SafeMath.div(amount_, 3);
-        _balances[team_and_project_coordinator_address_1] = _balances[
-            team_and_project_coordinator_address_1
-        ].add(thirdOfValue);
-
-        _balances[team_and_project_coordinator_address_2] = _balances[
-            team_and_project_coordinator_address_2
-        ].add(thirdOfValue);
-
-        _balances[team_and_project_coordinator_address_3] = _balances[
-            team_and_project_coordinator_address_3
-        ].add(thirdOfValue);
-    }
-
-    /**
      * @notice EXTERNAL FUNCTIONS
      */
 
-    function addBalance(
-        address from,
-        address to,
-        uint256 amount
-    ) external {
-        require(from == owner(), "Caller must be owner");
-        require(to != address(0), "User cannot be 0");
-        require(amount > 0, "Amount have to be greater than 0");
-
-        _balances[to] = _balances[to].add(amount);
+    function transferDevPool(address to_, uint256 amount_) external onlyOwner {
+        require(amount_ != 0, "Invalid amount");
+        require(amount_ < _devPool, "Insufficient supply");
+        require(to_ != address(0), "Invalid address");
+        _balances[to_] += amount_;
     }
 
     /**
@@ -526,17 +767,35 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         emit Transfer(address(0), address(this), amount_);
     }
 
+    function mintLiquidityReserve(uint256 amount_) public onlyOwner {
+        require(amount_ > 0, "Amount mint cannot be 0");
+        _balances[address(this)] = _balances[address(this)].add(amount_);
+        _totalSupply = _totalSupply.add(amount_);
+        emit Transfer(address(0), address(this), amount_);
+    }
+
     function burnStakingReward(uint256 amount_) external onlyOwner {
         require(
             amount_ < _stakingReward,
-            "TalaxToken: Amount burnt larger than Staking Reward"
+            "Amount burnt larger than Staking Reward"
         );
         _stakingReward = _stakingReward.sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
         emit Transfer(address(this), address(0), amount_);
     }
 
+    function burnLiquidityReserve(uint256 amount_) external onlyOwner {
+        require(
+            amount_ < _balances[address(this)],
+            "Amount burnt larger than balance"
+        );
+        _balances[address(this)] = _balances[address(this)].sub(amount_);
+        _totalSupply = _totalSupply.sub(amount_);
+        emit Transfer(address(this), address(0), amount_);
+    }
+
     function changeTaxFee(uint16 taxFee_) external onlyOwner {
+        require(taxFee_ < 5, "Tax Fee maximum is 5%");
         _taxFee = taxFee_;
         emit ChangeTax(_msgSender(), taxFee_);
     }
@@ -548,16 +807,15 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
 
     function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
         _changePenaltyFee(penaltyFee_);
+        emit ChangePenaltyFee(_msgSender(), penaltyFee_);
     }
 
     function changeAirdropPercentage(uint256 airdrop_) external onlyOwner {
         _changeAirdropPercentage(airdrop_);
+        emit ChangeAirdropPercentage(_msgSender(), airdrop_);
     }
 
-    /**
-     * Add functionality like burn to the _stake afunction
-     *
-     */
+    /* ------------------------ Stake function with burn function ------------------------ */
     function stake(uint256 _amount, uint256 _stakePeriod) external {
         // Make sure staker actually is good for it
         require(
@@ -565,12 +823,9 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
                 _stakePeriod == 90 days ||
                 _stakePeriod == 180 days ||
                 _stakePeriod == 365 days,
-            "TalaxToken: Staking option not exist"
+            "Staking option doesnt exist"
         );
-        require(
-            _amount < _balances[_msgSender()],
-            "TalaxToken: Cannot stake more than balance"
-        );
+        require(_amount < _balances[_msgSender()], "Insufficient Balance");
 
         _stake(_amount, _stakePeriod, _stakingPackage[_stakePeriod]);
         // Burn the amount of tokens on the sender
@@ -579,9 +834,7 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         _balances[address(this)] = _balances[address(this)].add(_amount);
     }
 
-    /**
-     * @notice withdrawStake is used to withdraw stakes from the account holder
-     */
+    /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
     function withdrawStake(uint256 amount, uint256 stake_index) external {
         (uint256 amount_, uint256 reward_) = _withdrawStake(
             amount,
@@ -590,10 +843,10 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        _mint(address(this), reward_);
+        mintLiquidityReserve(reward_);
         _balances[address(this)] = _balances[address(this)].sub(amount_);
         _balances[address(this)] = _balances[address(this)].sub(reward_);
-        _totalSupply = _totalSupply + amount_ + reward_;
+        _totalSupply += amount_ + reward_;
         _balances[_msgSender()] += amount_ + reward_;
     }
 
@@ -602,36 +855,183 @@ contract TalaxToken is IBEP20, Ownable, Stakable, Multilockable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        _mint(address(this), reward_);
+        mintLiquidityReserve(reward_);
         _balances[address(this)] = _balances[address(this)].sub(amount_);
         _balances[address(this)] = _balances[address(this)].sub(reward_);
-        _totalSupply = _totalSupply + amount_ + reward_;
+        _totalSupply += amount_ + reward_;
         _balances[_msgSender()] += amount_ + reward_;
     }
 
     function claimAirdrop() external {
-        require(_airdropStatus == true, "TalaxToken: Airdrop is not available");
+        require(_airdropStatus == true, "Airdrop not yet started");
         uint256 airdrop = _claimAirdrop(_msgSender());
         _balances[address(this)] = _balances[address(this)].sub(airdrop);
         _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
     }
 
-    /**
-     * @dev Multilockable
-     */
-    function addBeneficiary(address[] calldata user, uint256 amount)
+    /* -------------------------------------------------------------------------- */
+    /*                                Locked Wallet                               */
+    /* -------------------------------------------------------------------------- */
+    function initiateLockedWallet_PrivateSale() external onlyOwner {
+        require(
+            lockedWalletStatus == false && privateSaleStatus == false,
+            "Nothing to initialize"
+        );
+        lockedWalletStatus = true;
+        privatePlacementLockedWallet.initiateLockedWallet();
+        strategicPartnerLockedWallet_1.initiateLockedWallet();
+        strategicPartnerLockedWallet_2.initiateLockedWallet();
+        strategicPartnerLockedWallet_3.initiateLockedWallet();
+        teamAndProjectCoordinatorLockedWallet_1.initiateLockedWallet();
+        teamAndProjectCoordinatorLockedWallet_2.initiateLockedWallet();
+        teamAndProjectCoordinatorLockedWallet_3.initiateLockedWallet();
+        emit InitiateLockedWallet(_msgSender());
+
+        privateSaleStatus = true;
+        _initiatePrivateSale();
+        emit InitiatePrivateSale(_msgSender());
+    }
+
+    /* ---------------------------- Private Placement --------------------------- */
+    function unlockPrivatePlacementWallet() external lockedWalletInitiated {
+        require(
+            _msgSender() == privatePlacementLockedWallet.beneficiary(),
+            "Wallet owner only"
+        );
+
+        uint256 timeLockedAmount = privatePlacementLockedWallet
+            .releaseClaimable(privatePlacementReleaseAmount());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    /* ---------------------------- Strategic Partner --------------------------- */
+    function unlockStrategicPartnerWallet_1() external lockedWalletInitiated {
+        require(
+            _msgSender() == strategicPartnerLockedWallet_1.beneficiary(),
+            "Wallet owner only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_1
+            .releaseClaimable(strategicPartnerReleaseAmount());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockStrategicPartnerWallet_2() external lockedWalletInitiated {
+        require(
+            _msgSender() == strategicPartnerLockedWallet_2.beneficiary(),
+            "Wallet owner only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_2
+            .releaseClaimable(strategicPartnerReleaseAmount());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockStrategicPartnerWallet_3() external lockedWalletInitiated {
+        require(
+            _msgSender() == strategicPartnerLockedWallet_3.beneficiary(),
+            "Wallet owner only"
+        );
+        uint256 timeLockedAmount = strategicPartnerLockedWallet_3
+            .releaseClaimable(strategicPartnerReleaseAmount());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    /* ---------------------- Team and Project Coordinator ---------------------- */
+    function unlockTeamAndProjectCoordinatorWallet_1()
+        external
+        lockedWalletInitiated
+    {
+        require(
+            _msgSender() ==
+                teamAndProjectCoordinatorLockedWallet_1.beneficiary(),
+            "Wallet owner only"
+        );
+        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockTeamAndProjectCoordinatorWallet_2()
+        external
+        lockedWalletInitiated
+    {
+        require(
+            _msgSender() ==
+                teamAndProjectCoordinatorLockedWallet_2.beneficiary(),
+            "Wallet owner only"
+        );
+        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    function unlockTeamAndProjectCoordinatorWallet_3()
+        external
+        lockedWalletInitiated
+    {
+        require(
+            _msgSender() ==
+                teamAndProjectCoordinatorLockedWallet_3.beneficiary(),
+            "Wallet owner only"
+        );
+        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
+            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
+
+        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                                Private Sale                                */
+    /* -------------------------------------------------------------------------- */
+
+    function addBeneficiary(address user, uint256 amount) external onlyOwner {
+        require(privateSaleStatus == true, "Private Sale not yet started");
+        require(amount > 0, "Cannot add beneficiary with 0 amount");
+        _privateSale -= amount;
+        _addBeneficiary(user, amount);
+        emit AddPrivateSale(msg.sender, user, amount);
+    }
+
+    function addMultipleBeneficiary(Beneficiary[] calldata benefs)
         external
         onlyOwner
     {
-        require(amount > 0, "TalaxToken: Cannot add beneficiary with 0 amount");
-        _addBeneficiary(user, amount);
+        require(privateSaleStatus == true, "Private Sale not yet started");
+        require(benefs.length > 0, "Nothing to add");
+        for (uint256 i = 0; i < benefs.length; i++) {
+            _privateSale -= benefs[i].amount;
+            _addBeneficiary(benefs[i].user, benefs[i].amount);
+            emit AddPrivateSale(msg.sender, benefs[i].user, benefs[i].amount);
+        }
+    }
 
-        emit AddPrivateSaleBeneficiary(msg.sender, user);
+    function deleteBeneficiary(address user) external onlyOwner {
+        require(privateSaleStatus == true, "Private Sale not yet started");
+        uint256 amount = _deleteBeneficiary(user);
+        _privateSale += amount;
+        emit DeletePrivateSale(msg.sender, user);
+    }
+
+    function deleteMultipleBeneficiary(address[] calldata benefs)
+        external
+        onlyOwner
+    {
+        require(privateSaleStatus == true, "Private Sale not yet started");
+        require(benefs.length > 0, "Nothing to delete");
+        for (uint256 i = 0; i < benefs.length; i++) {
+            uint256 amount = _deleteBeneficiary(benefs[i]);
+            _privateSale += amount;
+            emit DeletePrivateSale(msg.sender, benefs[i]);
+        }
     }
 
     function claimPrivateSale() external {
         uint256 privateSale = _releaseClaimable(_msgSender());
-
         _balances[_msgSender()] = _balances[_msgSender()].add(privateSale);
     }
 }
