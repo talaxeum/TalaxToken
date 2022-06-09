@@ -1,0 +1,376 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Context.sol": {
+      "lastModificationDate": 1654743320745,
+      "contentHash": "f5f88f8cbac2c5bee66d11ccd9c89978",
+      "sourceName": "contracts/Context.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\TalaxToken.sol": {
+      "lastModificationDate": 1654744988092,
+      "contentHash": "fb2e8b0ff119025332983cc37ab4c114",
+      "sourceName": "contracts/TalaxToken.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IBEP20.sol",
+        "./Context.sol",
+        "./SafeMath.sol",
+        "./Ownable.sol",
+        "./Stakable.sol",
+        "./Lockable.sol",
+        "./Multilockable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "TalaxToken"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\IBEP20.sol": {
+      "lastModificationDate": 1654743320745,
+      "contentHash": "9d2702d8a1da9b526c0075d4868e40fd",
+      "sourceName": "contracts/IBEP20.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "IBEP20"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\SafeMath.sol": {
+      "lastModificationDate": 1654743320747,
+      "contentHash": "8e8bdf77728b319e09c22a4ee82b499e",
+      "sourceName": "contracts/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Ownable.sol": {
+      "lastModificationDate": 1654743320746,
+      "contentHash": "89df0d3f5e9f0976989ff6692f3f1877",
+      "sourceName": "contracts/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Stakable.sol": {
+      "lastModificationDate": 1654744187723,
+      "contentHash": "606bba304faec7eb9e50a50ac6ea4501",
+      "sourceName": "contracts/Stakable.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeMath.sol",
+        "./IBEP20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Stakable"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Lockable.sol": {
+      "lastModificationDate": 1654744947533,
+      "contentHash": "9dd42fce7b879c0e57588f4d6f48855c",
+      "sourceName": "contracts/Lockable.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Lockable"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Multilockable.sol": {
+      "lastModificationDate": 1654744100992,
+      "contentHash": "aeab33fdab9f24c1f5327945cd3b08f5",
+      "sourceName": "contracts/Multilockable.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Multilockable"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Talaxlockable.sol": {
+      "lastModificationDate": 1654743320748,
+      "contentHash": "d89fadecf281a1e6f452f8a66dfb8080",
+      "sourceName": "contracts/Talaxlockable.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IBEP20.sol",
+        "./Lockable.sol",
+        "./SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Talaxlockable"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Migrations.sol": {
+      "lastModificationDate": 1654743320746,
+      "contentHash": "4a7ad1f9a23e4e229d43fdb655eded3a",
+      "sourceName": "contracts/Migrations.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Migrations"
+      ]
+    }
+  }
+}
