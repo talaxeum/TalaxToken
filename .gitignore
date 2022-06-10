@@ -1,6 +1,8 @@
 abi.txt
 bytecode.txt
 
+artifacts/
+cache/
 .prettierrc
 metamask.secret
 .secret*
