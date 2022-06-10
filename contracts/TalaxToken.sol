@@ -196,6 +196,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     event InitiatePrivateSale(address indexed from);
     event InitiateLockedWallet(address indexed from);
 
+    event TransferStakingReward(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
     /* ---------------------------------------------------------------------------------------------- */
     /*                                            MODIFIERS                                           */
     /* ---------------------------------------------------------------------------------------------- */
@@ -811,7 +817,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         require(amount_ != 0, "Amount mint cannot be 0");
         _stakingReward = _stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
-        emit Transfer(address(0), address(this), amount_);
+        emit TransferStakingReward(address(0), address(this), amount_);
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
@@ -828,7 +834,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
         _stakingReward = _stakingReward.sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
-        emit Transfer(address(this), address(0), amount_);
+        emit TransferStakingReward(address(this), address(0), amount_);
     }
 
     function burnLiquidityReserve(uint256 amount_) external onlyOwner {
@@ -890,9 +896,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintLiquidityReserve(reward_);
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
-        _balances[address(this)] = _balances[address(this)].sub(reward_);
+        mintStakingReward(reward_);
+        _balances[address(this)] -= amount_;
+        _stakingReward -= reward_;
         _totalSupply += amount_ + reward_;
         _balances[_msgSender()] += amount_ + reward_;
     }
@@ -902,9 +908,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintLiquidityReserve(reward_);
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
-        _balances[address(this)] = _balances[address(this)].sub(reward_);
+        mintStakingReward(reward_);
+        _balances[address(this)] -= amount_;
+        _stakingReward -= reward_;
         _totalSupply += amount_ + reward_;
         _balances[_msgSender()] += amount_ + reward_;
     }
@@ -912,8 +918,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function claimAirdrop() external {
         require(_airdropStatus == true, "Airdrop not yet started");
         uint256 airdrop = _claimAirdrop(_msgSender());
-        _balances[address(this)] = _balances[address(this)].sub(airdrop);
-        _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
+        _balances[address(this)] -= airdrop;
+        _balances[_msgSender()] += airdrop;
     }
 
     /* -------------------------------------------------------------------------- */
