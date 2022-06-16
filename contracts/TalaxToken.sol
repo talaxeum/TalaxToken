@@ -1082,13 +1082,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /*                                Private Sale                                */
     /* -------------------------------------------------------------------------- */
 
-    function addBeneficiary(address user, uint256 amount) external onlyOwner {
-        require(privateSaleStatus == true, "Private Sale not yet started");
-        require(amount > 0, "Cannot add beneficiary with 0 amount");
-        _privateSale -= amount;
-        _addBeneficiary(user, amount);
-        emit AddPrivateSale(msg.sender, user, amount);
-    }
+    // function addBeneficiary(address user, uint256 amount) external onlyOwner {
+    //     require(privateSaleStatus == true, "Private Sale not yet started");
+    //     require(amount > 0, "Cannot add beneficiary with 0 amount");
+    //     _privateSale -= amount;
+    //     _addBeneficiary(user, amount);
+    //     emit AddPrivateSale(msg.sender, user, amount);
+    // }
 
     function addMultipleBeneficiary(Beneficiary[] calldata benefs)
         external
@@ -1103,12 +1103,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         }
     }
 
-    function deleteBeneficiary(address user) external onlyOwner {
-        require(privateSaleStatus == true, "Private Sale not yet started");
-        uint256 amount = _deleteBeneficiary(user);
-        _privateSale += amount;
-        emit DeletePrivateSale(msg.sender, user);
-    }
+    // function deleteBeneficiary(address user) external onlyOwner {
+    //     require(privateSaleStatus == true, "Private Sale not yet started");
+    //     uint256 amount = _deleteBeneficiary(user);
+    //     _privateSale += amount;
+    //     emit DeletePrivateSale(msg.sender, user);
+    // }
 
     function deleteMultipleBeneficiary(address[] calldata benefs)
         external
