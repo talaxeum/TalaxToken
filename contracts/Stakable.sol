@@ -10,16 +10,13 @@ contract Stakable {
      * push once to stakeholders for it to work proplerly
      */
 
-    uint256 private _stakingPenalty;
-    uint256 private _airdrop;
+    uint256 private _stakingPenaltyRate;
+    uint256 private _airdropRate;
 
     constructor() {
-        // This push is needed so we avoid index 0 causing bug of index-1
-        stakeholders.push();
-
         //Staking penalty and Airdrop in 0.1 times percentage
-        _stakingPenalty = 15;
-        _airdrop = 80;
+        _stakingPenaltyRate = 15;
+        _airdropRate = 80;
     }
 
     /**
@@ -34,7 +31,7 @@ contract Stakable {
         uint256 since;
         // This claimable field is new and used to tell how big of a reward is currently available
         uint256 claimable;
-        uint256 claimable_airdrop;
+        uint256 claimable_airdropRate;
         uint256 rewardAPY;
         uint256 releaseTime;
     }
@@ -42,9 +39,9 @@ contract Stakable {
      * @notice Stakeholder is a staker that has active stakes
      */
     struct Stakeholder {
+        Stake stake;
         address user;
         uint256 latestClaimDrop;
-        Stake[] address_stakes;
     }
 
     /**
@@ -53,20 +50,14 @@ contract Stakable {
      */
     struct StakingSummary {
         uint256 total_amount;
-        Stake[] stakes;
+        Stake stake;
     }
 
     /**
      * @notice
-     *   This is a array where we store all Stakes that are performed on the Contract
-     *   The stakes for each address are stored at a certain index, the index can be found using the stakes mapping
-     */
-    Stakeholder[] internal stakeholders;
-    /**
-     * @notice
      * stakes is used to keep track of the INDEX for the stakers in the stakes array
      */
-    mapping(address => uint256) internal stakes;
+    mapping(address => Stakeholder) internal stakeholders;
 
     /**
      * @notice Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable
@@ -74,7 +65,6 @@ contract Stakable {
     event Staked(
         address indexed user,
         uint256 amount,
-        uint256 index,
         uint256 timestamp,
         uint256 releaseTime
     );
@@ -82,21 +72,10 @@ contract Stakable {
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
 
-    /**
-     * @notice _addStakeholder takes care of adding a stakeholder to the stakeholders array
-     */
-    function _addStakeholder(address staker) internal returns (uint256) {
-        // Push a empty item to the Array to make space for our new stakeholder
-        stakeholders.push();
-        // Calculate the index of the last item in the array by Len-1
-        uint256 userIndex = stakeholders.length - 1;
-        // Assign the address to the new index
-        stakeholders[userIndex].user = staker;
-        // Assign current timestamp to latestCLaimDrop
-        stakeholders[userIndex].latestClaimDrop = block.timestamp;
-        // Add index to the stakeHolders
-        stakes[staker] = userIndex;
-        return userIndex;
+    /* ------------------------------------------ Accessor ------------------------------------------ */
+    function getAPY(address _staker) public view returns (uint256) {
+        require(stakeholders[_staker].stake.amount > 0, "No stake found");
+        return stakeholders[_staker].stake.rewardAPY;
     }
 
     /**
@@ -105,47 +84,30 @@ contract Stakable {
      * StakeID
      */
     function _stake(
+        address _user,
         uint256 _amount,
         uint256 _stakePeriod,
         uint256 _rewardRate
     ) internal {
         // Simple check so that user does not stake 0
         require(_amount > 0, "Stakable: Cannot stake nothing");
-        // require(_amount > 1e18, "Minimum stake is 1 TALAX");
 
-        // Mappings in solidity creates all values, but empty, so we can just check the address
-        uint256 index = stakes[msg.sender];
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
-        // See if the staker already has a staked index or if its the first time
-        if (index == 0) {
-            // This stakeholder stakes for the first time
-            // We need to add him to the stakeHolders and also map it into the Index of the stakes
-            // The index returned will be the index of the stakeholder in the stakeholders array
-            index = _addStakeholder(msg.sender);
-        }
 
         // Use the index to push a new Stake
         // push a newly created Stake with the current block timestamp.
-        stakeholders[index].address_stakes.push(
-            Stake(
-                msg.sender,
-                _amount,
-                timestamp,
-                0,
-                0,
-                _rewardRate,
-                (_stakePeriod + timestamp)
-            )
-        );
-        // Emit an event that the stake has occured
-        emit Staked(
-            msg.sender,
+        stakeholders[_user].stake = Stake(
+            _user,
             _amount,
-            index,
             timestamp,
+            0,
+            0,
+            _rewardRate,
             (_stakePeriod + timestamp)
         );
+        // Emit an event that the stake has occured
+        emit Staked(_user, _amount, timestamp, (_stakePeriod + timestamp));
     }
 
     function _changePenaltyFee(uint256 amount_) internal {
@@ -153,7 +115,7 @@ contract Stakable {
             amount_ <= 30,
             "Stakable: Penalty fee cannot exceed 3 percent."
         );
-        _stakingPenalty = amount_;
+        _stakingPenaltyRate = amount_;
         emit PenaltyChanged(amount_);
     }
 
@@ -162,12 +124,12 @@ contract Stakable {
             amount_ <= 200,
             "Stakable: Airdrop Percentage cannot exceed 20 percent."
         );
-        _airdrop = amount_;
+        _airdropRate = amount_;
         emit AirdropChanged(amount_);
     }
 
     function penaltyFee() public view returns (uint256) {
-        return _stakingPenalty;
+        return _stakingPenaltyRate;
     }
 
     function calculateStakingDuration(uint256 since_)
@@ -184,19 +146,19 @@ contract Stakable {
             );
     }
 
-    function calculateStakeReward(Stake memory _current_stake, uint256 _amount)
+    function calculateStakeReward(Stake memory user_stake, uint256 _amount)
         internal
         view
         returns (uint256)
     {
-        if (_current_stake.amount == 0) {
+        if (user_stake.amount == 0) {
             return 0;
         }
 
         return
             (_amount *
-                _current_stake.rewardAPY *
-                calculateStakingDuration(_current_stake.since)) / 1e26;
+                user_stake.rewardAPY *
+                calculateStakingDuration(user_stake.since)) / 1e26;
     }
 
     function calculateStakingWithPenalty(uint256 amount, uint256 reward)
@@ -211,11 +173,11 @@ contract Stakable {
         return (
             SafeMath.sub(
                 amount,
-                SafeMath.div(SafeMath.mul(amount, _stakingPenalty), 1000)
+                SafeMath.div(SafeMath.mul(amount, _stakingPenaltyRate), 1000)
             ),
             SafeMath.sub(
                 reward,
-                SafeMath.div(SafeMath.mul(reward, _stakingPenalty), 1000)
+                SafeMath.div(SafeMath.mul(reward, _stakingPenaltyRate), 1000)
             )
         );
     }
@@ -227,100 +189,24 @@ contract Stakable {
      * Will return the amount to MINT onto the acount
      * Will also calculateStakeReward and reset timer
      */
-    function _withdrawStake(uint256 amount, uint256 index)
-        internal
-        returns (uint256, uint256)
-    {
+    function _withdrawStake(address _user) internal returns (uint256, uint256) {
         // Grab user_index which is the index to use to grab the Stake[]
-        uint256 user_index = stakes[msg.sender];
-        Stake storage current_stake = stakeholders[user_index].address_stakes[
-            index
-        ];
-
-        require(
-            current_stake.amount >= amount,
-            "Stakable: Cannot withdraw more than you have staked"
-        );
+        Stake storage stake = stakeholders[_user].stake;
 
         // Calculate available Reward first before we start modifying data
-        uint256 reward = calculateStakeReward(current_stake, amount);
-        uint256 stakeDuration = current_stake.releaseTime - current_stake.since;
+        uint256 amount = stake.amount;
+        uint256 reward = calculateStakeReward(stake, stake.amount);
 
         /**
          * @notice This is penalty given for early withdrawal before the designated time
          */
 
-        if (current_stake.releaseTime > block.timestamp) {
-            current_stake.amount -= amount;
-
-            if (current_stake.amount == 0) {
-                delete stakeholders[user_index].address_stakes[index];
-            } else {
-                stakeholders[user_index]
-                    .address_stakes[index]
-                    .amount = current_stake.amount;
-                // Reset timer of stake
-                stakeholders[user_index].address_stakes[index].since = block
-                    .timestamp;
-                stakeholders[user_index].address_stakes[index].releaseTime =
-                    block.timestamp +
-                    stakeDuration;
-            }
-
+        if (stake.releaseTime > block.timestamp) {
+            delete stakeholders[_user];
             return calculateStakingWithPenalty(amount, reward);
         }
 
-        // Remove by subtracting the money unstaked
-        current_stake.amount -= amount;
-        // If stake is empty, 0, then remove it from the array of stakes
-        if (current_stake.amount == 0) {
-            delete stakeholders[user_index].address_stakes[index];
-        } else {
-            stakeholders[user_index]
-                .address_stakes[index]
-                .amount = current_stake.amount;
-            // Reset timer of stake
-            stakeholders[user_index].address_stakes[index].since = block
-                .timestamp;
-            stakeholders[user_index].address_stakes[index].releaseTime =
-                block.timestamp +
-                stakeDuration;
-        }
-
-        return (amount, reward);
-    }
-
-    function _withdrawAllStake(uint256 index)
-        internal
-        returns (uint256, uint256)
-    {
-        // Grab user_index which is the index to use to grab the Stake[]
-        uint256 user_index = stakes[msg.sender];
-        Stake storage current_stake = stakeholders[user_index].address_stakes[
-            index
-        ];
-
-        require(
-            current_stake.amount > 0,
-            "Stakable: Cannot withdraw, you don't have any stake in this Index"
-        );
-
-        // Calculate available Reward first before we start modifying data
-        uint256 amount = current_stake.amount;
-        uint256 reward = calculateStakeReward(current_stake, amount);
-
-        /**
-         * @notice This is penalty given for early withdrawal before the designated time
-         */
-
-        if (current_stake.releaseTime > block.timestamp) {
-            current_stake.amount -= amount;
-            delete stakeholders[user_index].address_stakes[index];
-            return calculateStakingWithPenalty(amount, reward);
-        }
-
-        delete stakeholders[user_index].address_stakes[index];
-
+        delete stakeholders[_user];
         return (amount, reward);
     }
 
@@ -329,34 +215,25 @@ contract Stakable {
         view
         returns (StakingSummary memory)
     {
-        uint256 totalStakeAmount;
-
         StakingSummary memory summary = StakingSummary(
             0,
-            stakeholders[stakes[_staker]].address_stakes
+            stakeholders[_staker].stake
         );
-        require(
-            summary.stakes.length != 0,
-            "Stakable: This address does not have any stakes"
+        require(summary.stake.amount != 0, "No stake found");
+
+        uint availableReward = calculateStakeReward(
+            summary.stake,
+            summary.stake.amount
         );
 
-        for (uint256 s = 0; s < summary.stakes.length; s += 1) {
-            uint256 availableReward = calculateStakeReward(
-                summary.stakes[s],
-                summary.stakes[s].amount
-            );
-            summary.stakes[s].claimable = availableReward;
-            totalStakeAmount += summary.stakes[s].amount;
-        }
+        summary.stake.claimable = availableReward;
+        summary.total_amount = summary.stake.amount;
 
-        summary.total_amount = totalStakeAmount;
         return summary;
     }
 
     function _claimAirdrop(address _staker) internal returns (uint256) {
-        uint256 totalAirdrop;
-
-        Stakeholder storage stakeholder = stakeholders[stakes[_staker]];
+        Stakeholder storage stakeholder = stakeholders[_staker];
         uint256 monthAirdrop = (block.timestamp - stakeholder.latestClaimDrop)
             .div(7 days);
 
@@ -365,23 +242,12 @@ contract Stakable {
             "Stakable: Airdrop can only be claimed in a month timespan"
         );
 
-        require(
-            stakeholder.address_stakes.length > 0,
-            "Stakable: This address does not have any stakes"
-        );
+        require(stakeholder.stake.amount > 0, "No stake found");
 
-        for (uint256 i = 0; i < stakeholder.address_stakes.length; i++) {
-            if (stakeholder.address_stakes[i].amount <= 0) {
-                continue;
-            }
-            uint256 value = (stakeholder.address_stakes[i].amount * _airdrop) /
-                100;
-            totalAirdrop += value;
-            stakeholder.address_stakes[i].claimable_airdrop = value;
-        }
-
+        uint256 airdrop = ((stakeholder.stake.amount * _airdropRate) / 100);
+        stakeholder.stake.claimable_airdropRate = airdrop;
         stakeholder.latestClaimDrop = block.timestamp;
 
-        return totalAirdrop;
+        return airdrop;
     }
 }

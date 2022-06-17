@@ -515,6 +515,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _beforeTokenTransfer(from, to, amount);
 
         uint256 fromBalance = _balances[from];
+        require(
+            fromBalance >= amount,
+            "ERC20: transfer amount exceeds balance"
+        );
+        unchecked {
+            _balances[from] = fromBalance - amount;
+        }
 
         uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
         uint256 taxedAmount = SafeMath.sub(amount, tax);
@@ -525,7 +532,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _addThirdOfValue(teamFee);
         _balances[address(this)] = _balances[address(this)].add(liquidityFee);
 
-        _balances[from] = _balances[from].sub(amount, "Insufficient Balance");
         _balances[to] = _balances[to].add(taxedAmount);
         emit Transfer(from, to, taxedAmount);
     }
@@ -815,7 +821,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
             "Staking option doesnt exist"
         );
 
-        _stake(_amount, _stakePeriod, _stakingPackage[_stakePeriod]);
+        _stake(
+            msg.sender,
+            _amount,
+            _stakePeriod,
+            _stakingPackage[_stakePeriod]
+        );
         // Burn the amount of tokens on the sender
         _burn(_msgSender(), _amount);
         // Stake amount goes to liquidity reserve
@@ -823,25 +834,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
-    function withdrawStake(uint256 amount, uint256 stake_index) external {
-        (uint256 amount_, uint256 reward_) = _withdrawStake(
-            amount,
-            stake_index
-        );
-        // Return staked tokens to user
-        // Amount staked on liquidity reserved goes to the user
-        // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintStakingReward(reward_);
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
-        _stakingReward = _stakingReward.sub(reward_);
-        _totalSupply = _totalSupply.add(amount_ + reward_);
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            amount_ + reward_
-        );
-    }
-
-    function withdrawAllStake(uint256 stake_index) external {
-        (uint256 amount_, uint256 reward_) = _withdrawAllStake(stake_index);
+    function withdrawStake() external {
+        (uint256 amount_, uint256 reward_) = _withdrawStake(msg.sender);
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
