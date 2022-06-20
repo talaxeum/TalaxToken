@@ -72,12 +72,6 @@ contract Stakable {
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
 
-    /* ------------------------------------------ Accessor ------------------------------------------ */
-    function getAPY(address _staker) public view returns (uint256) {
-        require(stakeholders[_staker].stake.amount > 0, "No stake found");
-        return stakeholders[_staker].stake.rewardAPY;
-    }
-
     /**
      * @notice
      * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
