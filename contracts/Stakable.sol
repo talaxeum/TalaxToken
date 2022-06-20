@@ -90,7 +90,8 @@ contract Stakable {
         uint256 _rewardRate
     ) internal {
         // Simple check so that user does not stake 0
-        require(_amount > 0, "Stakable: Cannot stake nothing");
+        require(_amount > 0, "Cannot stake nothing");
+        require(stakeholders[_user].stake.amount == 0,"User is a staker");
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -113,7 +114,7 @@ contract Stakable {
     function _changePenaltyFee(uint256 amount_) internal {
         require(
             amount_ <= 30,
-            "Stakable: Penalty fee cannot exceed 3 percent."
+            "Penalty fee cannot exceed 3 percent."
         );
         _stakingPenaltyRate = amount_;
         emit PenaltyChanged(amount_);
@@ -122,7 +123,7 @@ contract Stakable {
     function _changeAirdropPercentage(uint256 amount_) internal {
         require(
             amount_ <= 200,
-            "Stakable: Airdrop Percentage cannot exceed 20 percent."
+            "Airdrop Percentage cannot exceed 20 percent."
         );
         _airdropRate = amount_;
         emit AirdropChanged(amount_);
@@ -137,12 +138,12 @@ contract Stakable {
         view
         returns (uint256)
     {
-        require(since_ > 0, "Stakable: Error timestamp 0");
+        require(since_ > 0, "Error timestamp 0");
         return
             SafeMath.div(
                 (block.timestamp - since_) * 1e24,
                 365 days,
-                "Stakable: Error cannot divide timestamp"
+                "Error cannot divide timestamp"
             );
     }
 
@@ -239,7 +240,7 @@ contract Stakable {
 
         require(
             monthAirdrop >= 1,
-            "Stakable: Airdrop can only be claimed in a month timespan"
+            "Claimable once a month"
         );
 
         require(stakeholder.stake.amount > 0, "No stake found");

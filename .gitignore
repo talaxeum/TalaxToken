@@ -1,5 +1,6 @@
 abi.txt
 bytecode.txt
+.env
 
 .prettierrc
 metamask.secret

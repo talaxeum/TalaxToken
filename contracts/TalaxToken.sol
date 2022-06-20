@@ -102,7 +102,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
          * Amount Initialization
          */
 
-        _balances[address(this)] = 52500 * 1e3 * 1e18;
+        // _balances[address(this)] = 52500 * 1e3 * 1e18;
+        _balances[msg.sender] = 52500 * 1e3 * 1e18;
         _stakingReward = 17514 * 1e3 * 1e18;
 
         // Public Sale

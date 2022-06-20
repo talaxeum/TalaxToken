@@ -19,9 +19,9 @@
  */
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
+require("dotenv").config();
 
-const fs = require("fs");
-const mnemonic = fs.readFileSync(".secret_ganache").toString().trim();
+const mnemonic = process.env.MNEMONIC;
 
 module.exports = {
     /**
@@ -46,6 +46,14 @@ module.exports = {
             port: 7545, // Standard BSC port (default: none)
             network_id: "*", // Any network (default: none)
         },
+        rinkeby: {
+            provider: function () {
+                return new HDWalletProvider(process.env.MNEMONIC, process.env.INFURA_ENDPOINT);
+            },
+            network_id: 4,
+            gas: 4500000,
+            gasPrice: 10000000000,
+        }
         // testnet: {
         // 	provider: () =>
         // 		new HDWalletProvider(
@@ -110,14 +118,17 @@ module.exports = {
                 // See the solidity docs for advice about optimization and evmVersion
                 optimizer: {
                     enabled: true,
-                    runs: 300,
+                    runs: 1000,
                 },
                 //  evmVersion: "byzantium"
             },
         },
     },
 
-    plugins: ["truffle-contract-size"],
+    plugins: ["truffle-contract-size", "truffle-plugin-verify"],
+    api_keys: {
+        etherscan: process.env.RINKEBY_API
+    }
 
     // Truffle DB is currently disabled by default; to enable it, change enabled:
     // false to enabled: true. The default storage location can also be

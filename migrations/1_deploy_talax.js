@@ -1,5 +1,4 @@
-const TalaxToken = artifacts.require("TalaxToken");
-
-module.exports = function (deployer) {
-  deployer.deploy(TalaxToken);
+var MyNotary = artifacts.require("TalaxToken");
+module.exports = function (deployer, network, accounts) {
+  deployer.deploy(MyNotary, { from: accounts[0] });
 };
