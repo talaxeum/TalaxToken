@@ -34,6 +34,7 @@ contract Stakable {
         uint256 claimable_airdropRate;
         uint256 rewardAPY;
         uint256 releaseTime;
+        uint256 penalty;
     }
     /**
      * @notice Stakeholder is a staker that has active stakes
@@ -50,6 +51,7 @@ contract Stakable {
      */
     struct StakingSummary {
         uint256 total_amount;
+        uint256 penalty;
         Stake stake;
     }
 
@@ -85,7 +87,7 @@ contract Stakable {
     ) internal {
         // Simple check so that user does not stake 0
         require(_amount > 0, "Cannot stake nothing");
-        require(stakeholders[_user].stake.amount == 0,"User is a staker");
+        require(stakeholders[_user].stake.amount == 0, "User is a staker");
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -106,19 +108,13 @@ contract Stakable {
     }
 
     function _changePenaltyFee(uint256 amount_) internal {
-        require(
-            amount_ <= 30,
-            "Penalty fee cannot exceed 3 percent."
-        );
+        require(amount_ <= 30, "Penalty fee cannot exceed 3 percent.");
         _stakingPenaltyRate = amount_;
         emit PenaltyChanged(amount_);
     }
 
     function _changeAirdropPercentage(uint256 amount_) internal {
-        require(
-            amount_ <= 200,
-            "Airdrop Percentage cannot exceed 20 percent."
-        );
+        require(amount_ <= 200, "Airdrop Percentage cannot exceed 20 percent.");
         _airdropRate = amount_;
         emit AirdropChanged(amount_);
     }
@@ -141,7 +137,7 @@ contract Stakable {
             );
     }
 
-    function calculateStakeReward(Stake memory user_stake, uint256 _amount)
+    function calculateStakeReward(Stake storage user_stake, uint256 _amount)
         internal
         view
         returns (uint256)
@@ -150,30 +146,37 @@ contract Stakable {
             return 0;
         }
 
+        user_stake.penalty = 0;
+
         return
             (_amount *
                 user_stake.rewardAPY *
                 calculateStakingDuration(user_stake.since)) / 1e26;
     }
 
-    function calculateStakingWithPenalty(uint256 amount, uint256 reward)
-        internal
-        view
-        returns (uint256, uint256)
-    {
+    function calculateStakingWithPenalty(
+        Stake storage user_stake,
+        uint256 amount,
+        int256 reward
+    ) internal view returns (uint256, uint256) {
         if (amount == 0) {
             return (0, 0);
         }
 
+        uint256 amount_penalty = SafeMath.div(
+            SafeMath.mul(amount, _stakingPenaltyRate),
+            1000
+        );
+        uint256 reward_penalty = SafeMath.div(
+            SafeMath.mul(reward, _stakingPenaltyRate),
+            1000
+        );
+
+        user_stake.penalty = amount_penalty + reward_penalty;
+
         return (
-            SafeMath.sub(
-                amount,
-                SafeMath.div(SafeMath.mul(amount, _stakingPenaltyRate), 1000)
-            ),
-            SafeMath.sub(
-                reward,
-                SafeMath.div(SafeMath.mul(reward, _stakingPenaltyRate), 1000)
-            )
+            SafeMath.sub(amount, amount_penalty),
+            SafeMath.sub(reward, reward_penalty)
         );
     }
 
@@ -184,25 +187,32 @@ contract Stakable {
      * Will return the amount to MINT onto the acount
      * Will also calculateStakeReward and reset timer
      */
-    function _withdrawStake(address _user) internal returns (uint256, uint256) {
+    function _withdrawStake(address _user, uint256 _amount)
+        internal
+        returns (uint256, uint256)
+    {
         // Grab user_index which is the index to use to grab the Stake[]
         Stake storage stake = stakeholders[_user].stake;
 
-        // Calculate available Reward first before we start modifying data
-        uint256 amount = stake.amount;
-        uint256 reward = calculateStakeReward(stake, stake.amount);
+        uint256 reward = calculateStakeReward(stake, _amount);
 
-        /**
-         * @notice This is penalty given for early withdrawal before the designated time
-         */
-
-        if (stake.releaseTime > block.timestamp) {
+        if (stake.amount == _amount) {
             delete stakeholders[_user];
-            return calculateStakingWithPenalty(amount, reward);
-        }
 
-        delete stakeholders[_user];
-        return (amount, reward);
+            if (stake.releaseTime > block.timestamp) {
+                return calculateStakingWithPenalty(stake, _amount, reward);
+            }
+
+            return (amount, reward);
+        } else {
+            stake.amount = stake.amount.sub(_amount);
+
+            if (stake.releaseTime > block.timestamp) {
+                return calculateStakingWithPenalty(stake, _amount, reward);
+            }
+
+            return (amount, reward);
+        }
     }
 
     function hasStake(address _staker)
@@ -211,6 +221,7 @@ contract Stakable {
         returns (StakingSummary memory)
     {
         StakingSummary memory summary = StakingSummary(
+            0,
             0,
             stakeholders[_staker].stake
         );
@@ -222,6 +233,7 @@ contract Stakable {
         );
 
         summary.stake.claimable = availableReward;
+        summary.penalty = summary.stake.penalty;
         summary.total_amount = summary.stake.amount;
 
         return summary;
@@ -232,10 +244,7 @@ contract Stakable {
         uint256 monthAirdrop = (block.timestamp - stakeholder.latestClaimDrop)
             .div(7 days);
 
-        require(
-            monthAirdrop >= 1,
-            "Claimable once a month"
-        );
+        require(monthAirdrop >= 1, "Claimable once a month");
 
         require(stakeholder.stake.amount > 0, "No stake found");
 
