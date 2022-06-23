@@ -313,45 +313,6 @@
 			},
 			{
 				"inputs": [],
-				"name": "_airdropStatus",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "_privateSale",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "_stakingReward",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "_startPrivateSale",
 				"outputs": [
 					{
@@ -399,6 +360,45 @@
 				"name": "addMultipleBeneficiary",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "airdropSince",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "airdropStatus",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "airdropWeek",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -541,19 +541,6 @@
 			{
 				"inputs": [
 					{
-						"internalType": "bool",
-						"name": "status_",
-						"type": "bool"
-					}
-				],
-				"name": "changeAirdropStatus",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
 						"internalType": "uint256",
 						"name": "penaltyFee_",
 						"type": "uint256"
@@ -681,25 +668,6 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_staker",
-						"type": "address"
-					}
-				],
-				"name": "getAPY",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [],
 				"name": "hasMultilockable",
 				"outputs": [
@@ -752,6 +720,11 @@
 								"type": "uint256"
 							},
 							{
+								"internalType": "uint256",
+								"name": "penalty",
+								"type": "uint256"
+							},
+							{
 								"components": [
 									{
 										"internalType": "address",
@@ -775,7 +748,7 @@
 									},
 									{
 										"internalType": "uint256",
-										"name": "claimable_airdropRate",
+										"name": "claimable_airdrop",
 										"type": "uint256"
 									},
 									{
@@ -828,7 +801,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "initiateLockedWallet_PrivateSale",
+				"name": "initiateLockedWalletprivateSale_Airdrop",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -957,6 +930,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "privateSale",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "privateSaleStatus",
 				"outputs": [
 					{
@@ -1017,6 +1003,19 @@
 				"name": "stake",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "stakingReward",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -1286,7 +1285,13 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
 				"name": "withdrawStake",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -1323,9 +1328,6 @@
 				},
 				"increaseAllowance(address,uint256)": {
 					"details": "Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address."
-				},
-				"mintStakingReward(uint256)": {
-					"details": "Creates 'amount_' of token into _stakingReward and liduidityReserveDeletes 'amount_' of token from _stakingRewardChange '_taxFee' with 'taxFee_'"
 				},
 				"name()": {
 					"details": "Returns the name of the token."
@@ -1380,7 +1382,7 @@
 		},
 		"optimizer": {
 			"enabled": true,
-			"runs": 300
+			"runs": 1000
 		},
 		"remappings": []
 	},
@@ -1458,19 +1460,19 @@
 			]
 		},
 		"contracts/Stakable.sol": {
-			"keccak256": "0x2f1f052f1a7449ea96de2eb0e14a6394212b7b12277a4f52fb215cbe026497f4",
+			"keccak256": "0x76ed95a8491431df992c76f5ac7a7e81affdc685bdba66bd8e052ef1ea0a4746",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://b49c97d2f87ed35740047cf9b6459682252950f5b5a72133fcc1d34b17152610",
-				"dweb:/ipfs/Qmb9muvhb2HjrL9Zh7KBBnZ2GKkSSnByjcHeeovG37R4JT"
+				"bzz-raw://b86fa6d5d8c385d4201bf09b7fefe0d60c2674ac64c9f47fbcda9a468af8eaaa",
+				"dweb:/ipfs/QmUnwopdDqiYkJHmMWQUDcE9gADYrn2pQSb86y5RfrsETG"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x8e120445ff27171739212e05e1f316fdef14ae05dab7eb8f91e4f108c60d274b",
+			"keccak256": "0xa39dc3106ca10cd10bb9c9fda47ae1f26ac4963989fe7894908252b2dfab6fea",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://6fae96bffd2379818980f068b086186cd5011243f93eaf232015e7e1c65adf56",
-				"dweb:/ipfs/QmS8Yau9Pb4Aj6Cabi5qxcbBVPB48DWCSLYWKdhQhJz9iX"
+				"bzz-raw://d7a993c5611cdb1078492c0f683c123b1ed5ccdc5e978d734a8b470e8d511eda",
+				"dweb:/ipfs/QmeJse1A3AixHrGf4Mw9LmTv2UrVyMU9JaAhsRDnmTpfZm"
 			]
 		}
 	},

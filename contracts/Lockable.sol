@@ -6,18 +6,17 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract Lockable {
     uint256 private _amount;
 
-    address public owner;
+    address private owner;
     // beneficiary of tokens after they are released
-    address private immutable _beneficiary;
+    address public immutable beneficiary;
 
     uint256 private _startLockedWallet;
 
     uint256 private _latestClaimMonth;
 
     constructor(uint256 amount_, address beneficiary_) {
-        require(amount_ > 0, "Lockable: Amount must greater than zero");
         _amount = amount_;
-        _beneficiary = beneficiary_;
+        beneficiary = beneficiary_;
         _startLockedWallet = block.timestamp;
         owner = msg.sender;
     }
@@ -27,33 +26,15 @@ contract Lockable {
      */
 
     modifier onlyTalax() {
-        require(
-            msg.sender == owner,
-            "Lockable: caller have to be TalaxToken Smart Contract"
-        );
+        require(msg.sender == owner, "Not owner");
         _;
-    }
-
-    /**
-     * @dev Helper functions
-     */
-    function amount() external view returns (uint256) {
-        return _amount;
-    }
-
-    function beneficiary() external view returns (address) {
-        return _beneficiary;
-    }
-
-    function sender() external view returns (address) {
-        return msg.sender;
     }
 
     /**
      * @notice Initiate Locked Wallet
      */
 
-    function initiateLockedWallet() external {
+    function initiateLockedWallet() external onlyTalax {
         _startLockedWallet = block.timestamp;
     }
 
@@ -74,7 +55,7 @@ contract Lockable {
 
         _latestClaimMonth = months + 1;
 
-        require(claimable != 0, "Lockable: There's nothing to claim yet");
+        require(claimable != 0, "Nothing to claim yet");
         return claimable;
     }
 

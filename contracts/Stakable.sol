@@ -10,8 +10,9 @@ contract Stakable {
      * push once to stakeholders for it to work proplerly
      */
 
-    uint256 private _stakingPenaltyRate;
-    uint256 private _airdropRate;
+    uint256 public _stakingPenaltyRate;
+    uint256 public _airdropRate;
+    uint256 public airdropSince;
 
     constructor() {
         //Staking penalty and Airdrop in 0.1 times percentage
@@ -31,10 +32,9 @@ contract Stakable {
         uint256 since;
         // This claimable field is new and used to tell how big of a reward is currently available
         uint256 claimable;
-        uint256 claimable_airdropRate;
+        uint256 claimable_airdrop;
         uint256 rewardAPY;
         uint256 releaseTime;
-        uint256 penalty;
     }
     /**
      * @notice Stakeholder is a staker that has active stakes
@@ -73,6 +73,14 @@ contract Stakable {
 
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
+
+    function _startAirdropSince() internal {
+        airdropSince = block.timestamp;
+    }
+
+    function _calculateWeek(uint256 input) internal view returns (uint256) {
+        return (block.timestamp - input).div(7 days);
+    }
 
     /**
      * @notice
@@ -119,10 +127,6 @@ contract Stakable {
         emit AirdropChanged(amount_);
     }
 
-    function penaltyFee() public view returns (uint256) {
-        return _stakingPenaltyRate;
-    }
-
     function calculateStakingDuration(uint256 since_)
         internal
         view
@@ -137,7 +141,7 @@ contract Stakable {
             );
     }
 
-    function calculateStakeReward(Stake storage user_stake, uint256 _amount)
+    function calculateStakeReward(Stake memory user_stake, uint256 _amount)
         internal
         view
         returns (uint256)
@@ -146,23 +150,17 @@ contract Stakable {
             return 0;
         }
 
-        user_stake.penalty = 0;
-
         return
             (_amount *
                 user_stake.rewardAPY *
                 calculateStakingDuration(user_stake.since)) / 1e26;
     }
 
-    function calculateStakingWithPenalty(
-        Stake storage user_stake,
-        uint256 amount,
-        int256 reward
-    ) internal view returns (uint256, uint256) {
-        if (amount == 0) {
-            return (0, 0);
-        }
-
+    function calculatePenalty(uint256 amount, uint256 reward)
+        internal
+        view
+        returns (uint256, uint256)
+    {
         uint256 amount_penalty = SafeMath.div(
             SafeMath.mul(amount, _stakingPenaltyRate),
             1000
@@ -172,8 +170,22 @@ contract Stakable {
             1000
         );
 
-        user_stake.penalty = amount_penalty + reward_penalty;
+        return (amount_penalty, reward_penalty);
+    }
 
+    function calculateStakingWithPenalty(uint256 amount, uint256 reward)
+        internal
+        view
+        returns (uint256, uint256)
+    {
+        if (amount == 0) {
+            return (0, 0);
+        }
+
+        (uint256 amount_penalty, uint256 reward_penalty) = calculatePenalty(
+            amount,
+            reward
+        );
         return (
             SafeMath.sub(amount, amount_penalty),
             SafeMath.sub(reward, reward_penalty)
@@ -200,18 +212,52 @@ contract Stakable {
             delete stakeholders[_user];
 
             if (stake.releaseTime > block.timestamp) {
-                return calculateStakingWithPenalty(stake, _amount, reward);
+                return calculateStakingWithPenalty(_amount, reward);
             }
 
-            return (amount, reward);
+            return (_amount, reward);
         } else {
             stake.amount = stake.amount.sub(_amount);
 
             if (stake.releaseTime > block.timestamp) {
-                return calculateStakingWithPenalty(stake, _amount, reward);
+                return calculateStakingWithPenalty(_amount, reward);
             }
 
-            return (amount, reward);
+            return (_amount, reward);
+        }
+    }
+
+    function _calculateAirdrop(uint256 stakeAmount)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 airdrop = ((stakeAmount * _airdropRate) / 100);
+        return airdrop;
+    }
+
+    function _claimAirdrop(address _staker) internal view returns (uint256) {
+        Stakeholder memory stakeholder = stakeholders[_staker];
+
+        require(stakeholder.stake.amount > 0, "No stake found");
+
+        require(
+            _calculateWeek(stakeholder.latestClaimDrop) > 0,
+            "Claimable once a week"
+        );
+
+        uint256 airdrop = _calculateAirdrop(stakeholder.stake.amount);
+        stakeholder.stake.claimable_airdrop = 0;
+        stakeholder.latestClaimDrop = block.timestamp;
+
+        return airdrop;
+    }
+
+    function airdropWeek() public view returns (uint256) {
+        if (airdropSince != 0) {
+            return (block.timestamp - airdropSince) / 7 days;
+        } else {
+            return 0;
         }
     }
 
@@ -220,38 +266,35 @@ contract Stakable {
         view
         returns (StakingSummary memory)
     {
-        StakingSummary memory summary = StakingSummary(
-            0,
-            0,
-            stakeholders[_staker].stake
-        );
+        Stakeholder memory data = stakeholders[_staker];
+        StakingSummary memory summary = StakingSummary(0, 0, data.stake);
         require(summary.stake.amount != 0, "No stake found");
 
-        uint availableReward = calculateStakeReward(
+        uint256 availableReward = calculateStakeReward(
             summary.stake,
             summary.stake.amount
         );
+        uint256 penalty;
+
+        if (summary.stake.releaseTime > block.timestamp) {
+            (uint256 amount_penalty, uint256 reward_penalty) = calculatePenalty(
+                summary.stake.amount,
+                availableReward
+            );
+            penalty = amount_penalty + reward_penalty;
+        }
+
+        if (_calculateWeek(data.latestClaimDrop) > 0) {
+            uint256 airdrop = _calculateAirdrop(summary.stake.amount);
+            summary.stake.claimable_airdrop = airdrop;
+        } else {
+            summary.stake.claimable_airdrop = 0;
+        }
 
         summary.stake.claimable = availableReward;
-        summary.penalty = summary.stake.penalty;
+        summary.penalty = penalty;
         summary.total_amount = summary.stake.amount;
 
         return summary;
-    }
-
-    function _claimAirdrop(address _staker) internal returns (uint256) {
-        Stakeholder storage stakeholder = stakeholders[_staker];
-        uint256 monthAirdrop = (block.timestamp - stakeholder.latestClaimDrop)
-            .div(7 days);
-
-        require(monthAirdrop >= 1, "Claimable once a month");
-
-        require(stakeholder.stake.amount > 0, "No stake found");
-
-        uint256 airdrop = ((stakeholder.stake.amount * _airdropRate) / 100);
-        stakeholder.stake.claimable_airdropRate = airdrop;
-        stakeholder.latestClaimDrop = block.timestamp;
-
-        return airdrop;
     }
 }
