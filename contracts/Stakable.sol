@@ -232,7 +232,7 @@ contract Stakable {
         view
         returns (uint256)
     {
-        uint256 airdrop = ((stakeAmount * _airdropRate) / 100);
+        uint256 airdrop = ((stakeAmount * _airdropRate) / 1000) / 52 weeks;
         return airdrop;
     }
 
