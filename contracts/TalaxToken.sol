@@ -12,14 +12,7 @@ import "./Stakable.sol";
 import "./Lockable.sol";
 import "./Multilockable.sol";
 
-contract TalaxToken is
-    ERC20,
-    ERC20Burnable,
-    Ownable,
-    Data,
-    Stakable,
-    Multilockable
-{
+contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     using SafeMath for uint256;
 
     mapping(address => uint256) private _balances;
@@ -47,9 +40,13 @@ contract TalaxToken is
     /**
      * Local (in this smart contract)
      * address staking_reward_address;
-     * address liquidity_reserve_address;
+     * address liquidity_reserve_address; // this cotract's address
      */
 
+    address public private_placement_address;
+    address public strategic_partner_address_1;
+    address public strategic_partner_address_2;
+    address public strategic_partner_address_3;
 
     /* ------------------------------------------ Lockable ------------------------------------------ */
 
@@ -83,6 +80,15 @@ contract TalaxToken is
         _stakingPackage[90 days] = 6;
         _stakingPackage[180 days] = 7;
         _stakingPackage[360 days] = 8;
+
+        /**
+         * Address Initialization
+         */
+
+        private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
+        strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
+        strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
+        strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
 
         /**
          * Amount Initialization
@@ -173,6 +179,14 @@ contract TalaxToken is
     event ChangePenaltyFee(address indexed from, uint256 amount);
     event ChangeAirdropPercentage(address indexed from, uint256 amount);
 
+    event ChangePrivatePlacementAddress(address indexed to);
+
+    event ChangeStrategicPartnerAddress(
+        address indexed to1,
+        address indexed to2,
+        address indexed to3
+    );
+
     event AddPrivateSale(
         address indexed from,
         address indexed who,
@@ -198,29 +212,18 @@ contract TalaxToken is
         _;
     }
 
-    modifier onlyWalletOwner(address walletOwner) {
+    function _onlyWalletOwner(address walletOwner) internal view {
         require(_msgSender() == walletOwner, "Wallet owner only");
+    }
+
+    modifier onlyWalletOwner(address walletOwner) {
+        _onlyWalletOwner(walletOwner);
         _;
     }
 
     /* ---------------------------------------------------------------------------------------------- */
     /*                                       INTERNAL FUNCTIONS                                       */
     /* ---------------------------------------------------------------------------------------------- */
-
-    function _addThirdOfValue(uint256 amount_) internal {
-        uint256 thirdOfValue = SafeMath.div(amount_, 3);
-        _balances[team_and_project_coordinator_address_1] = _balances[
-            team_and_project_coordinator_address_1
-        ].add(thirdOfValue);
-
-        _balances[team_and_project_coordinator_address_2] = _balances[
-            team_and_project_coordinator_address_2
-        ].add(thirdOfValue);
-
-        _balances[team_and_project_coordinator_address_3] = _balances[
-            team_and_project_coordinator_address_3
-        ].add(thirdOfValue);
-    }
 
     /**
      * @dev Moves tokens `amount` from `sender` to `recipient`.
@@ -487,20 +490,45 @@ contract TalaxToken is
         }
     }
 
-    /**
-     * @notice EXTERNAL FUNCTIONS
-     */
+    function _addThirdOfValue(uint256 amount_) internal {
+        uint256 thirdOfValue = SafeMath.div(amount_, 3);
+        _balances[team_and_project_coordinator_address_1] = _balances[
+            team_and_project_coordinator_address_1
+        ].add(thirdOfValue);
 
-    /**
-     * @dev Creates 'amount_' of token into stakingReward and liduidityReserve
-     * @dev Deletes 'amount_' of token from stakingReward
-     * @dev Change '_taxFee' with 'taxFee_'
-     */
+        _balances[team_and_project_coordinator_address_2] = _balances[
+            team_and_project_coordinator_address_2
+        ].add(thirdOfValue);
+
+        _balances[team_and_project_coordinator_address_3] = _balances[
+            team_and_project_coordinator_address_3
+        ].add(thirdOfValue);
+    }
 
     function _mintStakingReward(uint256 amount_) internal {
         stakingReward = stakingReward.add(amount_);
         _totalSupply = _totalSupply.add(amount_);
         emit TransferStakingReward(address(0), address(this), amount_);
+    }
+
+    /**
+     * @notice EXTERNAL FUNCTIONS
+     */
+
+    function changePrivatePlacementAddress(address _input) external onlyOwner {
+        private_placement_address = _input;
+        emit ChangePrivatePlacementAddress(_input);
+    }
+
+    function changeStrategicPartnerAddress1(
+        address address1,
+        address address2,
+        address address3
+    ) external onlyOwner {
+        strategic_partner_address_1 = address1;
+        strategic_partner_address_2 = address2;
+        strategic_partner_address_3 = address3;
+        emit ChangeStrategicPartnerAddress(address1, address2, address3);
     }
 
     function mintStakingReward(uint256 amount_) public onlyOwner {

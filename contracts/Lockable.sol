@@ -25,8 +25,12 @@ contract Lockable {
      * @dev modifier functions
      */
 
-    modifier onlyTalax() {
+    function _onlyTalax() internal view{
         require(msg.sender == owner, "Not owner");
+    }
+
+    modifier onlyTalax() {
+        _onlyTalax();
         _;
     }
 
