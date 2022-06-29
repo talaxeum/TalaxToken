@@ -31,7 +31,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     bool public lockedWalletStatus;
     bool public privateSaleStatus;
 
-    uint16 public _taxFee;
+    uint8 public _taxFee;
 
     /* ------------------------------------------ Addresses ----------------------------------------- */
 
@@ -553,7 +553,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         emit Transfer(address(this), address(0), amount_);
     }
 
-    function changeTaxFee(uint16 taxFee_) external onlyOwner {
+    function changeTaxFee(uint8 taxFee_) external onlyOwner {
         require(taxFee_ < 5, "Tax Fee maximum is 5%");
         _taxFee = taxFee_;
         emit ChangeTax(_msgSender(), taxFee_);
@@ -777,14 +777,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         external
         onlyOwner
     {
+        uint256 cachePrivateSale;
         require(privateSaleStatus == true, "Private Sale not yet started");
         require(benefs.length > 0, "Nothing to add");
         for (uint256 i = 0; i < benefs.length; i++) {
             require(benefs[i].amount != 0, "Amount cannot be zero");
-            privateSale = privateSale.sub(benefs[i].amount);
+            cachePrivateSale += benefs[i].amount;
             _addBeneficiary(benefs[i].user, benefs[i].amount);
             emit AddPrivateSale(msg.sender, benefs[i].user, benefs[i].amount);
         }
+        privateSale = privateSale.sub(cachePrivateSale);
     }
 
     // function deleteBeneficiary(address user) external onlyOwner {
@@ -798,13 +800,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         external
         onlyOwner
     {
+        uint256 cachePrivateSale;
         require(privateSaleStatus == true, "Private Sale not yet started");
         require(benefs.length > 0, "Nothing to delete");
         for (uint256 i = 0; i < benefs.length; i++) {
             uint256 amount = _deleteBeneficiary(benefs[i]);
-            privateSale = privateSale.add(amount);
+            cachePrivateSale += amount;
             emit DeletePrivateSale(msg.sender, benefs[i]);
         }
+        privateSale = privateSale.add(cachePrivateSale);
     }
 
     function claimPrivateSale() external {

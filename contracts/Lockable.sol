@@ -25,7 +25,7 @@ contract Lockable {
      * @dev modifier functions
      */
 
-    function _onlyTalax() internal view{
+    function _onlyTalax() internal view {
         require(msg.sender == owner, "Not owner");
     }
 
@@ -54,7 +54,7 @@ contract Lockable {
         uint256 claimable;
 
         for (uint256 i = _latestClaimMonth; i <= 55; i++) {
-            claimable = SafeMath.add(claimable, amount_[i]);
+            claimable += amount[i];
         }
 
         _latestClaimMonth = months + 1;
