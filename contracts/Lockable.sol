@@ -54,7 +54,7 @@ contract Lockable {
         uint256 claimable;
 
         for (uint256 i = _latestClaimMonth; i <= 55; i++) {
-            claimable += amount[i];
+            claimable += amount_[i];
         }
 
         _latestClaimMonth = months + 1;

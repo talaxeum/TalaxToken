@@ -1,0 +1,116 @@
+{
+	"compiler": {
+		"version": "0.8.11+commit.d7f03943"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount_",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "beneficiary_",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [],
+				"name": "beneficiary",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "initiateLockedWallet",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[55]",
+						"name": "amount_",
+						"type": "uint256[55]"
+					}
+				],
+				"name": "releaseClaimable",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"initiateLockedWallet()": {
+					"notice": "Initiate Locked Wallet"
+				},
+				"releaseClaimable(uint256[55])": {
+					"notice": "Transfers tokens held by timelock to beneficiary."
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/Lockable.sol": "Lockable"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": true,
+			"runs": 1000
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/utils/math/SafeMath.sol": {
+			"keccak256": "0xa2f576be637946f767aa56601c26d717f48a0aff44f82e46f13807eea1009a21",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://973868f808e88e21a1a0a01d4839314515ee337ad096286c88e41b74dcc11fc2",
+				"dweb:/ipfs/QmfYuZxRfx2J2xdk4EXN7jKg4bUYEMTaYk9BAw9Bqn4o2Y"
+			]
+		},
+		"contracts/Lockable.sol": {
+			"keccak256": "0x052bfbc27695ed0d9079dae7a01773a2bfaa69ecd211096335986a44e4eaca67",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://c5d0555230ed5170d5becee5c8c8da7ee1946b96a6642afe36c9822f231ea1d6",
+				"dweb:/ipfs/QmbmZ6ssrnVMBLhD16UVpE6mYMvzWM2gqj47JWbtFpFQ6X"
+			]
+		}
+	},
+	"version": 1
+}

@@ -798,6 +798,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     //     emit AddPrivateSale(msg.sender, user, amount);
     // }
 
+    function _checkBeneficiaryAmount(uint256 amount) internal pure {
+        require(amount != 0, "Amount cannot be zero");
+    }
+
     function addMultipleBeneficiary(Beneficiary[] calldata benefs)
         external
         onlyOwner
@@ -806,7 +810,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         require(privateSaleStatus == true, "Private Sale not yet started");
         require(benefs.length > 0, "Nothing to add");
         for (uint256 i = 0; i < benefs.length; i++) {
-            require(benefs[i].amount != 0, "Amount cannot be zero");
+            _checkBeneficiaryAmount(benefs[i].amount);
             cachePrivateSale += benefs[i].amount;
             _addBeneficiary(benefs[i].user, benefs[i].amount);
             emit AddPrivateSale(msg.sender, benefs[i].user, benefs[i].amount);
