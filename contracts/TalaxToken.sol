@@ -618,13 +618,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
-    function withdrawStake(uint256 amount) external {
-        (uint256 amount_, uint256 reward_) = _withdrawStake(msg.sender, amount);
+    function withdrawStake() external {
+        (uint256 amount_, uint256 reward_) = _withdrawStake(msg.sender);
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
         mintStakingReward(reward_);
-        _balances[address(this)] = _balances[address(this)].sub(amount);
+        _balances[address(this)] = _balances[address(this)].sub(amount_);
         stakingReward = stakingReward.sub(reward_);
         _totalSupply = _totalSupply.add(amount_ + reward_);
         _balances[_msgSender()] = _balances[_msgSender()].add(
@@ -841,7 +841,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     function claimPrivateSale() external {
-        uint256 amount = _releaseClaimable(_msgSender());
-        _balances[_msgSender()] = _balances[_msgSender()].add(amount);
+        _balances[_msgSender()] = _balances[_msgSender()].add(
+            _releaseClaimable(_msgSender())
+        );
     }
 }
