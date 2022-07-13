@@ -1281,13 +1281,7 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
+				"inputs": [],
 				"name": "withdrawStake",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -1446,43 +1440,43 @@
 			]
 		},
 		"contracts/Data.sol": {
-			"keccak256": "0xd660f5fa0198cff3407ee38f9b3451001faabe247c5f3e985112edc9cff60162",
+			"keccak256": "0xcf4c4693b41e555c0450972b616cfff263d6ede69148127426603cdf7e3dbfe1",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://b839452fa8602dd30cfa8b61ccefc54f9bcfbe62be3f0600f6ebde92421850bf",
-				"dweb:/ipfs/QmThNtGQJFNu1RGe59RH4DHckinBw5HHLH636tedCDwNNK"
+				"bzz-raw://90237bd9e54fdb70da614cf2bb5081d1fae010cd867e471ef466e2b3cb734140",
+				"dweb:/ipfs/QmZGYSrC61LGNwY8kofnqxSYRGQDAEb6EZnv86nah9AVJ1"
 			]
 		},
 		"contracts/Lockable.sol": {
-			"keccak256": "0x052bfbc27695ed0d9079dae7a01773a2bfaa69ecd211096335986a44e4eaca67",
+			"keccak256": "0xc648414f4b5f9f3f01506d70cc06749a2bee4d0e9dca865c8cbb83164ff7d4f6",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://c5d0555230ed5170d5becee5c8c8da7ee1946b96a6642afe36c9822f231ea1d6",
-				"dweb:/ipfs/QmbmZ6ssrnVMBLhD16UVpE6mYMvzWM2gqj47JWbtFpFQ6X"
+				"bzz-raw://1e9ed2994042f8d4910e5a0e8eb2b8c4f6db748c90c519b7411a649ae70d2a05",
+				"dweb:/ipfs/QmVEDFTWrBg9Kap3gy6YELxzgzJDUYCke1ng7zwtp7Ek98"
 			]
 		},
 		"contracts/Multilockable.sol": {
-			"keccak256": "0x9104e67633bd5da6e23aba48bd39f40c87ce9fa5893c694ead9e2a1d165b9939",
+			"keccak256": "0xb44628fea2bbec891322ef76af8b3b31b88c152a2ff9bdcdda2307178e5fb1bb",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://fd868ee092841701c3b48f56c32e941a4e7fd8f5be8e710c52fc0bc8f29ba836",
-				"dweb:/ipfs/QmQvHJS8pVP1NamP4xbkVnCyquMkhiWkWsQ6qPczntjyD2"
+				"bzz-raw://787d81d8e0e6668627b31c79421140259ed49b4ba7263031f4acf3feab738425",
+				"dweb:/ipfs/QmVcSQcKVFKRRhvECCztJPNcj5uS8xpPqnCPD14cNtVMiQ"
 			]
 		},
 		"contracts/Stakable.sol": {
-			"keccak256": "0x15743369d0f105528a22de8c9cf9a4e314f6f6e4703e635f52d318903ebbd651",
+			"keccak256": "0x4e31f4afd1efc3714b1081fd0f999d9b10bfd52d976a3d34da75a0acdd7bea6b",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://80787b636d943bcdaf53924a4df2d8b195a4c601ecaea65cf112525d8e96ac4e",
-				"dweb:/ipfs/QmUo5vi9HWvxC8iM9RdCEt99SC9qRx85hkGyhrAM8dJfPw"
+				"bzz-raw://d70abaf94fc5b2efa095d69bd8d610051da67cac93795358a57fc2fca103de21",
+				"dweb:/ipfs/QmaGi42GYMszwKKxZrw1z9AVXyRZ6CeqnFnwfi7pqSXYBS"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x547934f540369d68539e98535c3966203fdea221ff3c3dd882035339a8567097",
+			"keccak256": "0x498b2d87b7fa5ecab293b2e5bcee9a06b5e8cac2611a053e4e2f89f14e6c01f3",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://066e99dfd7981e5ff255ed6f4ce417486e822ff2b7aa8b279b71649c3b7f39f4",
-				"dweb:/ipfs/QmTwKVqLixxtyXh5FjZoCL4kcmEA1sNTzx2BvxiUz8qCgv"
+				"bzz-raw://1b182b053998d172e82fbe1eeb0285b448718441d821dc546ed917377f07315f",
+				"dweb:/ipfs/QmVutt5U1LGX7QjubATmM6i9DooN3NBNS8KeJ8yo856Vhb"
 			]
 		}
 	},

@@ -27,11 +27,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     mapping(uint256 => uint256) internal _stakingPackage;
     uint256 public stakingReward;
     uint256 public privateSale;
+    uint8 public _taxFee;
+
     bool public airdropStatus;
     bool public lockedWalletStatus;
     bool public privateSaleStatus;
-
-    uint8 public _taxFee;
 
     /* ------------------------------------------ Addresses ----------------------------------------- */
 
@@ -43,10 +43,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
      * address liquidity_reserve_address; // this cotract's address
      */
 
-    address public private_placement_address;
-    address public strategic_partner_address_1;
-    address public strategic_partner_address_2;
-    address public strategic_partner_address_3;
+    address public private_placement_address =
+        0x07A20dc6722563783e44BA8EDCA08c774621125E;
+    address public strategic_partner_address_1 =
+        0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
+    address public strategic_partner_address_2 =
+        0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
+    address public strategic_partner_address_3 =
+        0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
 
     /* ------------------------------------------ Lockable ------------------------------------------ */
 
@@ -82,20 +86,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _stakingPackage[360 days] = 8;
 
         /**
-         * Address Initialization
-         */
-
-        private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
-        strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
-        strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
-        strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
-
-        /**
          * Amount Initialization
          */
 
-        // _balances[address(this)] = 52500 * 1e3 * 1e18;
-        _balances[msg.sender] = 52500 * 1e3 * 1e18;
+        _balances[address(this)] = 52500 * 1e3 * 1e18;
+        // _balances[msg.sender] = 52500 * 1e3 * 1e18;
         stakingReward = 17514 * 1e3 * 1e18;
 
         // Public Sale
@@ -605,14 +600,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
             "Staking option doesnt exist"
         );
 
+        // Burn the amount of tokens on the sender
+        _burn(_msgSender(), _amount);
+
         _stake(
             msg.sender,
             _amount,
             _stakePeriod,
             _stakingPackage[_stakePeriod]
         );
-        // Burn the amount of tokens on the sender
-        _burn(_msgSender(), _amount);
+
         // Stake amount goes to liquidity reserve
         _balances[address(this)] = _balances[address(this)].add(_amount);
     }
