@@ -10,9 +10,20 @@ contract Stakable {
      * push once to stakeholders for it to work proplerly
      */
 
+    struct Voter {
+        bool votingRight;
+        mapping(uint256 => bool) voted;
+    }
+
     uint256 public _stakingPenaltyRate;
     uint256 public _airdropRate;
     uint256 public airdropSince;
+
+    bool private votingStatus;
+    uint256 private votingId;
+    uint256 public totalVoters;
+    mapping(address => Voter) public voters;
+    mapping(uint256 => uint256) public votedUsers;
 
     constructor() {
         //Staking penalty and Airdrop in 0.1 times percentage
@@ -96,6 +107,9 @@ contract Stakable {
         // Simple check so that user does not stake 0
         require(_amount > 0, "Cannot stake nothing");
         require(stakeholders[_user].stake.amount == 0, "User is a staker");
+
+        totalVoters += 1;
+        voters[_user].votingRight = true;
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -202,12 +216,51 @@ contract Stakable {
         delete stakeholders[_user];
 
         if (stake.releaseTime > block.timestamp) {
+            totalVoters -= 1;
+            delete voters[_user].voted[votingId];
             return calculateStakingWithPenalty(stake.amount, reward);
         }
 
+        totalVoters -= 1;
+        delete voters[_user].voted[votingId];
         return (stake.amount, reward);
     }
 
+    function hasStake(address _staker)
+        external
+        view
+        returns (StakingSummary memory)
+    {
+        Stakeholder memory data = stakeholders[_staker];
+        StakingSummary memory summary = StakingSummary(0, 0, data.stake);
+        require(summary.stake.amount != 0, "No stake found");
+
+        uint256 availableReward = calculateStakeReward(summary.stake);
+        uint256 penalty;
+
+        if (summary.stake.releaseTime > block.timestamp) {
+            (uint256 amount_penalty, uint256 reward_penalty) = calculatePenalty(
+                summary.stake.amount,
+                availableReward
+            );
+            penalty = amount_penalty + reward_penalty;
+        }
+
+        if (_calculateWeek(data.latestClaimDrop) > 0) {
+            uint256 airdrop = _calculateAirdrop(summary.stake.amount);
+            summary.stake.claimable_airdrop = airdrop;
+        } else {
+            summary.stake.claimable_airdrop = 0;
+        }
+
+        summary.stake.claimable = availableReward;
+        summary.penalty = penalty;
+        summary.total_amount = summary.stake.amount;
+
+        return summary;
+    }
+
+    /* -------------------------------------- Airdrop functions ------------------------------------- */
     function _calculateAirdrop(uint256 stakeAmount)
         internal
         view
@@ -240,37 +293,57 @@ contract Stakable {
         }
     }
 
-    function hasStake(address _staker)
-        public
-        view
-        returns (StakingSummary memory)
-    {
-        Stakeholder memory data = stakeholders[_staker];
-        StakingSummary memory summary = StakingSummary(0, 0, data.stake);
-        require(summary.stake.amount != 0, "No stake found");
+    /* -------------------------------------- Voting functions -------------------------------------- */
+    function _startVoting() internal {
+        require(votingStatus == false, "Voting is already running");
+        votingStatus = true;
+        votingId += 1;
+    }
 
-        uint256 availableReward = calculateStakeReward(summary.stake);
-        uint256 penalty;
+    function isVoter(address _staker) public view returns (bool) {
+        require(_staker != address(0), "Invalid address");
 
-        if (summary.stake.releaseTime > block.timestamp) {
-            (uint256 amount_penalty, uint256 reward_penalty) = calculatePenalty(
-                summary.stake.amount,
-                availableReward
-            );
-            penalty = amount_penalty + reward_penalty;
-        }
+        return voters[_staker].votingRight;
+    }
 
-        if (_calculateWeek(data.latestClaimDrop) > 0) {
-            uint256 airdrop = _calculateAirdrop(summary.stake.amount);
-            summary.stake.claimable_airdrop = airdrop;
+    function vote() public {
+        require(votingStatus == true, "Voting is not available");
+        require(voters[msg.sender].votingRight == true, "You are not a voter");
+        require(
+            voters[msg.sender].voted[votingId] == false,
+            "You have voted before"
+        );
+
+        voters[msg.sender].voted[votingId] = true;
+        votedUsers[votingId] += 1;
+    }
+
+    function retractVote() public {
+        require(votingStatus == true, "Voting is not available");
+        require(voters[msg.sender].votingRight == true, "You are not a voter");
+        require(
+            voters[msg.sender].voted[votingId] == true,
+            "You have not voted yet"
+        );
+
+        voters[msg.sender].voted[votingId] == false;
+        votedUsers[votingId] -= 1;
+    }
+
+    function _getVotingResult() internal view returns (bool) {
+        require(votingStatus == true, "Voting is not available");
+        require(totalVoters > 1, "Not enough voters");
+        uint256 half_voters = SafeMath.div(SafeMath.mul(totalVoters, 5), 10);
+
+        if (votedUsers[votingId] > half_voters) {
+            return true;
         } else {
-            summary.stake.claimable_airdrop = 0;
+            return false;
         }
+    }
 
-        summary.stake.claimable = availableReward;
-        summary.penalty = penalty;
-        summary.total_amount = summary.stake.amount;
-
-        return summary;
+    function _stopVoting() internal {
+        require(votingStatus == true, "Voting is not available");
+        votingStatus = false;
     }
 }

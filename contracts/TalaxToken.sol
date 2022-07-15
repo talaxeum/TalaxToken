@@ -27,6 +27,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     mapping(uint256 => uint256) internal _stakingPackage;
     uint256 public stakingReward;
     uint256 public privateSale;
+    uint256 public daoProjectPool;
     uint8 public _taxFee;
 
     bool public airdropStatus;
@@ -37,12 +38,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     address private timelockController;
 
-    /**
-     * Local (in this smart contract)
-     * address staking_reward_address;
-     * address liquidity_reserve_address; // this cotract's address
-     */
+    /* ---------------------------------- later moved into Data.sol --------------------------------- */
+    address private cex_listing_address;
+    /* ---------------------------------------------- - --------------------------------------------- */
 
+    // Changeable address by owner
     address public private_placement_address =
         0x07A20dc6722563783e44BA8EDCA08c774621125E;
     address public strategic_partner_address_1 =
@@ -54,16 +54,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     /* ------------------------------------------ Lockable ------------------------------------------ */
 
-    Lockable private privatePlacementLockedWallet;
-    Lockable private devPoolLockedWallet_1;
-    Lockable private devPoolLockedWallet_2;
-    Lockable private devPoolLockedWallet_3;
-    Lockable private strategicPartnerLockedWallet_1;
-    Lockable private strategicPartnerLockedWallet_2;
-    Lockable private strategicPartnerLockedWallet_3;
-    Lockable private teamAndProjectCoordinatorLockedWallet_1;
-    Lockable private teamAndProjectCoordinatorLockedWallet_2;
-    Lockable private teamAndProjectCoordinatorLockedWallet_3;
+    Lockable internal privatePlacementLockedWallet;
+    Lockable internal marketingLockedWallet_1;
+    Lockable internal marketingLockedWallet_2;
+    Lockable internal marketingLockedWallet_3;
+    Lockable internal strategicPartnerLockedWallet_1;
+    Lockable internal strategicPartnerLockedWallet_2;
+    Lockable internal strategicPartnerLockedWallet_3;
+    Lockable internal teamAndProjectCoordinatorLockedWallet_1;
+    Lockable internal teamAndProjectCoordinatorLockedWallet_2;
+    Lockable internal teamAndProjectCoordinatorLockedWallet_3;
 
     struct Beneficiary {
         address user;
@@ -71,7 +71,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     constructor() ERC20("TALAXEUM", "TALAX") {
-        _totalSupply = 210 * 1e6 * 1e18;
+        _totalSupply = 21 * 1e9 * 1e18;
         _name = "TALAXEUM";
         _symbol = "TALAX";
 
@@ -85,73 +85,70 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _stakingPackage[180 days] = 7;
         _stakingPackage[360 days] = 8;
 
-        /**
-         * Amount Initialization
-         */
-
-        _balances[address(this)] = 52500 * 1e3 * 1e18;
-        // _balances[msg.sender] = 52500 * 1e3 * 1e18;
-        stakingReward = 17514 * 1e3 * 1e18;
-
         // Public Sale
-        _balances[public_sale_address] = 2310 * 1e3 * 1e18;
+        _balances[public_sale_address] = 39690 * 1e3 * 1e18;
+        // CEX Listing
+        _balances[cex_listing_address] = 105000 * 1e3 * 1e18;
 
-        // Private Sale
-        // privateSaleLockedWallet = new Multilockable(14679 * 1e3 * 1e18);
-        privateSale = 14679 * 1e3 * 1e18;
+        // Private Sale (MultiLockable)
+        privateSale = 146790 * 1e3 * 1e18;
+        // Staking Reward (stored inside this contract)
+        stakingReward = 268590 * 1e3 * 1e18;
+        // DAO Project Pool
+        daoProjectPool = 420000 * 1e3 * 1e18;
+        // Liquitidity Reserve (This Contract)
+        _balances[address(this)] = 420000 * 1e3 * 1e18;
 
-        /**
-         * Locked Wallet Initialization
-         */
-
+        /* ---------------------------------------- Locked Wallet --------------------------------------- */
         privatePlacementLockedWallet = new Lockable(
-            6993 * 1e3 * 1e18,
+            69930 * 1e3 * 1e18,
             private_placement_address
         );
 
-        devPoolLockedWallet_1 = new Lockable(
-            24668 * 1e3 * 1e18,
-            dev_pool_address_1
+        marketingLockedWallet_1 = new Lockable(
+            70000 * 1e3 * 1e18,
+            marketing_address_1
         );
-        devPoolLockedWallet_2 = new Lockable(
-            24668 * 1e3 * 1e18,
-            dev_pool_address_2
+        marketingLockedWallet_2 = new Lockable(
+            70000 * 1e3 * 1e18,
+            marketing_address_2
         );
-        devPoolLockedWallet_3 = new Lockable(
-            24668 * 1e3 * 1e18,
-            dev_pool_address_3
+        marketingLockedWallet_3 = new Lockable(
+            70000 * 1e3 * 1e18,
+            marketing_address_3
         );
 
         strategicPartnerLockedWallet_1 = new Lockable(
-            3500 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             strategic_partner_address_1
         );
         strategicPartnerLockedWallet_2 = new Lockable(
-            3500 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             strategic_partner_address_2
         );
         strategicPartnerLockedWallet_3 = new Lockable(
-            3500 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             strategic_partner_address_3
         );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-            10500 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             team_and_project_coordinator_address_1
         );
         teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-            10500 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             team_and_project_coordinator_address_2
         );
         teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-            10500 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             team_and_project_coordinator_address_3
         );
 
-        //Public Sale, Private Sale, Private Placement, Staking Reward
-        // Dev Pool, Strategic Partner, Team and Project Coordinator
+        // Public Sale, CEX Listing - EOA Type Balance
+        // Private Placement, Strategic Partner & Advisory, Team and Project Contributor, Marketing - Locked Wallet Type Balance
+        // Staking Reward, Liquidity Reserve, DAO Project Pool - Smart Contract Balance
         _totalSupply = _totalSupply.sub(
-            157500 * 1e3 * 1e18,
+            1411410 * 1e3 * 1e18,
             "Insufficient Total Supply"
         );
     }
@@ -201,9 +198,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /* ---------------------------------------------------------------------------------------------- */
     /*                                            MODIFIERS                                           */
     /* ---------------------------------------------------------------------------------------------- */
+    function _isLockedWalletInitiated() internal view {
+        require(lockedWalletStatus == true, "Locked Wallet not yet started");
+    }
 
     modifier lockedWalletInitiated() {
-        require(lockedWalletStatus == true, "Locked Wallet not yet started");
+        _isLockedWalletInitiated();
         _;
     }
 
@@ -531,9 +531,24 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         emit TransferStakingReward(address(0), address(this), amount_);
     }
 
-    /**
-     * @notice EXTERNAL FUNCTIONS
-     */
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                       External Functions                                       */
+    /* ---------------------------------------------------------------------------------------------- */
+
+    function transferToDAOPool(uint256 amount_) external {
+        _balances[msg.sender] = _balances[msg.sender].sub(amount_);
+        daoProjectPool += amount_;
+    }
+
+    function transferDAOPool(address to_, uint256 amount_) external onlyOwner {
+        bool result = _getVotingResult();
+
+        if (result == true) {
+            daoProjectPool = daoProjectPool.sub(amount_);
+            _balances[to_] = _balances[to_].add(amount_);
+        }
+        _stopVoting();
+    }
 
     function changePrivatePlacementAddress(address _input) external onlyOwner {
         private_placement_address = _input;
@@ -646,9 +661,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
         lockedWalletStatus = true;
         privatePlacementLockedWallet.initiateLockedWallet();
-        devPoolLockedWallet_1.initiateLockedWallet();
-        devPoolLockedWallet_2.initiateLockedWallet();
-        devPoolLockedWallet_3.initiateLockedWallet();
+        marketingLockedWallet_1.initiateLockedWallet();
+        marketingLockedWallet_2.initiateLockedWallet();
+        marketingLockedWallet_3.initiateLockedWallet();
         strategicPartnerLockedWallet_1.initiateLockedWallet();
         strategicPartnerLockedWallet_2.initiateLockedWallet();
         strategicPartnerLockedWallet_3.initiateLockedWallet();
@@ -679,37 +694,37 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     /* -------------------------------- Dev Pool -------------------------------- */
-    function unlockDevPoolWallet_1()
+    function unlockMarketingWallet_1()
         external
         lockedWalletInitiated
-        onlyWalletOwner(devPoolLockedWallet_1.beneficiary())
+        onlyWalletOwner(marketingLockedWallet_1.beneficiary())
     {
-        uint256 timeLockedAmount = devPoolLockedWallet_1.releaseClaimable(
-            devPoolReleaseAmount()
+        uint256 timeLockedAmount = marketingLockedWallet_1.releaseClaimable(
+            marketingReleaseAmount()
         );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    function unlockDevPoolWallet_2()
+    function unlockMarketingWallet_2()
         external
         lockedWalletInitiated
-        onlyWalletOwner(devPoolLockedWallet_2.beneficiary())
+        onlyWalletOwner(marketingLockedWallet_2.beneficiary())
     {
-        uint256 timeLockedAmount = devPoolLockedWallet_2.releaseClaimable(
-            devPoolReleaseAmount()
+        uint256 timeLockedAmount = marketingLockedWallet_2.releaseClaimable(
+            marketingReleaseAmount()
         );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    function unlockDevPoolWallet_3()
+    function unlockMarketingWallet_3()
         external
         lockedWalletInitiated
-        onlyWalletOwner(devPoolLockedWallet_3.beneficiary())
+        onlyWalletOwner(marketingLockedWallet_3.beneficiary())
     {
-        uint256 timeLockedAmount = devPoolLockedWallet_3.releaseClaimable(
-            devPoolReleaseAmount()
+        uint256 timeLockedAmount = marketingLockedWallet_3.releaseClaimable(
+            marketingReleaseAmount()
         );
 
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);

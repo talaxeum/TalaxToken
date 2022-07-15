@@ -46,7 +46,7 @@ contract Lockable {
      *  @dev 		Main Functions
      *  @return 	Claimable amount from Locked Wallet
      */
-    function _calculateClaimableAmount(uint256[55] memory amount_)
+    function _calculateClaimableAmount(uint256[51] memory amount_)
         internal
         returns (uint256)
     {
@@ -66,7 +66,7 @@ contract Lockable {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function releaseClaimable(uint256[55] memory amount_)
+    function releaseClaimable(uint256[51] memory amount_)
         external
         onlyTalax
         returns (uint256)

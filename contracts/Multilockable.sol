@@ -7,9 +7,9 @@ contract Multilockable {
     using SafeMath for uint256;
     uint256 public totalUser;
 
-    uint256 public totalAmount = 14679 * 1e3 * 1e18;
-    uint256 public constant phase_1_total = 1467900 * 1e18;
-    uint256 public constant phase_2_total = 36195 * 1e18;
+    uint256 public totalAmount = 146790000 * 1e18;
+    uint256 public constant phase_1_total = 7339500 * 1e18;
+    uint256 public constant phase_2_total = 3873625 * 1e17; // monhtly limit
 
     uint256 public _startPrivateSale;
 
