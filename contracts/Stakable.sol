@@ -3,6 +3,8 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+error Voting__VotingStatus();
+
 contract Stakable {
     using SafeMath for uint256;
     /**
@@ -29,6 +31,16 @@ contract Stakable {
         //Staking penalty and Airdrop in 0.1 times percentage
         _stakingPenaltyRate = 15;
         _airdropRate = 80;
+    }
+
+    /* ------------------------------------------ Modifier ------------------------------------------ */
+    function _checkVotingStatus() internal view {
+        require(votingStatus, "Voting is not available");
+    }
+
+    modifier votingStatusTrue() {
+        _checkVotingStatus();
+        _;
     }
 
     /**
@@ -306,8 +318,7 @@ contract Stakable {
         return voters[_staker].votingRight;
     }
 
-    function vote() public {
-        require(votingStatus == true, "Voting is not available");
+    function vote() public votingStatusTrue {
         require(voters[msg.sender].votingRight == true, "You are not a voter");
         require(
             voters[msg.sender].voted[votingId] == false,
@@ -318,8 +329,7 @@ contract Stakable {
         votedUsers[votingId] += 1;
     }
 
-    function retractVote() public {
-        require(votingStatus == true, "Voting is not available");
+    function retractVote() public votingStatusTrue {
         require(voters[msg.sender].votingRight == true, "You are not a voter");
         require(
             voters[msg.sender].voted[votingId] == true,
@@ -330,8 +340,7 @@ contract Stakable {
         votedUsers[votingId] -= 1;
     }
 
-    function _getVotingResult() internal view returns (bool) {
-        require(votingStatus == true, "Voting is not available");
+    function _getVotingResult() internal view votingStatusTrue returns (bool) {
         require(totalVoters > 1, "Not enough voters");
         uint256 half_voters = SafeMath.div(SafeMath.mul(totalVoters, 5), 10);
 
@@ -342,8 +351,7 @@ contract Stakable {
         }
     }
 
-    function _stopVoting() internal {
-        require(votingStatus == true, "Voting is not available");
+    function _stopVoting() internal votingStatusTrue {
         votingStatus = false;
     }
 }

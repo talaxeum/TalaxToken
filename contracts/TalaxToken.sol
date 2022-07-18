@@ -681,7 +681,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
-    /* ---------------------------- Private Placement --------------------------- */
+    /* -------------------------------------- Private Placement ------------------------------------- */
     function unlockPrivatePlacementWallet()
         external
         lockedWalletInitiated
@@ -693,7 +693,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /* -------------------------------- Dev Pool -------------------------------- */
+    /* ------------------------------------------ Marketing ----------------------------------------- */
     function unlockMarketingWallet_1()
         external
         lockedWalletInitiated
@@ -730,7 +730,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /* ---------------------------- Strategic Partner --------------------------- */
+    /* -------------------------------------- Strategic Partner ------------------------------------- */
     function unlockStrategicPartnerWallet_1()
         external
         lockedWalletInitiated
@@ -764,7 +764,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /* ---------------------- Team and Project Coordinator ---------------------- */
+    /* -------------------------------- Team and Project Coordinator -------------------------------- */
     function unlockTeamAndProjectCoordinatorWallet_1()
         external
         lockedWalletInitiated
