@@ -71,7 +71,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     constructor() ERC20("TALAXEUM", "TALAX") {
-        _totalSupply = 21 * 1e9 * 1e18;
+        _totalSupply = 21 * 1e7 * 1e18;
         _name = "TALAXEUM";
         _symbol = "TALAX";
 
