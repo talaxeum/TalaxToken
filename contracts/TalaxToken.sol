@@ -71,7 +71,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     constructor() ERC20("TALAXEUM", "TALAX") {
-        _totalSupply = 21 * 1e9 * 1e18;
+        _totalSupply = 21 * 1e8 * 1e18;
         _name = "TALAXEUM";
         _symbol = "TALAX";
 
@@ -106,41 +106,41 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
 
         marketingLockedWallet_1 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             marketing_address_1
         );
         marketingLockedWallet_2 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             marketing_address_2
         );
         marketingLockedWallet_3 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             marketing_address_3
         );
 
         strategicPartnerLockedWallet_1 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             strategic_partner_address_1
         );
         strategicPartnerLockedWallet_2 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             strategic_partner_address_2
         );
         strategicPartnerLockedWallet_3 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             strategic_partner_address_3
         );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             team_and_project_coordinator_address_1
         );
         teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             team_and_project_coordinator_address_2
         );
         teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-            70000 * 1e3 * 1e18,
+            7000 * 1e3 * 1e18,
             team_and_project_coordinator_address_3
         );
 
@@ -681,7 +681,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
-    /* ---------------------------- Private Placement --------------------------- */
+    /* -------------------------------------- Private Placement ------------------------------------- */
     function unlockPrivatePlacementWallet()
         external
         lockedWalletInitiated
@@ -693,7 +693,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /* -------------------------------- Dev Pool -------------------------------- */
+    /* ------------------------------------------ Marketing ----------------------------------------- */
     function unlockMarketingWallet_1()
         external
         lockedWalletInitiated
@@ -730,7 +730,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /* ---------------------------- Strategic Partner --------------------------- */
+    /* -------------------------------------- Strategic Partner ------------------------------------- */
     function unlockStrategicPartnerWallet_1()
         external
         lockedWalletInitiated
@@ -764,7 +764,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
-    /* ---------------------- Team and Project Coordinator ---------------------- */
+    /* -------------------------------- Team and Project Coordinator -------------------------------- */
     function unlockTeamAndProjectCoordinatorWallet_1()
         external
         lockedWalletInitiated
