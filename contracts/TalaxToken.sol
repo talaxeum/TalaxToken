@@ -86,7 +86,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _stakingPackage[360 days] = 8;
 
         // Public Sale
-<<<<<<< HEAD
         _balances[public_sale_address] = 3969 * 1e3 * 1e18;
         // CEX Listing
         _balances[cex_listing_address] = 10500 * 1e3 * 1e18;
@@ -103,29 +102,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         /* ---------------------------------------- Locked Wallet --------------------------------------- */
         privatePlacementLockedWallet = new Lockable(
             6993 * 1e3 * 1e18,
-=======
-        _balances[public_sale_address] = 396900 * 1e3 * 1e18;
-        // CEX Listing
-        _balances[cex_listing_address] = 1050000 * 1e3 * 1e18;
-
-        // Private Sale (MultiLockable)
-        privateSale = 1467900 * 1e3 * 1e18;
-        // Staking Reward (stored inside this contract)
-        stakingReward = 2685900 * 1e3 * 1e18;
-        // DAO Project Pool
-        daoProjectPool = 4200000 * 1e3 * 1e18;
-        // Liquitidity Reserve (This Contract)
-        _balances[address(this)] = 4200000 * 1e3 * 1e18;
-
-        /* ---------------------------------------- Locked Wallet --------------------------------------- */
-        privatePlacementLockedWallet = new Lockable(
-            699300 * 1e3 * 1e18,
->>>>>>> scenario1
             private_placement_address
         );
 
         marketingLockedWallet_1 = new Lockable(
-<<<<<<< HEAD
             7000 * 1e3 * 1e18,
             marketing_address_1
         );
@@ -135,22 +115,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
         marketingLockedWallet_3 = new Lockable(
             7000 * 1e3 * 1e18,
-=======
-            700000 * 1e3 * 1e18,
-            marketing_address_1
-        );
-        marketingLockedWallet_2 = new Lockable(
-            700000 * 1e3 * 1e18,
-            marketing_address_2
-        );
-        marketingLockedWallet_3 = new Lockable(
-            700000 * 1e3 * 1e18,
->>>>>>> scenario1
             marketing_address_3
         );
 
         strategicPartnerLockedWallet_1 = new Lockable(
-<<<<<<< HEAD
             7000 * 1e3 * 1e18,
             strategic_partner_address_1
         );
@@ -160,22 +128,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
         strategicPartnerLockedWallet_3 = new Lockable(
             7000 * 1e3 * 1e18,
-=======
-            700000 * 1e3 * 1e18,
-            strategic_partner_address_1
-        );
-        strategicPartnerLockedWallet_2 = new Lockable(
-            700000 * 1e3 * 1e18,
-            strategic_partner_address_2
-        );
-        strategicPartnerLockedWallet_3 = new Lockable(
-            700000 * 1e3 * 1e18,
->>>>>>> scenario1
             strategic_partner_address_3
         );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-<<<<<<< HEAD
             7000 * 1e3 * 1e18,
             team_and_project_coordinator_address_1
         );
@@ -185,17 +141,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
         teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
             7000 * 1e3 * 1e18,
-=======
-            700000 * 1e3 * 1e18,
-            team_and_project_coordinator_address_1
-        );
-        teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-            700000 * 1e3 * 1e18,
-            team_and_project_coordinator_address_2
-        );
-        teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-            700000 * 1e3 * 1e18,
->>>>>>> scenario1
             team_and_project_coordinator_address_3
         );
 
@@ -203,11 +148,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // Private Placement, Strategic Partner & Advisory, Team and Project Contributor, Marketing - Locked Wallet Type Balance
         // Staking Reward, Liquidity Reserve, DAO Project Pool - Smart Contract Balance
         _totalSupply = _totalSupply.sub(
-<<<<<<< HEAD
             141141 * 1e3 * 1e18,
-=======
-            14114100 * 1e3 * 1e18,
->>>>>>> scenario1
             "Insufficient Total Supply"
         );
     }
