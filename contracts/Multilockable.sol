@@ -9,7 +9,7 @@ contract Multilockable {
 
     uint256 public totalAmount = 14679000 * 1e18;
     uint256 public constant phase_1_total = 733950 * 1e18;
-    uint256 public constant phase_2_total = 3873625 * 1e16; // monhtly limit
+    uint256 public constant phase_2_total = 38206 * 1e18; // monhtly limit
 
     uint256 public _startPrivateSale;
 
