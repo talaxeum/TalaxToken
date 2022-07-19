@@ -836,7 +836,20 @@
 			},
 			{
 				"inputs": [],
-				"name": "initiateLockedWalletprivateSale_Airdrop",
+				"name": "initializationStatus",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "initiateLockedWallet_PrivateSale_Airdrop",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -850,19 +863,6 @@
 					}
 				],
 				"name": "isVoter",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "lockedWalletStatus",
 				"outputs": [
 					{
 						"internalType": "bool",
@@ -945,38 +945,12 @@
 			},
 			{
 				"inputs": [],
-				"name": "privateSale",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "privateSaleAmount",
 				"outputs": [
 					{
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "privateSaleStatus",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
 					}
 				],
 				"stateMutability": "view",
@@ -1496,11 +1470,11 @@
 			]
 		},
 		"contracts/Multilockable.sol": {
-			"keccak256": "0xf017488bab98a5fd1ab4ee0df91ea0071a7d6611976e74c10c2d5f6737fa109e",
+			"keccak256": "0x02014d27c782511f91ae93974819501e4b6929537febce5ffe6a6baf0c95d2b0",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://21ac5778ca8e84ed236d60d90049d1ab164760731c577edffb2f25d2d61f10a1",
-				"dweb:/ipfs/QmPkib6ZrMh1oMg6Yty8W9fBQvSLRDu8Hi6hnPdAFCzH94"
+				"bzz-raw://18595bd7d7485bc125bf580a1d2b7346f7bb02f21d7a409ee5841a0b21cdd640",
+				"dweb:/ipfs/QmWQQA2JwLsRw9GQxBeLgmqgyygmEeVF8e7TKeZA4zAww6"
 			]
 		},
 		"contracts/Stakable.sol": {
@@ -1512,11 +1486,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0xf58c537e35432010aea42d10f77499aef1acd20ca2a222c1b15f375a952ef392",
+			"keccak256": "0x4dcad64c7854dc47b5ca39c82a8657aaaad3d17bca6a9152559fc42f1fb6e4d3",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://cbeef429a79de769a658ce67baaa4c3e609be2cb9cc219978e01dc5581fb90d4",
-				"dweb:/ipfs/QmR2S59ADh37ZUmiSGTZTDNBCMReZ5YrUbDA54j7Vmdg2a"
+				"bzz-raw://eb5817513896db01c7cbbc75a12dba9cca200e5cf4783cf07cc8ada1d1807a36",
+				"dweb:/ipfs/QmfXSTmBkua5z9ZLqpqHiJ4iZPaddfgbqWi7suW1RkAVKg"
 			]
 		}
 	},
