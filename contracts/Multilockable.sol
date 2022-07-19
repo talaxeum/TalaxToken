@@ -7,7 +7,7 @@ contract Multilockable {
     using SafeMath for uint256;
     uint256 public privateSaleUsers;
 
-    uint256 public privateSaleAmount = 1467900000 * 1e18;
+    uint256 public privateSaleAmount;
     uint256 internal constant _phase1 = 73395000 * 1e18;
     uint256 internal constant _phase2 = 3820562 * 1e18; // daily limit
 
@@ -23,7 +23,9 @@ contract Multilockable {
     // beneficiary of tokens after they are released
     mapping(address => Multilock) private beneficiary;
 
-    constructor() {}
+    constructor() {
+        privateSaleAmount = 1467900000 * 1e18;
+    }
 
     function _initiatePrivateSale() internal {
         startPrivateSale = block.timestamp;

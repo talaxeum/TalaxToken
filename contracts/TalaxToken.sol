@@ -26,7 +26,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     mapping(uint256 => uint256) internal _stakingPackage;
     uint256 public stakingReward;
-    uint256 public privateSale;
     uint256 public daoProjectPool;
     uint8 public taxFee;
 
@@ -90,8 +89,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // CEX Listing
         _balances[cex_listing_address] = 1050000 * 1e3 * 1e18;
 
-        // Private Sale (MultiLockable)
-        privateSale = 1467900 * 1e3 * 1e18;
+        // Private Sale (MultiLockable.sol)
         // Staking Reward (stored inside this contract)
         stakingReward = 2685900 * 1e3 * 1e18;
         // DAO Project Pool
@@ -818,16 +816,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         external
         onlyOwner
     {
-        uint256 cachePrivateSale;
         require(privateSaleStatus == true, "Private Sale not yet started");
         require(benefs.length > 0, "Nothing to add");
         for (uint256 i = 0; i < benefs.length; i++) {
             _checkBeneficiaryAmount(benefs[i].amount);
-            cachePrivateSale += benefs[i].amount;
             _addBeneficiary(benefs[i].user, benefs[i].amount);
             emit AddPrivateSale(msg.sender, benefs[i].user, benefs[i].amount);
         }
-        privateSale = privateSale.sub(cachePrivateSale);
     }
 
     // function deleteBeneficiary(address user) external onlyOwner {
@@ -841,15 +836,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         external
         onlyOwner
     {
-        uint256 cachePrivateSale;
         require(privateSaleStatus == true, "Private Sale not yet started");
         require(benefs.length > 0, "Nothing to delete");
         for (uint256 i = 0; i < benefs.length; i++) {
             uint256 amount = _deleteBeneficiary(benefs[i]);
-            cachePrivateSale += amount;
             emit DeletePrivateSale(msg.sender, benefs[i]);
         }
-        privateSale = privateSale.add(cachePrivateSale);
     }
 
     function claimPrivateSale() external {
