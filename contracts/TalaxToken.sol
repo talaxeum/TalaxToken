@@ -142,6 +142,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
 
         // Public Sale, CEX Listing - EOA Type Balance
+        // Private Sale - Multilock.sol
         // Private Placement, Strategic Partner & Advisory, Team and Project Contributor, Marketing - Locked Wallet Type Balance
         // Staking Reward, Liquidity Reserve, DAO Project Pool - Smart Contract Balance
         _totalSupply = _totalSupply.sub(

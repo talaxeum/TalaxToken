@@ -1,11 +1,11 @@
 Install truffle globally:
 
-```
+```javascript
     npm install --location=global truffle
 ```
 Run npm install in project directory
 
-```
+```javascript
     npm install
 ```
 To compile the Smart Contract:
