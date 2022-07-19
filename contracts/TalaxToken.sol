@@ -71,7 +71,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     }
 
     constructor() ERC20("TALAXEUM", "TALAX") {
-        _totalSupply = 21 * 1e7 * 1e18;
+        _totalSupply = 21 * 1e8 * 1e18;
         _name = "TALAXEUM";
         _symbol = "TALAX";
 
@@ -86,61 +86,61 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _stakingPackage[360 days] = 8;
 
         // Public Sale
-        _balances[public_sale_address] = 3969 * 1e3 * 1e18;
+        _balances[public_sale_address] = 39690 * 1e3 * 1e18;
         // CEX Listing
-        _balances[cex_listing_address] = 10500 * 1e3 * 1e18;
+        _balances[cex_listing_address] = 105000 * 1e3 * 1e18;
 
         // Private Sale (MultiLockable)
-        privateSale = 14679 * 1e3 * 1e18;
+        privateSale = 146790 * 1e3 * 1e18;
         // Staking Reward (stored inside this contract)
-        stakingReward = 26859 * 1e3 * 1e18;
+        stakingReward = 268590 * 1e3 * 1e18;
         // DAO Project Pool
-        daoProjectPool = 42000 * 1e3 * 1e18;
+        daoProjectPool = 420000 * 1e3 * 1e18;
         // Liquitidity Reserve (This Contract)
-        _balances[address(this)] = 42000 * 1e3 * 1e18;
+        _balances[address(this)] = 420000 * 1e3 * 1e18;
 
         /* ---------------------------------------- Locked Wallet --------------------------------------- */
         privatePlacementLockedWallet = new Lockable(
-            6993 * 1e3 * 1e18,
+            69930 * 1e3 * 1e18,
             private_placement_address
         );
 
         marketingLockedWallet_1 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             marketing_address_1
         );
         marketingLockedWallet_2 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             marketing_address_2
         );
         marketingLockedWallet_3 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             marketing_address_3
         );
 
         strategicPartnerLockedWallet_1 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             strategic_partner_address_1
         );
         strategicPartnerLockedWallet_2 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             strategic_partner_address_2
         );
         strategicPartnerLockedWallet_3 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             strategic_partner_address_3
         );
 
         teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             team_and_project_coordinator_address_1
         );
         teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             team_and_project_coordinator_address_2
         );
         teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-            7000 * 1e3 * 1e18,
+            70000 * 1e3 * 1e18,
             team_and_project_coordinator_address_3
         );
 
@@ -148,7 +148,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // Private Placement, Strategic Partner & Advisory, Team and Project Contributor, Marketing - Locked Wallet Type Balance
         // Staking Reward, Liquidity Reserve, DAO Project Pool - Smart Contract Balance
         _totalSupply = _totalSupply.sub(
-            141141 * 1e3 * 1e18,
+            1411410 * 1e3 * 1e18,
             "Insufficient Total Supply"
         );
     }
