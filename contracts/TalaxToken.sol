@@ -43,13 +43,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /* ---------------------------------------------- - --------------------------------------------- */
 
     // Changeable address by owner
-    address public private_placement_address =
+    address internal private_placement_address =
         0x07A20dc6722563783e44BA8EDCA08c774621125E;
-    address public strategic_partner_address_1 =
+    address internal strategic_partner_address_1 =
         0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
-    address public strategic_partner_address_2 =
+    address internal strategic_partner_address_2 =
         0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
-    address public strategic_partner_address_3 =
+    address internal strategic_partner_address_3 =
         0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
 
     /* ------------------------------------------ Lockable ------------------------------------------ */
