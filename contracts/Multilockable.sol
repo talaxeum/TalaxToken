@@ -54,10 +54,7 @@ contract Multilockable {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(
-                            phase_1_total,
-                            beneficiary[user].lockedAmount
-                        ),
+                        SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
@@ -70,10 +67,7 @@ contract Multilockable {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(
-                            phase_1_total,
-                            beneficiary[user].lockedAmount
-                        ),
+                        SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
@@ -86,10 +80,7 @@ contract Multilockable {
                 sinceLatestClaim *
                 claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(
-                            phase_2_total,
-                            beneficiary[user].lockedAmount
-                        ),
+                        SafeMath.mul(_phase2, beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
