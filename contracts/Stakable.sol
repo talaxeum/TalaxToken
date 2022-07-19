@@ -21,8 +21,8 @@ contract Stakable {
     uint256 public airdropRate;
     uint256 public airdropSince;
 
-    bool private _votingStatus;
-    uint256 private _votingId;
+    bool internal _votingStatus;
+    uint256 internal _votingId;
     uint256 public totalVoters;
     mapping(address => Voter) public voters;
     mapping(uint256 => uint256) public votedUsers;
