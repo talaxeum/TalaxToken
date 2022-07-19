@@ -350,58 +350,6 @@
 				"type": "fallback"
 			},
 			{
-				"inputs": [],
-				"name": "_airdropRate",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "_stakingPenaltyRate",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "_startPrivateSale",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "_taxFee",
-				"outputs": [
-					{
-						"internalType": "uint8",
-						"name": "",
-						"type": "uint8"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
 						"components": [
@@ -424,6 +372,19 @@
 				"name": "addMultipleBeneficiary",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "airdropRate",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -1023,12 +984,38 @@
 			},
 			{
 				"inputs": [],
+				"name": "privateSaleAmount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "privateSaleStatus",
 				"outputs": [
 					{
 						"internalType": "bool",
 						"name": "",
 						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "privateSaleUsers",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -1081,7 +1068,33 @@
 			},
 			{
 				"inputs": [],
+				"name": "stakingPenaltyRate",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "stakingReward",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "startPrivateSale",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -1146,12 +1159,12 @@
 			},
 			{
 				"inputs": [],
-				"name": "totalAmount",
+				"name": "taxFee",
 				"outputs": [
 					{
-						"internalType": "uint256",
+						"internalType": "uint8",
 						"name": "",
-						"type": "uint256"
+						"type": "uint8"
 					}
 				],
 				"stateMutability": "view",
@@ -1160,19 +1173,6 @@
 			{
 				"inputs": [],
 				"name": "totalSupply",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "totalUser",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -1574,27 +1574,27 @@
 			]
 		},
 		"contracts/Multilockable.sol": {
-			"keccak256": "0x60a71474d593a2a25fafd35f2044bd967e7ffe36c5824229b8862b1fc344bf40",
+			"keccak256": "0xa66525ecb59f25f192220806154cbadbd2899ae535713ad14e397cfda400629c",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://61afd37357b897b3db487290f4b8000b042db13a59524fb66fdc3225623d7211",
-				"dweb:/ipfs/Qmf3e51BeiVKPDQD7E4AWM3ABHnffpxS6rQc1uKYphT8cM"
+				"bzz-raw://fe81f3c86b4565c746bcefd0556a7486ec04e403c52c95d269fb4ab7f787663c",
+				"dweb:/ipfs/QmRRBxLNKMUfR52SZgnus79nY2iTQuQ99uKtf6CNi9Yckg"
 			]
 		},
 		"contracts/Stakable.sol": {
-			"keccak256": "0x3cc36c788cf8c6caca84efe1d96270e8b0df5533fdd9d6ee6a9f1265b8516a79",
+			"keccak256": "0xffb21b339eb79e971a8cc1ff8b92076a6105f80bfb626b071022e13e260e8379",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://aa6953cedfe5d4175e308cb9dafc337995378513aab8618b2f9987d41abcfa0a",
-				"dweb:/ipfs/QmXXsvgoWyo1yrYdVoF13gqUP1UNgGZTcfwnMynvLPMeEX"
+				"bzz-raw://0f3a9b24b88786d87dc283e58e39228f1349daae3e687568216d983b94a3b45d",
+				"dweb:/ipfs/QmcwpDiHn5R9QQuKqY5jmqMhhG4dx2XoVpdUfguB5qwwHn"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0xd3969fb2c015a8a1ad76afa1f292ca2fa1419dc7a705800c89c8762744a7c814",
+			"keccak256": "0xdbfc3c57da2c9437a291b6bff4a61c168ad7fea6487cccb4bc875329fa4486a4",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://1283a642e408b30cd70536964edd58a6467bc893d13e74dafa547a1425290c88",
-				"dweb:/ipfs/Qmcm3vcBGEgWmjgomh1guNgCES3vogQmvLoox52cu6FS2a"
+				"bzz-raw://fed2ed0fd47dca476d2214e10490f9f15616d861d2d94cbb942c6caf6de99f05",
+				"dweb:/ipfs/Qmdtot5cjfgFmMTNMKkpXodAQcksyXkekvF5AgyQ8Qsy5o"
 			]
 		}
 	},

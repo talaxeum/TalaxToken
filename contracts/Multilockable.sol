@@ -8,8 +8,8 @@ contract Multilockable {
     uint256 public privateSaleUsers;
 
     uint256 public privateSaleAmount = 1467900000 * 1e18;
-    uint256 public constant phase_1_total = 73395000 * 1e18;
-    uint256 public constant phase_2_total = 3820562 * 1e18; // monhtly limit
+    uint256 internal constant _phase1 = 73395000 * 1e18;
+    uint256 internal constant _phase2 = 3820562 * 1e18; // daily limit
 
     uint256 public startPrivateSale;
 
