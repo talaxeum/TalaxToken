@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Multilockable {
     using SafeMath for uint256;
-    uint256 public ;
+    uint256 public privateSaleUsers;
 
     uint256 public totalAmount = 14679000 * 1e18;
     uint256 public constant phase_1_total = 733950 * 1e18;
