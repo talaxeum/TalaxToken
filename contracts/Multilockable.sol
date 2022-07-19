@@ -8,8 +8,8 @@ contract Multilockable {
     uint256 public privateSaleUsers;
 
     uint256 public totalAmount = 14679000 * 1e18;
-    uint256 internal constant phase_1_total = 733950 * 1e18;
-    uint256 internal constant phase_2_total = 38206 * 1e18; // monhtly limit
+    uint256 internal constant _phase1 = 733950 * 1e18;
+    uint256 internal constant _phase2 = 38206 * 1e18; // monhtly limit
 
     uint256 public startPrivateSale;
 
@@ -54,10 +54,7 @@ contract Multilockable {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(
-                            phase_1_total,
-                            beneficiary[user].lockedAmount
-                        ),
+                        SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
@@ -70,10 +67,7 @@ contract Multilockable {
             if (beneficiary[user].phase_1_claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(
-                            phase_1_total,
-                            beneficiary[user].lockedAmount
-                        ),
+                        SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
@@ -86,10 +80,7 @@ contract Multilockable {
                 sinceLatestClaim *
                 claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(
-                            phase_2_total,
-                            beneficiary[user].lockedAmount
-                        ),
+                        SafeMath.mul(_phase2, beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
