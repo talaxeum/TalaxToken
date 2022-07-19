@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-error Voting__VotingStatus();
+error Voting___votingStatus();
 
 contract Stakable {
     using SafeMath for uint256;
@@ -17,29 +17,29 @@ contract Stakable {
         mapping(uint256 => bool) voted;
     }
 
-    uint256 public _stakingPenaltyRate;
-    uint256 public _airdropRate;
+    uint256 public stakingPenaltyRate;
+    uint256 public airdropRate;
     uint256 public airdropSince;
 
-    bool private votingStatus;
-    uint256 private votingId;
+    bool private _votingStatus;
+    uint256 private _votingId;
     uint256 public totalVoters;
     mapping(address => Voter) public voters;
     mapping(uint256 => uint256) public votedUsers;
 
     constructor() {
         //Staking penalty and Airdrop in 0.1 times percentage
-        _stakingPenaltyRate = 15;
-        _airdropRate = 80;
+        stakingPenaltyRate = 15;
+        airdropRate = 80;
     }
 
     /* ------------------------------------------ Modifier ------------------------------------------ */
-    function _checkVotingStatus() internal view {
-        require(votingStatus, "Voting is not available");
+    function _check_votingStatus() internal view {
+        require(_votingStatus, "Voting is not available");
     }
 
-    modifier votingStatusTrue() {
-        _checkVotingStatus();
+    modifier _votingStatusTrue() {
+        _check_votingStatus();
         _;
     }
 
@@ -143,13 +143,13 @@ contract Stakable {
 
     function _changePenaltyFee(uint256 amount_) internal {
         require(amount_ <= 30, "Penalty fee cannot exceed 3 percent.");
-        _stakingPenaltyRate = amount_;
+        stakingPenaltyRate = amount_;
         emit PenaltyChanged(amount_);
     }
 
     function _changeAirdropPercentage(uint256 amount_) internal {
         require(amount_ <= 200, "Airdrop Percentage cannot exceed 20 percent.");
-        _airdropRate = amount_;
+        airdropRate = amount_;
         emit AirdropChanged(amount_);
     }
 
@@ -188,8 +188,8 @@ contract Stakable {
         returns (uint256, uint256)
     {
         return (
-            SafeMath.div(SafeMath.mul(amount, _stakingPenaltyRate), 1000),
-            SafeMath.div(SafeMath.mul(reward, _stakingPenaltyRate), 1000)
+            SafeMath.div(SafeMath.mul(amount, stakingPenaltyRate), 1000),
+            SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000)
         );
     }
 
@@ -229,12 +229,12 @@ contract Stakable {
 
         if (stake.releaseTime > block.timestamp) {
             totalVoters -= 1;
-            delete voters[_user].voted[votingId];
+            delete voters[_user].voted[_votingId];
             return calculateStakingWithPenalty(stake.amount, reward);
         }
 
         totalVoters -= 1;
-        delete voters[_user].voted[votingId];
+        delete voters[_user].voted[_votingId];
         return (stake.amount, reward);
     }
 
@@ -278,7 +278,7 @@ contract Stakable {
         view
         returns (uint256)
     {
-        return ((stakeAmount * _airdropRate) / 1000) / 52 weeks;
+        return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
     }
 
     function _claimAirdrop(address _staker) internal view returns (uint256) {
@@ -307,9 +307,9 @@ contract Stakable {
 
     /* -------------------------------------- Voting functions -------------------------------------- */
     function _startVoting() internal {
-        require(votingStatus == false, "Voting is already running");
-        votingStatus = true;
-        votingId += 1;
+        require(_votingStatus == false, "Voting is already running");
+        _votingStatus = true;
+        _votingId += 1;
     }
 
     function isVoter(address _staker) public view returns (bool) {
@@ -318,40 +318,40 @@ contract Stakable {
         return voters[_staker].votingRight;
     }
 
-    function vote() public votingStatusTrue {
+    function vote() public _votingStatusTrue {
         require(voters[msg.sender].votingRight == true, "You are not a voter");
         require(
-            voters[msg.sender].voted[votingId] == false,
+            voters[msg.sender].voted[_votingId] == false,
             "You have voted before"
         );
 
-        voters[msg.sender].voted[votingId] = true;
-        votedUsers[votingId] += 1;
+        voters[msg.sender].voted[_votingId] = true;
+        votedUsers[_votingId] += 1;
     }
 
-    function retractVote() public votingStatusTrue {
+    function retractVote() public _votingStatusTrue {
         require(voters[msg.sender].votingRight == true, "You are not a voter");
         require(
-            voters[msg.sender].voted[votingId] == true,
+            voters[msg.sender].voted[_votingId] == true,
             "You have not voted yet"
         );
 
-        voters[msg.sender].voted[votingId] == false;
-        votedUsers[votingId] -= 1;
+        voters[msg.sender].voted[_votingId] == false;
+        votedUsers[_votingId] -= 1;
     }
 
-    function _getVotingResult() internal view votingStatusTrue returns (bool) {
+    function _getVotingResult() internal view _votingStatusTrue returns (bool) {
         require(totalVoters > 1, "Not enough voters");
         uint256 half_voters = SafeMath.div(SafeMath.mul(totalVoters, 5), 10);
 
-        if (votedUsers[votingId] > half_voters) {
+        if (votedUsers[_votingId] > half_voters) {
             return true;
         } else {
             return false;
         }
     }
 
-    function _stopVoting() internal votingStatusTrue {
-        votingStatus = false;
+    function _stopVoting() internal _votingStatusTrue {
+        _votingStatus = false;
     }
 }
