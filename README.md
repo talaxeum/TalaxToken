@@ -1,3 +1,13 @@
+Install truffle globally:
+
+```
+    npm install --location=global truffle
+```
+Run npm install in project directory
+
+```
+    npm install
+```
 To compile the Smart Contract:
 
 ```solidity
