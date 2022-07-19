@@ -680,6 +680,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "daoProjectPool",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "decimals",
 				"outputs": [
 					{
@@ -868,6 +881,25 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_staker",
+						"type": "address"
+					}
+				],
+				"name": "isVoter",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "lockedWalletStatus",
 				"outputs": [
@@ -1023,6 +1055,13 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "retractVote",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -1145,6 +1184,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "totalVoters",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -1165,6 +1217,24 @@
 						"type": "bool"
 					}
 				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "to_",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount_",
+						"type": "uint256"
+					}
+				],
+				"name": "transferDAOPool",
+				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
@@ -1211,22 +1281,35 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "unlockDevPoolWallet_1",
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount_",
+						"type": "uint256"
+					}
+				],
+				"name": "transferToDAOPool",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "unlockDevPoolWallet_2",
+				"name": "unlockMarketingWallet_1",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "unlockDevPoolWallet_3",
+				"name": "unlockMarketingWallet_2",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "unlockMarketingWallet_3",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -1278,6 +1361,51 @@
 				"name": "unlockTeamAndProjectCoordinatorWallet_3",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "vote",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "votedUsers",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "voters",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "votingRight",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -1353,17 +1481,7 @@
 				}
 			},
 			"kind": "user",
-			"methods": {
-				"_stakingPenaltyRate()": {
-					"notice": "Constructor since this contract is not ment to be used without inheritance push once to stakeholders for it to work proplerly"
-				},
-				"changePrivatePlacementAddress(address)": {
-					"notice": "EXTERNAL FUNCTIONS"
-				},
-				"private_placement_address()": {
-					"notice": "Local (in this smart contract) address staking_reward_address; address liquidity_reserve_address; // this cotract's address"
-				}
-			},
+			"methods": {},
 			"version": 1
 		}
 	},
@@ -1440,43 +1558,43 @@
 			]
 		},
 		"contracts/Data.sol": {
-			"keccak256": "0xcf4c4693b41e555c0450972b616cfff263d6ede69148127426603cdf7e3dbfe1",
+			"keccak256": "0x56298dc77e17130428a71f17ea7f021e0c3d4006f6542fbd5f45b840ab3d570d",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://90237bd9e54fdb70da614cf2bb5081d1fae010cd867e471ef466e2b3cb734140",
-				"dweb:/ipfs/QmZGYSrC61LGNwY8kofnqxSYRGQDAEb6EZnv86nah9AVJ1"
+				"bzz-raw://33cb3e687986230b2637e15fc9b02320b43b967380529f72875d385daa1ef439",
+				"dweb:/ipfs/QmVjwJ2tqqWJhtS8MaGJsnRZE4ux9J5aGBgmicVf4oVSZU"
 			]
 		},
 		"contracts/Lockable.sol": {
-			"keccak256": "0xc648414f4b5f9f3f01506d70cc06749a2bee4d0e9dca865c8cbb83164ff7d4f6",
+			"keccak256": "0xbb770112b7a61041a9c6ecf88c5ac41a391d22ca545fe74cc6da50fecb436329",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://1e9ed2994042f8d4910e5a0e8eb2b8c4f6db748c90c519b7411a649ae70d2a05",
-				"dweb:/ipfs/QmVEDFTWrBg9Kap3gy6YELxzgzJDUYCke1ng7zwtp7Ek98"
+				"bzz-raw://378b80cc478f1a9456e76c045b899ab3449003a738c1897d81bfd249f8a5a9df",
+				"dweb:/ipfs/Qme8uMj7qqGrwfQ3Q2mtt2E78JszyMTmhrudi3wWNUxZRQ"
 			]
 		},
 		"contracts/Multilockable.sol": {
-			"keccak256": "0xb44628fea2bbec891322ef76af8b3b31b88c152a2ff9bdcdda2307178e5fb1bb",
+			"keccak256": "0x60a71474d593a2a25fafd35f2044bd967e7ffe36c5824229b8862b1fc344bf40",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://787d81d8e0e6668627b31c79421140259ed49b4ba7263031f4acf3feab738425",
-				"dweb:/ipfs/QmVcSQcKVFKRRhvECCztJPNcj5uS8xpPqnCPD14cNtVMiQ"
+				"bzz-raw://61afd37357b897b3db487290f4b8000b042db13a59524fb66fdc3225623d7211",
+				"dweb:/ipfs/Qmf3e51BeiVKPDQD7E4AWM3ABHnffpxS6rQc1uKYphT8cM"
 			]
 		},
 		"contracts/Stakable.sol": {
-			"keccak256": "0x4e31f4afd1efc3714b1081fd0f999d9b10bfd52d976a3d34da75a0acdd7bea6b",
+			"keccak256": "0x3cc36c788cf8c6caca84efe1d96270e8b0df5533fdd9d6ee6a9f1265b8516a79",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://d70abaf94fc5b2efa095d69bd8d610051da67cac93795358a57fc2fca103de21",
-				"dweb:/ipfs/QmaGi42GYMszwKKxZrw1z9AVXyRZ6CeqnFnwfi7pqSXYBS"
+				"bzz-raw://aa6953cedfe5d4175e308cb9dafc337995378513aab8618b2f9987d41abcfa0a",
+				"dweb:/ipfs/QmXXsvgoWyo1yrYdVoF13gqUP1UNgGZTcfwnMynvLPMeEX"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x498b2d87b7fa5ecab293b2e5bcee9a06b5e8cac2611a053e4e2f89f14e6c01f3",
+			"keccak256": "0xd3969fb2c015a8a1ad76afa1f292ca2fa1419dc7a705800c89c8762744a7c814",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://1b182b053998d172e82fbe1eeb0285b448718441d821dc546ed917377f07315f",
-				"dweb:/ipfs/QmVutt5U1LGX7QjubATmM6i9DooN3NBNS8KeJ8yo856Vhb"
+				"bzz-raw://1283a642e408b30cd70536964edd58a6467bc893d13e74dafa547a1425290c88",
+				"dweb:/ipfs/Qmcm3vcBGEgWmjgomh1guNgCES3vogQmvLoox52cu6FS2a"
 			]
 		}
 	},

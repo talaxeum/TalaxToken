@@ -5,13 +5,13 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Multilockable {
     using SafeMath for uint256;
-    uint256 public totalUser;
+    uint256 public ;
 
-    uint256 public totalAmount = 1467900000 * 1e18;
+    uint256 public privateSaleAmount = 1467900000 * 1e18;
     uint256 public constant phase_1_total = 73395000 * 1e18;
     uint256 public constant phase_2_total = 3820562 * 1e18; // monhtly limit
 
-    uint256 public _startPrivateSale;
+    uint256 public startPrivateSale;
 
     struct Multilock {
         uint256 lockedAmount;
@@ -26,7 +26,7 @@ contract Multilockable {
     constructor() {}
 
     function _initiatePrivateSale() internal {
-        _startPrivateSale = block.timestamp;
+        startPrivateSale = block.timestamp;
     }
 
     function hasMultilockable() external view returns (Multilock memory) {
@@ -47,7 +47,7 @@ contract Multilockable {
     {
         uint256 claimable;
 
-        uint256 lockDuration = (block.timestamp - _startPrivateSale) / 1 days;
+        uint256 lockDuration = (block.timestamp - startPrivateSale) / 1 days;
 
         //Phase 1 of locked wallet release - monthly
         if (lockDuration < 16 * 30) {
@@ -58,7 +58,7 @@ contract Multilockable {
                             phase_1_total,
                             beneficiary[user].lockedAmount
                         ),
-                        totalAmount
+                        privateSaleAmount
                     )
                 );
                 beneficiary[user].phase_1_claimed = true;
@@ -74,7 +74,7 @@ contract Multilockable {
                             phase_1_total,
                             beneficiary[user].lockedAmount
                         ),
-                        totalAmount
+                        privateSaleAmount
                     )
                 );
                 beneficiary[user].phase_1_claimed = true;
@@ -90,7 +90,7 @@ contract Multilockable {
                             phase_2_total,
                             beneficiary[user].lockedAmount
                         ),
-                        totalAmount
+                        privateSaleAmount
                     )
                 );
             beneficiary[user].latestClaimDay = lockDuration;
@@ -102,7 +102,7 @@ contract Multilockable {
 
     function _addBeneficiary(address user_, uint256 amount_) internal {
         require(
-            amount_ <= totalAmount,
+            amount_ <= privateSaleAmount,
             "PrivateSale: not enough balance to add a new user"
         );
         require(
@@ -114,8 +114,8 @@ contract Multilockable {
         beneficiary[user_].phase_1_claimed = false;
         beneficiary[user_].latestClaimDay = 1;
 
-        totalUser += 1;
-        totalAmount -= amount_;
+        privateSaleUsers += 1;
+        privateSaleAmount -= amount_;
     }
 
     function _deleteBeneficiary(address user_) internal returns (uint256) {
@@ -123,8 +123,8 @@ contract Multilockable {
             beneficiary[user_].amount != 0,
             "PrivateSale: This user doesnt exist"
         );
-        totalUser -= 1;
-        totalAmount += beneficiary[user_].amount;
+        privateSaleUsers -= 1;
+        privateSaleAmount += beneficiary[user_].amount;
         uint256 ex_amount = beneficiary[user_].amount;
 
         delete beneficiary[user_];

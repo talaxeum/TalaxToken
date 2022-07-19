@@ -28,7 +28,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     uint256 public stakingReward;
     uint256 public privateSale;
     uint256 public daoProjectPool;
-    uint8 public _taxFee;
+    uint8 public taxFee;
 
     bool public airdropStatus;
     bool public lockedWalletStatus;
@@ -36,7 +36,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     /* ------------------------------------------ Addresses ----------------------------------------- */
 
-    address private timelockController;
+    address private _timelockController;
 
     /* ---------------------------------- later moved into Data.sol --------------------------------- */
     address private cex_listing_address;
@@ -76,7 +76,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _symbol = "TALAX";
 
         // later divided by 100 to make percentage
-        _taxFee = 1;
+        taxFee = 1;
 
         airdropStatus = false;
 
@@ -253,7 +253,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
             _balances[from] = fromBalance - amount;
         }
 
-        uint256 tax = SafeMath.div(SafeMath.mul(amount, _taxFee), 100);
+        uint256 tax = SafeMath.div(SafeMath.mul(amount, taxFee), 100);
         uint256 taxedAmount = SafeMath.sub(amount, tax);
 
         uint256 teamFee = SafeMath.div(SafeMath.mul(taxedAmount, 2), 10);
@@ -590,7 +590,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     function changeTaxFee(uint8 taxFee_) external onlyOwner {
         require(taxFee_ < 5, "Tax Fee maximum is 5%");
-        _taxFee = taxFee_;
+        taxFee = taxFee_;
         emit ChangeTax(_msgSender(), taxFee_);
     }
 
