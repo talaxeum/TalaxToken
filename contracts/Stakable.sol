@@ -34,12 +34,16 @@ contract Stakable {
     }
 
     /* ------------------------------------------ Modifier ------------------------------------------ */
-    function _check_votingStatus() internal view {
+    function _checkUserStake(uint256 amount) internal pure {
+        require(amount > 0, "No Stake Found");
+    }
+
+    function _checkVotingStatus() internal view {
         require(_votingStatus, "Voting is not available");
     }
 
-    modifier _votingStatusTrue() {
-        _check_votingStatus();
+    modifier votingStatusTrue() {
+        _checkVotingStatus();
         _;
     }
 
@@ -159,6 +163,8 @@ contract Stakable {
         returns (uint256)
     {
         require(since_ > 0, "Error timestamp 0");
+
+        // times by 1e24 so theres no missing value
         return
             SafeMath.div(
                 (block.timestamp - since_) * 1e24,
@@ -175,7 +181,7 @@ contract Stakable {
         if (user_stake.amount == 0) {
             return 0;
         }
-
+        // divided by 1e26 because 1e2 for APY and 1e24 from calculate staking duration
         return
             (user_stake.amount *
                 user_stake.rewardAPY *
@@ -245,7 +251,7 @@ contract Stakable {
     {
         Stakeholder memory data = stakeholders[_staker];
         StakingSummary memory summary = StakingSummary(0, 0, data.stake);
-        require(summary.stake.amount != 0, "No stake found");
+        _checkUserStake(summary.stake.amount);
 
         uint256 availableReward = calculateStakeReward(summary.stake);
         uint256 penalty;
@@ -284,7 +290,7 @@ contract Stakable {
     function _claimAirdrop(address _staker) internal view returns (uint256) {
         Stakeholder memory stakeholder = stakeholders[_staker];
 
-        require(stakeholder.stake.amount > 0, "No stake found");
+        _checkUserStake(stakeholder.stake.amount);
 
         require(
             _calculateWeek(stakeholder.latestClaimDrop) > 0,
@@ -318,7 +324,7 @@ contract Stakable {
         return voters[_staker].votingRight;
     }
 
-    function vote() public _votingStatusTrue {
+    function vote() public votingStatusTrue {
         require(voters[msg.sender].votingRight == true, "You are not a voter");
         require(
             voters[msg.sender].voted[_votingId] == false,
@@ -329,7 +335,7 @@ contract Stakable {
         votedUsers[_votingId] += 1;
     }
 
-    function retractVote() public _votingStatusTrue {
+    function retractVote() public votingStatusTrue {
         require(voters[msg.sender].votingRight == true, "You are not a voter");
         require(
             voters[msg.sender].voted[_votingId] == true,
@@ -340,7 +346,7 @@ contract Stakable {
         votedUsers[_votingId] -= 1;
     }
 
-    function _getVotingResult() internal view _votingStatusTrue returns (bool) {
+    function _getVotingResult() internal view votingStatusTrue returns (bool) {
         require(totalVoters > 1, "Not enough voters");
         uint256 half_voters = SafeMath.div(SafeMath.mul(totalVoters, 5), 10);
 
@@ -351,7 +357,7 @@ contract Stakable {
         }
     }
 
-    function _stopVoting() internal _votingStatusTrue {
+    function _stopVoting() internal votingStatusTrue {
         _votingStatus = false;
     }
 }

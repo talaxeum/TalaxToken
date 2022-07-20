@@ -34,21 +34,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     /* ------------------------------------------ Addresses ----------------------------------------- */
 
-    address private _timelockController;
-
-    /* ---------------------------------- later moved into Data.sol --------------------------------- */
+    // Later moved to Data.sol
     address private cex_listing_address;
-    /* ---------------------------------------------- - --------------------------------------------- */
 
     // Changeable address by owner
-    address internal private_placement_address =
-        0x07A20dc6722563783e44BA8EDCA08c774621125E;
-    address internal strategic_partner_address_1 =
-        0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
-    address internal strategic_partner_address_2 =
-        0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
-    address internal strategic_partner_address_3 =
-        0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
+    address public timelockController;
+    address public private_placement_address;
+    address public strategic_partner_address_1;
+    address public strategic_partner_address_2;
+    address public strategic_partner_address_3;
 
     /* ------------------------------------------ Lockable ------------------------------------------ */
 
@@ -82,6 +76,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         _stakingPackage[90 days] = 6;
         _stakingPackage[180 days] = 7;
         _stakingPackage[360 days] = 8;
+
+        private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
+        strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
+        strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
+        strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
 
         // Public Sale
         _balances[public_sale_address] = 396900 * 1e3 * 1e18;
@@ -177,17 +176,19 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         address indexed to3
     );
 
-    event AddPrivateSale(
-        address indexed from,
-        address indexed who,
-        uint256 amount
-    );
-    event DeletePrivateSale(address indexed from, address indexed who);
+    event AddPrivateSale(address indexed from, Beneficiary[] beneficiary);
+    event DeletePrivateSale(address indexed from, address[] beneficiary);
 
     event InitiatePrivateSale(address indexed from);
     event InitiateLockedWallet(address indexed from);
 
     event TransferStakingReward(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
+    event TransferDAOPool(
         address indexed from,
         address indexed to,
         uint256 amount
@@ -546,6 +547,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
             _balances[to_] = _balances[to_].add(amount_);
         }
         _stopVoting();
+
+        emit TransferDAOPool(address(this), to_, amount_);
     }
 
     function changePrivatePlacementAddress(address _input) external onlyOwner {
@@ -807,10 +810,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     function _checkBeneficiaryAmount(uint256 amount)
         internal
-        pure
+        view
         isInitialize
     {
         require(amount != 0, "Amount cannot be zero");
+    }
+
+    function unsafeInc(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            return x + 1;
+        }
     }
 
     function addMultipleBeneficiary(Beneficiary[] calldata benefs)
@@ -819,11 +828,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         isInitialize
     {
         require(benefs.length > 0, "Nothing to add");
-        for (uint256 i = 0; i < benefs.length; i++) {
+        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             _checkBeneficiaryAmount(benefs[i].amount);
             _addBeneficiary(benefs[i].user, benefs[i].amount);
-            emit AddPrivateSale(msg.sender, benefs[i].user, benefs[i].amount);
         }
+        emit AddPrivateSale(msg.sender, benefs);
     }
 
     // function deleteBeneficiary(address user) external onlyOwner {
@@ -839,10 +848,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         isInitialize
     {
         require(benefs.length > 0, "Nothing to delete");
-        for (uint256 i = 0; i < benefs.length; i++) {
+        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             _deleteBeneficiary(benefs[i]);
-            emit DeletePrivateSale(msg.sender, benefs[i]);
         }
+        emit DeletePrivateSale(msg.sender, benefs);
     }
 
     function claimPrivateSale() external isInitialize {

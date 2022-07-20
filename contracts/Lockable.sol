@@ -41,6 +41,12 @@ contract Lockable {
         startLockedWallet = block.timestamp;
     }
 
+    function unsafeInc(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            return x + 1;
+        }
+    }
+
     /**
      *  @dev 		Main Functions
      *  @return 	Claimable amount from Locked Wallet
@@ -52,7 +58,7 @@ contract Lockable {
         uint256 months = (block.timestamp - startLockedWallet) / 30 days;
         uint256 claimable;
 
-        for (uint256 i = _latestClaimMonth; i <= 55; i++) {
+        for (uint256 i = _latestClaimMonth; i <= 55; i = unsafeInc(i)) {
             claimable += amount_[i];
         }
 
@@ -70,11 +76,9 @@ contract Lockable {
         onlyTalax
         returns (uint256)
     {
-        require(_amount > 0, "Lockable: no tokens left");
-
         uint256 claimableLockedAmount = _calculateClaimableAmount(amount_);
 
-        require(claimableLockedAmount > 0, "Lockable: no tokens to release");
+        // require(claimableLockedAmount > 0, "Lockable: no tokens to release");
 
         _amount = SafeMath.sub(
             _amount,
