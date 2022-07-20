@@ -4,21 +4,20 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Lockable {
-    uint256 private _amount;
+    uint256 internal _amount;
 
-    address private owner;
+    address internal _owner;
     // beneficiary of tokens after they are released
     address public immutable beneficiary;
 
-    uint256 private _startLockedWallet;
+    uint256 public startLockedWallet;
 
-    uint256 private _latestClaimMonth;
+    uint256 internal _latestClaimMonth;
 
     constructor(uint256 amount_, address beneficiary_) {
         _amount = amount_;
         beneficiary = beneficiary_;
-        _startLockedWallet = block.timestamp;
-        owner = msg.sender;
+        _owner = msg.sender;
     }
 
     /**
@@ -26,7 +25,7 @@ contract Lockable {
      */
 
     function _onlyTalax() internal view {
-        require(msg.sender == owner, "Not owner");
+        require(msg.sender == _owner, "Not _owner");
     }
 
     modifier onlyTalax() {
@@ -39,7 +38,7 @@ contract Lockable {
      */
 
     function initiateLockedWallet() external onlyTalax {
-        _startLockedWallet = block.timestamp;
+        startLockedWallet = block.timestamp;
     }
 
     /**
@@ -50,7 +49,7 @@ contract Lockable {
         internal
         returns (uint256)
     {
-        uint256 months = (block.timestamp - _startLockedWallet) / 30 days;
+        uint256 months = (block.timestamp - startLockedWallet) / 30 days;
         uint256 claimable;
 
         for (uint256 i = _latestClaimMonth; i <= 55; i++) {

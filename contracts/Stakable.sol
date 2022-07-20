@@ -305,7 +305,7 @@ contract Stakable {
         }
     }
 
-    /* -------------------------------------- Voting functions -------------------------------------- */
+    /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
     function _startVoting() internal {
         require(_votingStatus == false, "Voting is already running");
         _votingStatus = true;

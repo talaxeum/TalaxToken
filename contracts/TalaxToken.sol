@@ -642,7 +642,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
     }
 
-    function claimAirdrop() external {
+    function claimAirdrop() external isInitialize {
         require(airdropStatus == true, "Airdrop not yet started");
         uint256 airdrop = _claimAirdrop(_msgSender());
         _balances[address(this)] = _balances[address(this)].sub(airdrop);
@@ -805,7 +805,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     //     emit AddPrivateSale(msg.sender, user, amount);
     // }
 
-    function _checkBeneficiaryAmount(uint256 amount) internal pure {
+    function _checkBeneficiaryAmount(uint256 amount)
+        internal
+        pure
+        isInitialize
+    {
         require(amount != 0, "Amount cannot be zero");
     }
 
@@ -841,7 +845,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         }
     }
 
-    function claimPrivateSale() external {
+    function claimPrivateSale() external isInitialize {
         _balances[_msgSender()] = _balances[_msgSender()].add(
             _releaseClaimable(_msgSender())
         );
