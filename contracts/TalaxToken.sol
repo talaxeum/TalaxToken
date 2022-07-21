@@ -171,6 +171,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     event ChangePrivatePlacementAddress(address indexed to);
 
     event ChangeStrategicPartnerAddress(
+        address indexed from,
         address indexed to1,
         address indexed to2,
         address indexed to3
@@ -556,7 +557,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         emit ChangePrivatePlacementAddress(_input);
     }
 
-    function changeStrategicPartnerAddress1(
+    function changeStrategicPartnerAddress(
         address address1,
         address address2,
         address address3
@@ -564,7 +565,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         strategic_partner_address_1 = address1;
         strategic_partner_address_2 = address2;
         strategic_partner_address_3 = address3;
-        emit ChangeStrategicPartnerAddress(address1, address2, address3);
+        emit ChangeStrategicPartnerAddress(
+            msg.sender,
+            address1,
+            address2,
+            address3
+        );
     }
 
     function mintStakingReward(uint256 amount_) public onlyOwner {
