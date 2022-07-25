@@ -70,8 +70,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // later divided by 100 to make percentage
         taxFee = 1;
 
-        airdropStatus = false;
-
         // Staking APY in percentage
         _stakingPackage[90 days] = 6;
         _stakingPackage[180 days] = 7;
@@ -93,7 +91,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // DAO Project Pool
         daoProjectPool = 4200000 * 1e3 * 1e18;
         // Liquitidity Reserve (This Contract)
-        _balances[address(this)] = 4200000 * 1e3 * 1e18;
+        _balances[msg.sender] = 4200000 * 1e3 * 1e18;
+        // _balances[address(this)] = 4200000 * 1e3 * 1e18;
 
         /* ---------------------------------------- Locked Wallet --------------------------------------- */
         privatePlacementLockedWallet = new Lockable(
@@ -148,6 +147,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
             14114100 * 1e3 * 1e18,
             "Insufficient Total Supply"
         );
+
+        //Transfer Ownership to TimelockController address
     }
 
     fallback() external payable {
@@ -171,7 +172,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     event ChangePrivatePlacementAddress(address indexed to);
 
     event ChangeStrategicPartnerAddress(
-        address indexed from,
+        address from,
         address indexed to1,
         address indexed to2,
         address indexed to3
