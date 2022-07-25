@@ -535,6 +535,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     /*                                       External Functions                                       */
     /* ---------------------------------------------------------------------------------------------- */
 
+    function startTransferDAOVoting() external onlyOwner {
+        _startVoting();
+    }
+
     function transferToDAOPool(uint256 amount_) external {
         _balances[msg.sender] = _balances[msg.sender].sub(amount_);
         daoProjectPool += amount_;
