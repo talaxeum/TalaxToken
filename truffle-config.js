@@ -107,6 +107,14 @@ module.exports = {
     // Set default mocha options here, use special reporters etc.
     mocha: {
         // timeout: 100000
+        reporter: "eth-gas-reporter",
+        reporterOptions: {
+            currency: "IDR",
+            // token: "BNB",
+            // gasPriceApi:
+            //     "https://api.bscscan.com/api?module=proxy&action=eth_gasPrice",
+            forceConsoleOutput: true,
+        },
     },
 
     // Configure your compilers

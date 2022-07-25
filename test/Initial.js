@@ -19,9 +19,12 @@ contract("Initial", async (accounts) => {
         supply = parseFloat(await talax.totalSupply());
         console.log("Total Supply: ", supply);
 
-        assert.equal(
-            21 * 1e9 * 1e18 - 14114100 * 1e3 * 1e18,
+        assert.strictEqual(
             supply,
+            parseFloat(
+                (21000000 * 1e3 * 1e18).toFixed(0) -
+                    (14114100 * 1e3 * 1e18).toFixed(0)
+            ),
             "Total Supply should be 6885900 * 1e3 * 1e18"
         );
     });
@@ -37,12 +40,12 @@ contract("Initial", async (accounts) => {
         stakingReward = parseFloat(await talax.stakingReward());
         DAO = parseFloat(await talax.daoProjectPool());
 
-        assert.equal(
-            2685900 * 1e3 * 1e18,
+        assert.strictEqual(
             stakingReward,
+            parseFloat((2685900 * 1e3 * 1e18).toFixed(0)),
             "Staking Reward wrong amount"
         );
-        assert.equal(4200000 * 1e3 * 1e18, DAO, "DAO wrong amount");
+        assert.equal(DAO, 4200000 * 1e3 * 1e18, "DAO wrong amount");
     });
 
     it("Initial: initial taxFee", async () => {
@@ -55,7 +58,37 @@ contract("Initial", async (accounts) => {
         airdrop = await talax.airdropStatus();
         initialization = await talax.initializationStatus();
 
-        assert.equal(false, airdrop, "airdrop wrong status");
-        assert.equal(false, initialization, "initialization wrong status");
+        assert.equal(airdrop, false, "airdrop wrong status");
+        assert.equal(initialization, false, "initialization wrong status");
+    });
+
+    it("Initial: initialized", async () => {
+        airdrop = await talax.airdropStatus();
+        initialization = await talax.initializationStatus();
+
+        assert.equal(airdrop, false, "airdrop wrong status");
+        assert.equal(initialization, false, "initialization wrong status");
+
+        try {
+            await talax.initiateLockedWallet_PrivateSale_Airdrop({
+                from: accounts[1],
+            });
+        } catch (err) {
+            console.error("Initializing from acc 1", err.reason);
+        }
+
+        try {
+            await talax.initiateLockedWallet_PrivateSale_Airdrop({
+                from: owner,
+            });
+        } catch (err) {
+            console.error(err.reason);
+        }
+
+        airdrop = await talax.airdropStatus();
+        initialization = await talax.initializationStatus();
+
+        assert.equal(airdrop, true, "airdrop wrong status");
+        assert.equal(initialization, true, "initialization wrong status");
     });
 });

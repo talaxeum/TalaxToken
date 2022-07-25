@@ -58,8 +58,10 @@ contract Lockable {
         uint256 months = (block.timestamp - startLockedWallet) / 30 days;
         uint256 claimable;
 
-        for (uint256 i = _latestClaimMonth; i <= 51; i = unsafeInc(i)) {
-            claimable += amount_[i];
+        for (uint256 i = _latestClaimMonth; i <= months; i = unsafeInc(i)) {
+            if (_latestClaimMonth <= 51) {
+                claimable += amount_[i];
+            }
         }
 
         _latestClaimMonth = months + 1;
