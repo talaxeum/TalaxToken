@@ -617,8 +617,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function stake(uint256 _amount, uint256 _stakePeriod) external {
         // Make sure staker actually is good for it
         require(
-            _stakePeriod == 30 days ||
-                _stakePeriod == 90 days ||
+            _stakePeriod == 90 days ||
                 _stakePeriod == 180 days ||
                 _stakePeriod == 365 days,
             "Staking option doesnt exist"
