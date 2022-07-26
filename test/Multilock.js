@@ -47,6 +47,20 @@ contract("Multilock", async (accounts) => {
         }
     });
 
+    it("Multilock: release phase1 claimable amount", async () => {
+        startBalance = await talax.balanceOf(accounts[1]);
+        console.log(startBalance.toString());
+        start = await talax.hasMultilockable({ from: accounts[1] });
+        console.log(start);
+
+        await talax.claimPrivateSale({ from: accounts[1] });
+
+        endBalance = await talax.balanceOf(accounts[1]);
+        console.log(endBalance.toString());
+        end = await talax.hasMultilockable({ from: accounts[1] });
+        console.log(end);
+    });
+
     it("Multilock: delete beneficiaries", async () => {
         benefs = [accounts[1], accounts[2], accounts[4]];
 
