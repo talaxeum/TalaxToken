@@ -244,12 +244,8 @@ contract Stakable {
         return (stake.amount, reward);
     }
 
-    function hasStake(address _staker)
-        external
-        view
-        returns (StakingSummary memory)
-    {
-        Stakeholder memory data = stakeholders[_staker];
+    function hasStake() external view returns (StakingSummary memory) {
+        Stakeholder memory data = stakeholders[msg.sender];
         StakingSummary memory summary = StakingSummary(0, 0, data.stake);
         _checkUserStake(summary.stake.amount);
 

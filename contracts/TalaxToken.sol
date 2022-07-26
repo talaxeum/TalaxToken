@@ -647,10 +647,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintStakingReward(reward_);
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
+        _mintStakingReward(reward_);
+        _balances[address(this)] -= amount_;
         stakingReward = stakingReward.sub(reward_);
-        _totalSupply = _totalSupply.add(amount_ + reward_);
+        _totalSupply = _totalSupply.add(amount_);
         _balances[_msgSender()] = _balances[_msgSender()].add(
             amount_ + reward_
         );
