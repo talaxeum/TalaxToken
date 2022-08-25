@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Lockable {
+contract Lockedwallet {
     uint256 internal _amount;
 
     address internal _owner;
@@ -85,7 +85,7 @@ contract Lockable {
         _amount = SafeMath.sub(
             _amount,
             claimableLockedAmount,
-            "Lockable: Cannot substract total amount with claimable"
+            "Lockedwallet: Cannot substract total amount with claimable"
         );
 
         return claimableLockedAmount;

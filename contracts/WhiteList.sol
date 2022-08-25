@@ -13,7 +13,7 @@ contract WhiteList {
 
     uint256 public startPrivateSale;
 
-    struct Multilock {
+    struct Whitelist {
         uint256 lockedAmount;
         uint256 amount;
         bool isPhase1Claimed;
@@ -21,7 +21,7 @@ contract WhiteList {
     }
 
     // beneficiary of tokens after they are released
-    mapping(address => Multilock) public beneficiary;
+    mapping(address => Whitelist) public beneficiary;
 
     address talaxAddress;
 
@@ -46,10 +46,10 @@ contract WhiteList {
         startPrivateSale = block.timestamp;
     }
 
-    function hasMultilockable(address user)
+    function hasWhiteList(address user)
         external
         view
-        returns (Multilock memory)
+        returns (Whitelist memory)
     {
         return beneficiary[user];
     }
