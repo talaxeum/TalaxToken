@@ -8,11 +8,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./Data.sol";
-import "./Stakable.sol";
-import "./Lockable.sol";
-import "./Multilockable.sol";
 
-contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
+import "./Interfaces.sol";
+
+contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     using SafeMath for uint256;
 
     mapping(address => uint256) private _balances;
@@ -43,6 +42,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     address public strategic_partner_address_1;
     address public strategic_partner_address_2;
     address public strategic_partner_address_3;
+
+    IStakable stakingContract;
+    IWhiteList whiteListContract;
+    ILockable lockedWalletContract;
 
     /* ------------------------------------------ Lockable ------------------------------------------ */
 
@@ -92,7 +95,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         // DAO Project Pool
         daoProjectPool = 4200000 * 1e3 * 1e18;
         // Liquitidity Reserve (This Contract)
-        _balances[msg.sender] = 4200000 * 1e3 * 1e18;
+        _balances[msg.sender] = 4200000 * 1e3 * 1e18; // for testing and staging
         // _balances[address(this)] = 4200000 * 1e3 * 1e18;
 
         /* ---------------------------------------- Locked Wallet --------------------------------------- */

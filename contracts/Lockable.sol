@@ -41,7 +41,7 @@ contract Lockable {
         startLockedWallet = block.timestamp;
     }
 
-    function unsafeInc(uint256 x) internal pure returns (uint256) {
+    function _unsafeInc(uint256 x) internal pure returns (uint256) {
         unchecked {
             return x + 1;
         }
@@ -58,7 +58,7 @@ contract Lockable {
         uint256 months = (block.timestamp - startLockedWallet) / 30 days;
         uint256 claimable;
 
-        for (uint256 i = _latestClaimMonth; i <= months; i = unsafeInc(i)) {
+        for (uint256 i = _latestClaimMonth; i <= months; i = _unsafeInc(i)) {
             if (_latestClaimMonth <= 51) {
                 claimable += amount_[i];
             }
@@ -73,7 +73,7 @@ contract Lockable {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function releaseClaimable(uint256[51] memory amount_)
+    function releaseClaimable(uint256[51] memory amount)
         external
         onlyTalax
         returns (uint256)

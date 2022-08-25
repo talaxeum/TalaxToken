@@ -11,6 +11,11 @@ address constant team_and_project_coordinator_address_1 = 0xE61E7a7D16db384433E5
 address constant team_and_project_coordinator_address_2 = 0x406605Eb24A97A2D61b516d8d850F2aeFA6A731a;
 address constant team_and_project_coordinator_address_3 = 0x97620dEAdC98bC8173303686037ce7B986CF53C3;
 
+/* ------------------------------------ Interfaces Addresses ------------------------------------ */
+address constant stakeContract;
+address constant whiteListContract;
+address constant lockedWalletContract;
+
 /**
  * @dev this is the release rate for partial token release
  */

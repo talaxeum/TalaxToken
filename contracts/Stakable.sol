@@ -27,13 +27,25 @@ contract Stakable {
     mapping(address => Voter) public voters;
     mapping(uint256 => uint256) public votedUsers;
 
+    address talaxAddress;
+
     constructor() {
         //Staking penalty and Airdrop in 0.1 times percentage
         stakingPenaltyRate = 15;
         airdropRate = 80;
+        talaxAddress = msg.sender;
     }
 
     /* ------------------------------------------ Modifier ------------------------------------------ */
+    function isOwner() internal pure {
+        require(msg.sender == talaxAddress, "Not authorized");
+    }
+
+    modifier onlyOwner() {
+        isOwner();
+        _;
+    }
+
     function _checkUserStake(uint256 amount) internal pure {
         require(amount > 0, "No Stake Found");
     }
@@ -101,7 +113,15 @@ contract Stakable {
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
 
-    function _startAirdropSince() internal {
+    function setTalaxAddress(address talax) external onlyOwner {
+        talaxAddress = talax;
+    }
+
+    function getVoters(address user) external view returns (bool, bool) {
+        return (voters[user].votingRight, voters[user].voted[_votingId]);
+    }
+
+    function startAirdropSince() external onlyOwner {
         airdropSince = block.timestamp;
     }
 
@@ -114,50 +134,50 @@ contract Stakable {
      * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
      * StakeID
      */
-    function _stake(
-        address _user,
-        uint256 _amount,
-        uint256 _stakePeriod,
-        uint256 _rewardRate
-    ) internal {
+    function stake(
+        address user,
+        uint256 amount,
+        uint256 stakePeriod,
+        uint256 rewardRate
+    ) external onlyOwner {
         // Simple check so that user does not stake 0
-        require(_amount > 0, "Cannot stake nothing");
-        require(stakeholders[_user].stake.amount == 0, "User is a staker");
+        require(amount > 0, "Cannot stake nothing");
+        require(stakeholders[user].stake.amount == 0, "User is a staker");
 
         totalVoters += 1;
-        voters[_user].votingRight = true;
+        voters[user].votingRight = true;
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
 
         // Use the index to push a new Stake
         // push a newly created Stake with the current block timestamp.
-        stakeholders[_user].stake = Stake(
-            _user,
-            _amount,
+        stakeholders[user].stake = Stake(
+            user,
+            amount,
             timestamp,
             0,
             0,
-            _rewardRate,
-            (_stakePeriod + timestamp)
+            rewardRate,
+            (stakePeriod + timestamp)
         );
         // Emit an event that the stake has occured
-        emit Staked(_user, _amount, timestamp, (_stakePeriod + timestamp));
+        emit Staked(user, amount, timestamp, (stakePeriod + timestamp));
     }
 
-    function _changePenaltyFee(uint256 amount_) internal {
+    function changePenaltyFee(uint256 amount_) external onlyOwner {
         require(amount_ <= 30, "Penalty fee cannot exceed 3 percent.");
         stakingPenaltyRate = amount_;
         emit PenaltyChanged(amount_);
     }
 
-    function _changeAirdropPercentage(uint256 amount_) internal {
+    function changeAirdropPercentage(uint256 amount_) external onlyOwner {
         require(amount_ <= 200, "Airdrop Percentage cannot exceed 20 percent.");
         airdropRate = amount_;
         emit AirdropChanged(amount_);
     }
 
-    function calculateStakingDuration(uint256 since_)
+    function _calculateStakingDuration(uint256 since_)
         internal
         view
         returns (uint256)
@@ -173,7 +193,7 @@ contract Stakable {
             );
     }
 
-    function calculateStakeReward(Stake memory user_stake)
+    function _calculateStakeReward(Stake memory user_stake)
         internal
         view
         returns (uint256)
@@ -185,10 +205,10 @@ contract Stakable {
         return
             (user_stake.amount *
                 user_stake.rewardAPY *
-                calculateStakingDuration(user_stake.since)) / 1e26;
+                _calculateStakingDuration(user_stake.since)) / 1e26;
     }
 
-    function calculatePenalty(uint256 amount, uint256 reward)
+    function _calculatePenalty(uint256 amount, uint256 reward)
         internal
         view
         returns (uint256, uint256)
@@ -199,7 +219,7 @@ contract Stakable {
         );
     }
 
-    function calculateStakingWithPenalty(uint256 amount, uint256 reward)
+    function _calculateStakingWithPenalty(uint256 amount, uint256 reward)
         internal
         view
         returns (uint256, uint256)
@@ -208,7 +228,7 @@ contract Stakable {
             return (0, 0);
         }
 
-        (uint256 amount_penalty, uint256 reward_penalty) = calculatePenalty(
+        (uint256 amount_penalty, uint256 reward_penalty) = _calculatePenalty(
             amount,
             reward
         );
@@ -223,20 +243,24 @@ contract Stakable {
      * withdrawStake takes in an amount and a index of the stake and will remove tokens from that stake
      * Notice index of the stake is the users stake counter, starting at 0 for the first stake
      * Will return the amount to MINT onto the acount
-     * Will also calculateStakeReward and reset timer
+     * Will also _calculateStakeReward and reset timer
      */
-    function _withdrawStake(address _user) internal returns (uint256, uint256) {
+    function withdrawStake(address _user)
+        external
+        onlyOwner
+        returns (uint256, uint256)
+    {
         // Grab user_index which is the index to use to grab the Stake[]
         Stake memory stake = stakeholders[_user].stake;
 
-        uint256 reward = calculateStakeReward(stake);
+        uint256 reward = _calculateStakeReward(stake);
 
         delete stakeholders[_user];
 
         if (stake.releaseTime > block.timestamp) {
             totalVoters -= 1;
             delete voters[_user].voted[_votingId];
-            return calculateStakingWithPenalty(stake.amount, reward);
+            return _calculateStakingWithPenalty(stake.amount, reward);
         }
 
         totalVoters -= 1;
@@ -249,14 +273,14 @@ contract Stakable {
         StakingSummary memory summary = StakingSummary(0, 0, data.stake);
         _checkUserStake(summary.stake.amount);
 
-        uint256 availableReward = calculateStakeReward(summary.stake);
+        uint256 availableReward = _calculateStakeReward(summary.stake);
         uint256 penalty;
 
         if (summary.stake.releaseTime > block.timestamp) {
-            (uint256 amount_penalty, uint256 reward_penalty) = calculatePenalty(
-                summary.stake.amount,
-                availableReward
-            );
+            (
+                uint256 amount_penalty,
+                uint256 reward_penalty
+            ) = _calculatePenalty(summary.stake.amount, availableReward);
             penalty = amount_penalty + reward_penalty;
         }
 
@@ -283,7 +307,12 @@ contract Stakable {
         return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
     }
 
-    function _claimAirdrop(address _staker) internal view returns (uint256) {
+    function claimAirdrop(address _staker)
+        external
+        view
+        onlyOwner
+        returns (uint256)
+    {
         Stakeholder memory stakeholder = stakeholders[_staker];
 
         _checkUserStake(stakeholder.stake.amount);
@@ -308,7 +337,7 @@ contract Stakable {
     }
 
     /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
-    function _startVoting() internal {
+    function startVoting() external onlyOwner {
         require(_votingStatus == false, "Voting is already running");
         _votingStatus = true;
         _votingId += 1;
@@ -342,7 +371,13 @@ contract Stakable {
         votedUsers[_votingId] -= 1;
     }
 
-    function _getVotingResult() internal view votingStatusTrue returns (bool) {
+    function getVotingResult()
+        external
+        view
+        onlyOwner
+        votingStatusTrue
+        returns (bool)
+    {
         require(totalVoters > 1, "Not enough voters");
         uint256 half_voters = SafeMath.div(SafeMath.mul(totalVoters, 5), 10);
 
@@ -353,7 +388,7 @@ contract Stakable {
         }
     }
 
-    function _stopVoting() internal votingStatusTrue {
+    function stopVoting() external onlyOwner votingStatusTrue {
         _votingStatus = false;
     }
 }

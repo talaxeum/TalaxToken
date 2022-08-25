@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.11;
+
+struct Multilock {
+    uint256 lockedAmount;
+    uint256 amount;
+    bool isPhase1Claimed;
+    uint256 latestClaimDay;
+}
+
+interface IStakable {
+    function stakingPenaltyRate() external view returns (uint256);
+
+    function airdropRate() external view returns (uint256);
+
+    function airdropSince() external view returns (uint256);
+
+    function totalVoters() external view returns (uint256);
+
+    function getVoters(address user) external view returns (bool, bool); // votingRight and voted
+
+    function votedUsers(uint256 id) external view returns (uint256);
+
+    function startAirdropSince() external;
+
+    function stake(
+        address user,
+        uint256 amount,
+        uint256 stakePeriod,
+        uint256 rewardRate
+    ) external;
+
+    function changePenaltyFee(uint256 amount) external;
+
+    function changeAirdropPercentage(uint256 amount) external;
+
+    function withdrawStake(address user);
+
+    function claimAirdrop(address user) external view returns (uint256);
+
+    function startVoting() external;
+
+    function getVotingResult() external view returns (bool);
+
+    function stopVoting() external;
+}
+
+interface IWhiteList {
+    function privateSaleUsers() external view returns (uint256);
+
+    function privateSaleAmount() external view returns (uint256);
+
+    function startPrivateSale() external view returns (uint256);
+
+    function beneficiary(address user) external view returns (Multilock memory);
+
+    function initiateWhiteList() external;
+
+    function addBeneficiary(address user, uint256 amount) external;
+
+    function deleteBeneficiary(address user) external;
+
+    function releaseClaimable(address user) external;
+}
+
+interface ILockable {
+    function beneficiary() external view returns (uint256);
+
+    function startLockedWallet() external view returns (uint256);
+
+    function initiateLockedWallet() external;
+
+    function releaseClaimable(uint256[51] memory amount) external;
+}
