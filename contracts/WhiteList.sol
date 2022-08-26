@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract WhiteList {
+contract Whitelist {
     using SafeMath for uint256;
     uint256 public privateSaleUsers;
 
@@ -13,7 +13,7 @@ contract WhiteList {
 
     uint256 public startPrivateSale;
 
-    struct Whitelist {
+    struct WhitelistStruct {
         uint256 lockedAmount;
         uint256 amount;
         bool isPhase1Claimed;
@@ -21,7 +21,7 @@ contract WhiteList {
     }
 
     // beneficiary of tokens after they are released
-    mapping(address => Whitelist) public beneficiary;
+    mapping(address => WhitelistStruct) public beneficiary;
 
     address talaxAddress;
 
@@ -31,7 +31,7 @@ contract WhiteList {
     }
 
     /* ------------------------------------------ modifier ------------------------------------------ */
-    function _onlyTalax() internal pure {
+    function _onlyTalax() internal view {
         require(msg.sender == talaxAddress, "Not authorized");
     }
 
@@ -42,14 +42,14 @@ contract WhiteList {
 
     /* ---------------------------------------------- - --------------------------------------------- */
 
-    function initiateWhiteList() external onlyTalax {
+    function initiateWhitelist() external onlyTalax {
         startPrivateSale = block.timestamp;
     }
 
-    function hasWhiteList(address user)
+    function hasWhitelist(address user)
         external
         view
-        returns (Whitelist memory)
+        returns (WhitelistStruct memory)
     {
         return beneficiary[user];
     }

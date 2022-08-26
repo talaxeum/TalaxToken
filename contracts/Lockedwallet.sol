@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Lockedwallet {
+contract LockedWallet {
     uint256 internal _amount;
 
     address internal _owner;
@@ -78,7 +78,7 @@ contract Lockedwallet {
         onlyTalax
         returns (uint256)
     {
-        uint256 claimableLockedAmount = _calculateClaimableAmount(amount_);
+        uint256 claimableLockedAmount = _calculateClaimableAmount(amount);
 
         // require(claimableLockedAmount > 0, "Lockable: no tokens to release");
 

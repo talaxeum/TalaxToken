@@ -34,7 +34,7 @@ interface IStakable {
 
     function changeAirdropPercentage(uint256 amount) external;
 
-    function withdrawStake(address user);
+    function withdrawStake(address user) external returns (uint256, uint256);
 
     function claimAirdrop(address user) external view returns (uint256);
 
@@ -45,7 +45,7 @@ interface IStakable {
     function stopVoting() external;
 }
 
-interface IWhiteList {
+interface IWhitelist {
     function privateSaleUsers() external view returns (uint256);
 
     function privateSaleAmount() external view returns (uint256);
@@ -54,21 +54,23 @@ interface IWhiteList {
 
     function beneficiary(address user) external view returns (Multilock memory);
 
-    function initiateWhiteList() external;
+    function initiateWhitelist() external;
 
     function addBeneficiary(address user, uint256 amount) external;
 
-    function deleteBeneficiary(address user) external;
+    function deleteBeneficiary(address user) external returns (uint256);
 
-    function releaseClaimable(address user) external;
+    function releaseClaimable(address user) external returns (uint256);
 }
 
 interface ILockable {
-    function beneficiary() external view returns (uint256);
+    function beneficiary() external view returns (address);
 
     function startLockedWallet() external view returns (uint256);
 
     function initiateLockedWallet() external;
 
-    function releaseClaimable(uint256[51] memory amount) external;
+    function releaseClaimable(uint256[51] memory amount)
+        external
+        returns (uint256);
 }
