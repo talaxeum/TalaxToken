@@ -1,13 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
-struct Multilock {
-    uint256 lockedAmount;
-    uint256 amount;
-    bool isPhase1Claimed;
-    uint256 latestClaimDay;
-}
-
 interface IStakable {
     function stakingPenaltyRate() external view returns (uint256);
 
@@ -22,6 +15,8 @@ interface IStakable {
     function votedUsers(uint256 id) external view returns (uint256);
 
     function startAirdropSince() external;
+
+    function changeTalaxAddress(address talax) external;
 
     function stake(
         address user,
@@ -52,7 +47,17 @@ interface IWhitelist {
 
     function startPrivateSale() external view returns (uint256);
 
-    function beneficiary(address user) external view returns (Multilock memory);
+    function changeTalaxAddress(address talax) external;
+
+    function beneficiary(address user)
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            bool,
+            uint256
+        ); // lockedAmount, amount, isPhase1Claimed, latestClaimDay
 
     function initiateWhitelist() external;
 
@@ -65,6 +70,8 @@ interface IWhitelist {
 
 interface ILockable {
     function beneficiary() external view returns (address);
+
+    function changeTalaxAddress(address talax) external;
 
     function startLockedWallet() external view returns (uint256);
 

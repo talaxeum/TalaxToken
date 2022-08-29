@@ -2,8 +2,9 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./Interfaces.sol";
 
-contract LockedWallet {
+contract LockedWallet is ILockable {
     uint256 internal _amount;
 
     address internal _owner;
@@ -20,9 +21,7 @@ contract LockedWallet {
         _owner = msg.sender;
     }
 
-    /**
-     * @dev modifier functions
-     */
+    /* ------------------------------------------ Modifier ------------------------------------------ */
 
     function _onlyTalax() internal view {
         require(msg.sender == _owner, "Not _owner");
@@ -33,11 +32,17 @@ contract LockedWallet {
         _;
     }
 
+    /* ---------------------------------------------- - --------------------------------------------- */
+
+    function changeTalaxAddress(address talax) external onlyTalax {
+        talaxAddress = talax;
+    }
+
     /**
      * @notice Initiate Locked Wallet
      */
 
-    function initiateLockedWallet() external onlyTalax {
+    function initiateLockedWallet() external override onlyTalax {
         startLockedWallet = block.timestamp;
     }
 
@@ -75,6 +80,7 @@ contract LockedWallet {
      */
     function releaseClaimable(uint256[51] memory amount)
         external
+        override
         onlyTalax
         returns (uint256)
     {

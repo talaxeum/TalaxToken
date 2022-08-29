@@ -59,6 +59,12 @@ contract Stakable {
         _;
     }
 
+    /* ---------------------------------------------- - --------------------------------------------- */
+
+    function changeTalaxAddress(address talax) external onlyTalax {
+        talaxAddress = talax;
+    }
+
     /**
      * @notice
      * A stake struct is used to represent the way we store stakes,

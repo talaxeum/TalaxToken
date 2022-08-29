@@ -2,6 +2,7 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./Interfaces.sol";
 
 contract Whitelist {
     using SafeMath for uint256;
@@ -21,7 +22,7 @@ contract Whitelist {
     }
 
     // beneficiary of tokens after they are released
-    mapping(address => WhitelistStruct) public beneficiary;
+    mapping(address => WhitelistStruct) private _beneficiary;
 
     address talaxAddress;
 
@@ -42,7 +43,30 @@ contract Whitelist {
 
     /* ---------------------------------------------- - --------------------------------------------- */
 
-    function initiateWhitelist() external onlyTalax {
+    function changeTalaxAddress(address talax) external onlyTalax {
+        talaxAddress = talax;
+    }
+
+    function beneficiary(address user)
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            bool,
+            uint256
+        )
+    {
+        WhitelistStruct memory beneficiary = _beneficiary[user];
+        return (
+            beneficiary.lockedAmount,
+            beneficiary.amount,
+            beneficiary.isPhase1Claimed,
+            beneficiary.latestClaimDay
+        );
+    }
+
+    function initiateWhitelist() external override onlyTalax {
         startPrivateSale = block.timestamp;
     }
 
@@ -51,7 +75,7 @@ contract Whitelist {
         view
         returns (WhitelistStruct memory)
     {
-        return beneficiary[user];
+        return _beneficiary[user];
     }
 
     /**
@@ -68,54 +92,58 @@ contract Whitelist {
 
         //Phase 1 of locked wallet release - monthly
         if (lockDuration < 16 * 30) {
-            if (beneficiary[user].isPhase1Claimed == false) {
+            if (_beneficiary[user].isPhase1Claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
+                        SafeMath.mul(_phase1, _beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
-                beneficiary[user].isPhase1Claimed = true;
+                _beneficiary[user].isPhase1Claimed = true;
             }
-            beneficiary[user].latestClaimDay = 15 * 30;
+            _beneficiary[user].latestClaimDay = 15 * 30;
         }
         //Phase 2 of locked wallet release - daily
         else if (lockDuration >= 16 * 30 && lockDuration < 28 * 30) {
-            if (beneficiary[user].isPhase1Claimed == false) {
+            if (_beneficiary[user].isPhase1Claimed == false) {
                 claimable = claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
+                        SafeMath.mul(_phase1, _beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
-                beneficiary[user].isPhase1Claimed = true;
+                _beneficiary[user].isPhase1Claimed = true;
             }
 
             uint256 sinceLatestClaim = lockDuration -
-                beneficiary[user].latestClaimDay;
+                _beneficiary[user].latestClaimDay;
             claimable =
                 sinceLatestClaim *
                 claimable.add(
                     SafeMath.div(
-                        SafeMath.mul(_phase2, beneficiary[user].lockedAmount),
+                        SafeMath.mul(_phase2, _beneficiary[user].lockedAmount),
                         privateSaleAmount
                     )
                 );
-            beneficiary[user].latestClaimDay = lockDuration;
+            _beneficiary[user].latestClaimDay = lockDuration;
         }
 
         require(claimable != 0, "Nothing to claim yet");
         return claimable;
     }
 
-    function addBeneficiary(address user, uint256 amount) external onlyTalax {
+    function addBeneficiary(address user, uint256 amount)
+        external
+        override
+        onlyTalax
+    {
         require(amount <= privateSaleAmount, "Insufficient Total Balance");
-        require(beneficiary[user].amount == 0, "Cannot add Registered User");
+        require(_beneficiary[user].amount == 0, "Cannot add Registered User");
 
-        beneficiary[user].lockedAmount = amount;
-        beneficiary[user].amount = amount;
-        beneficiary[user].isPhase1Claimed = false;
-        beneficiary[user].latestClaimDay = 1;
+        _beneficiary[user].lockedAmount = amount;
+        _beneficiary[user].amount = amount;
+        _beneficiary[user].isPhase1Claimed = false;
+        _beneficiary[user].latestClaimDay = 1;
 
         privateSaleUsers += 1;
         privateSaleAmount -= amount;
@@ -123,15 +151,16 @@ contract Whitelist {
 
     function deleteBeneficiary(address user)
         external
+        override
         onlyTalax
         returns (uint256)
     {
-        require(beneficiary[user].amount != 0, "User not Registered");
+        require(_beneficiary[user].amount != 0, "User not Registered");
         privateSaleUsers -= 1;
-        privateSaleAmount += beneficiary[user].amount;
-        uint256 ex_amount = beneficiary[user].amount;
+        privateSaleAmount += _beneficiary[user].amount;
+        uint256 ex_amount = _beneficiary[user].amount;
 
-        delete beneficiary[user];
+        delete _beneficiary[user];
         return ex_amount;
     }
 
@@ -140,17 +169,18 @@ contract Whitelist {
      */
     function releaseClaimable(address user)
         external
+        override
         onlyTalax
         returns (uint256)
     {
-        require(beneficiary[user].amount > 0, "No Tokens Left");
+        require(_beneficiary[user].amount > 0, "No Tokens Left");
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(user);
 
         require(claimableLockedAmount > 0, "No Tokens to Release for Now");
 
-        beneficiary[user].amount = SafeMath.sub(
-            beneficiary[user].amount,
+        _beneficiary[user].amount = SafeMath.sub(
+            _beneficiary[user].amount,
             claimableLockedAmount
         );
 

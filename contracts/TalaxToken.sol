@@ -39,16 +39,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     // Changeable address by owner
     address public timelockController;
 
+    address public private_placement_address =
+        0xC8C67a94B0447a2aAccb8E4D22e2cd53d8Fcc456; //test account 1
+    // address public private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
+
     address public strategic_partner_address_1 =
         0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
     address public strategic_partner_address_2 =
         0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
     address public strategic_partner_address_3 =
         0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
-
-    address public private_placement_address =
-        0xC8C67a94B0447a2aAccb8E4D22e2cd53d8Fcc456; //test account 1
-    // address public private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
 
     /*
      * Notes
@@ -124,18 +124,20 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         _balances[msg.sender] = 4200000 * 1e3 * 1e18; // for testing and staging
         // _balances[address(this)] = 4200000 * 1e3 * 1e18;
 
+        /* ------------------------------------- Interfaces Contract ------------------------------------ */
         S_contract = IStakable(stake_address);
-        PP_contract = IWhitelist(address(0));
-        PS_contract = IWhitelist(address(0));
-        M_contract_1 = ILockable(address(0));
-        M_contract_2 = ILockable(address(0));
-        M_contract_3 = ILockable(address(0));
-        SP_contract_1 = ILockable(address(0));
-        SP_contract_2 = ILockable(address(0));
-        SP_contract_3 = ILockable(address(0));
-        TPC_contract_1 = ILockable(address(0));
-        TPC_contract_2 = ILockable(address(0));
-        TPC_contract_3 = ILockable(address(0));
+        PP_contract = IWhitelist(private_placement_address);
+        PS_contract = IWhitelist(private_sale_address);
+        M_contract_1 = ILockable(marketing_address_1);
+        M_contract_2 = ILockable(marketing_address_2);
+        M_contract_3 = ILockable(marketing_address_3);
+        SP_contract_1 = ILockable(strategic_partner_address_1);
+        SP_contract_2 = ILockable(strategic_partner_address_2);
+        SP_contract_3 = ILockable(strategic_partner_address_3);
+        TPC_contract_1 = ILockable(team_and_project_coordinator_address_1);
+        TPC_contract_2 = ILockable(team_and_project_coordinator_address_2);
+        TPC_contract_3 = ILockable(team_and_project_coordinator_address_3);
+        /* ---------------------------------------------- - --------------------------------------------- */
 
         // Public Sale, CEX Listing - EOA Type Balance
         // Private Sale - Multilock.sol
