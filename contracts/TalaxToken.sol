@@ -267,6 +267,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit Transfer(from, to, taxedAmount);
     }
 
+    function _mint(address account, uint256 amount) internal override virtual {
+        require(account != address(0), "ERC20: mint to the zero address");
+
+        _beforeTokenTransfer(address(0), account, amount);
+
+        _totalSupply += amount;
+        _balances[account] += amount;
+        emit Transfer(address(0), account, amount);
+
+        _afterTokenTransfer(address(0), account, amount);
+    }
+
     /**
      * @notice ERC20 FUNCTIONS
      */
