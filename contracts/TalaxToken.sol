@@ -40,15 +40,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     address public timelockController;
 
     address public private_placement_address =
-        0xC8C67a94B0447a2aAccb8E4D22e2cd53d8Fcc456; //test account 1
+        0xd9145CCE52D386f254917e481eB44e9943F39138; //test account 1
     // address public private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
 
     address public strategic_partner_address_1 =
-        0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
+        0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8;
     address public strategic_partner_address_2 =
-        0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
+        0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C;
     address public strategic_partner_address_3 =
-        0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
+        0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC;
 
     /*
      * Notes
@@ -267,7 +267,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit Transfer(from, to, taxedAmount);
     }
 
-    function _mint(address account, uint256 amount) internal override virtual {
+     function _mint(address account, uint256 amount) internal override {
         require(account != address(0), "ERC20: mint to the zero address");
 
         _beforeTokenTransfer(address(0), account, amount);
@@ -684,18 +684,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
 
         initializationStatus = true;
         M_contract_1.initiateLockedWallet();
-        M_contract_2.initiateLockedWallet();
-        M_contract_3.initiateLockedWallet();
-        SP_contract_1.initiateLockedWallet();
-        SP_contract_2.initiateLockedWallet();
-        SP_contract_3.initiateLockedWallet();
-        TPC_contract_1.initiateLockedWallet();
-        TPC_contract_2.initiateLockedWallet();
-        TPC_contract_3.initiateLockedWallet();
+        // M_contract_2.initiateLockedWallet();
+        // M_contract_3.initiateLockedWallet();
+        // SP_contract_1.initiateLockedWallet();
+        // SP_contract_2.initiateLockedWallet();
+        // SP_contract_3.initiateLockedWallet();
+        // TPC_contract_1.initiateLockedWallet();
+        // TPC_contract_2.initiateLockedWallet();
+        // TPC_contract_3.initiateLockedWallet();
         emit InitiateLockedWallet(_msgSender());
 
         PS_contract.initiateWhitelist();
-        PP_contract.initiateWhitelist();
+        // PP_contract.initiateWhitelist();
         emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;

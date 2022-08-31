@@ -4,6 +4,8 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./Interfaces.sol";
 
+// 700000000000000000000000000
+
 contract LockedWallet is ILockable {
     uint256 internal _amount;
 
@@ -27,6 +29,10 @@ contract LockedWallet is ILockable {
         require(msg.sender == _owner, "Not _owner");
     }
 
+    function getOwner() public view returns (address) {
+        return _owner;
+    }
+
     modifier onlyTalax() {
         _onlyTalax();
         _;
@@ -35,7 +41,7 @@ contract LockedWallet is ILockable {
     /* ---------------------------------------------- - --------------------------------------------- */
 
     function changeTalaxAddress(address talax) external onlyTalax {
-        talaxAddress = talax;
+        _owner = talax;
     }
 
     /**
