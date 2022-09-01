@@ -27,18 +27,18 @@ contract Stakable {
     mapping(address => Voter) public voters;
     mapping(uint256 => uint256) public votedUsers;
 
-    address talaxAddress;
+    address _owner;
 
     constructor() {
         //Staking penalty and Airdrop in 0.1 times percentage
         stakingPenaltyRate = 15;
         airdropRate = 80;
-        talaxAddress = msg.sender;
+        _owner = msg.sender;
     }
 
     /* ------------------------------------------ Modifier ------------------------------------------ */
     function isTalax() internal view {
-        require(msg.sender == talaxAddress, "Not authorized");
+        require(msg.sender == _owner, "Not authorized");
     }
 
     modifier onlyTalax() {
@@ -62,7 +62,7 @@ contract Stakable {
     /* ---------------------------------------------- - --------------------------------------------- */
 
     function changeTalaxAddress(address talax) external onlyTalax {
-        talaxAddress = talax;
+        _owner = talax;
     }
 
     /**
@@ -120,7 +120,7 @@ contract Stakable {
     event AirdropChanged(uint256 amount);
 
     function setTalaxAddress(address talax) external onlyTalax {
-        talaxAddress = talax;
+        _owner = talax;
     }
 
     function getVoters(address user) external view returns (bool, bool) {
