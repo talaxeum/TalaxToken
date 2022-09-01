@@ -44,7 +44,7 @@ contract Whitelist {
     /* ---------------------------------------------- - --------------------------------------------- */
 
     function changeTalaxAddress(address talax) external onlyTalax {
-        _owner = talax;
+        _ownerr = talax;
     }
 
     function beneficiary(address user)
