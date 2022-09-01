@@ -24,16 +24,16 @@ contract Whitelist {
     // beneficiary of tokens after they are released
     mapping(address => WhitelistStruct) private _beneficiary;
 
-    address talaxAddress;
+    address _owner;
 
     constructor() {
         privateSaleAmount = 1467900000 * 1e18;
-        talaxAddress = msg.sender;
+        _owner = msg.sender;
     }
 
     /* ------------------------------------------ modifier ------------------------------------------ */
     function _onlyTalax() internal view {
-        require(msg.sender == talaxAddress, "Not authorized");
+        require(msg.sender == _owner, "Not authorized");
     }
 
     modifier onlyTalax() {
@@ -44,7 +44,7 @@ contract Whitelist {
     /* ---------------------------------------------- - --------------------------------------------- */
 
     function changeTalaxAddress(address talax) external onlyTalax {
-        talaxAddress = talax;
+        _owner = talax;
     }
 
     function beneficiary(address user)
@@ -57,16 +57,16 @@ contract Whitelist {
             uint256
         )
     {
-        WhitelistStruct memory beneficiary = _beneficiary[user];
+        WhitelistStruct memory beneficiary_ = _beneficiary[user];
         return (
-            beneficiary.lockedAmount,
-            beneficiary.amount,
-            beneficiary.isPhase1Claimed,
-            beneficiary.latestClaimDay
+            beneficiary_.lockedAmount,
+            beneficiary_.amount,
+            beneficiary_.isPhase1Claimed,
+            beneficiary_.latestClaimDay
         );
     }
 
-    function initiateWhitelist() external override onlyTalax {
+    function initiateWhitelist() external onlyTalax {
         startPrivateSale = block.timestamp;
     }
 
@@ -134,7 +134,6 @@ contract Whitelist {
 
     function addBeneficiary(address user, uint256 amount)
         external
-        override
         onlyTalax
     {
         require(amount <= privateSaleAmount, "Insufficient Total Balance");
@@ -151,7 +150,6 @@ contract Whitelist {
 
     function deleteBeneficiary(address user)
         external
-        override
         onlyTalax
         returns (uint256)
     {
@@ -169,7 +167,6 @@ contract Whitelist {
      */
     function releaseClaimable(address user)
         external
-        override
         onlyTalax
         returns (uint256)
     {
