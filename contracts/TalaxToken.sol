@@ -40,15 +40,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     address public timelockController;
 
     address public private_placement_address =
-        0xd9145CCE52D386f254917e481eB44e9943F39138; //test account 1
+        0xf8e81D47203A594245E36C48e151709F0C19fBe8; //test account 1
     // address public private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
 
     address public strategic_partner_address_1 =
-        0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8;
+        0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B;
     address public strategic_partner_address_2 =
-        0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C;
+        0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47;
     address public strategic_partner_address_3 =
-        0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC;
+        0xDA0bab807633f07f013f94DD0E6A4F96F8742B53;
 
     /*
      * Notes
@@ -684,18 +684,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
 
         initializationStatus = true;
         M_contract_1.initiateLockedWallet();
-        // M_contract_2.initiateLockedWallet();
-        // M_contract_3.initiateLockedWallet();
-        // SP_contract_1.initiateLockedWallet();
-        // SP_contract_2.initiateLockedWallet();
-        // SP_contract_3.initiateLockedWallet();
-        // TPC_contract_1.initiateLockedWallet();
-        // TPC_contract_2.initiateLockedWallet();
-        // TPC_contract_3.initiateLockedWallet();
+        M_contract_2.initiateLockedWallet();
+        M_contract_3.initiateLockedWallet();
+        SP_contract_1.initiateLockedWallet();
+        SP_contract_2.initiateLockedWallet();
+        SP_contract_3.initiateLockedWallet();
+        TPC_contract_1.initiateLockedWallet();
+        TPC_contract_2.initiateLockedWallet();
+        TPC_contract_3.initiateLockedWallet();
         emit InitiateLockedWallet(_msgSender());
 
         PS_contract.initiateWhitelist();
-        // PP_contract.initiateWhitelist();
+        PP_contract.initiateWhitelist();
         emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;
