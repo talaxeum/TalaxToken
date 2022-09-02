@@ -14,13 +14,6 @@ contract Whitelist {
 
     uint256 public startPrivateSale;
 
-    struct WhitelistStruct {
-        uint256 lockedAmount;
-        uint256 amount;
-        bool isPhase1Claimed;
-        uint256 latestClaimDay;
-    }
-
     // beneficiary of tokens after they are released
     mapping(address => WhitelistStruct) private _beneficiary;
 
@@ -136,10 +129,7 @@ contract Whitelist {
         return claimable;
     }
 
-    function addBeneficiary(address user, uint256 amount)
-        external
-        onlyTalax
-    {
+    function addBeneficiary(address user, uint256 amount) external onlyTalax {
         require(amount <= privateSaleAmount, "Insufficient Total Balance");
         require(_beneficiary[user].amount == 0, "Cannot add Registered User");
 

@@ -231,7 +231,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Whitelist.sol": "Whitelist"
+			"contracts/WhiteList.sol": "Whitelist"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -253,12 +253,20 @@
 				"dweb:/ipfs/QmfYuZxRfx2J2xdk4EXN7jKg4bUYEMTaYk9BAw9Bqn4o2Y"
 			]
 		},
-		"contracts/Whitelist.sol": {
-			"keccak256": "0x28915498a00857b00657a9129c334f58d3d92517704bc1361b5b5c6f64052dd9",
+		"contracts/Interfaces.sol": {
+			"keccak256": "0x3e6787e58214b5af4af523a2a603f03dbdf4e397be411edd1ce47d792872ad03",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://a77124737b101cc99f8c2cfed9620fbd7ba2cbd1635382ced036fbab312de2e2",
-				"dweb:/ipfs/QmQ2MB5U6smmWNJP1Z9jW8WRtKkvogtvzK2zVkZRznfX2m"
+				"bzz-raw://3ceac46a908c7381881ed80661864bf9214de9b777f353a86b3d79f6d0dcf537",
+				"dweb:/ipfs/QmewThGMZUjU2i4LkFmqMD8zFt8QtMJpV7nCn59opjZ48B"
+			]
+		},
+		"contracts/WhiteList.sol": {
+			"keccak256": "0xd33e24aed420984d2ca062e46d0b5b1c19fcb4b4aa5be435620d13bc8d8676a3",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://77593f9ba98581f119a7f36c0d1ee733b99c5eb1fca0414d90520d9e23292bcb",
+				"dweb:/ipfs/Qmf15Wbohs3xsPaBxkwMbioC9Z9tzj1pQPygsx7a14QmZR"
 			]
 		}
 	},

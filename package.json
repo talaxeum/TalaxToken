@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/evan533/TalaxToken#readme",
   "dependencies": {
+    "@remix-project/remixd": "^0.6.6",
     "@truffle/hdwallet-provider": "^1.7.0",
     "bignumber.js": "^9.0.2",
     "chai": "^4.3.4",

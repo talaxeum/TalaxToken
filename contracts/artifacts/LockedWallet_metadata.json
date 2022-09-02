@@ -143,19 +143,19 @@
 			]
 		},
 		"contracts/Interfaces.sol": {
-			"keccak256": "0xad241fdd2cfa1040f00a41f75e08d4d0b3b15920d243154ce805836d1519f2d0",
+			"keccak256": "0x3e6787e58214b5af4af523a2a603f03dbdf4e397be411edd1ce47d792872ad03",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://3164a7677cfcc5ec84557dccd72f344f42b23ec4c175ca4bb0f6c19a0162003f",
-				"dweb:/ipfs/QmRdqWJtnV5yFpCXmtKBtk87qTj7qsqPprqEUCviLsBVTT"
+				"bzz-raw://3ceac46a908c7381881ed80661864bf9214de9b777f353a86b3d79f6d0dcf537",
+				"dweb:/ipfs/QmewThGMZUjU2i4LkFmqMD8zFt8QtMJpV7nCn59opjZ48B"
 			]
 		},
 		"contracts/Lockedwallet.sol": {
-			"keccak256": "0x0dcd6d540edc99aab8ca8ca6bb5289d3d1109b76c7f90bb3a13690bd69d3ae89",
+			"keccak256": "0x48b42e24077d9726bc4b8d4295d54e4d2c816501a21e14d0a4a970b2ce581b57",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://35193897712372b0e2849cc0c57277bbf1a973348801c21513689ab3e4fb2986",
-				"dweb:/ipfs/QmTmHE4PwKXSXatcEre99qy75qBowYLg1vT2ktUY4mcEaH"
+				"bzz-raw://cd28cca75ec0da67e75c778bd3e864d340895ed91698df121839c51b020ce3ab",
+				"dweb:/ipfs/QmXg6AiUUwWZkXeqFaQchCvHq43XEeVJH1GFwH1KYYi9i5"
 			]
 		}
 	},

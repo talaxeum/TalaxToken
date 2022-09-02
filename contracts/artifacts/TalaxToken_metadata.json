@@ -38,20 +38,7 @@
 						"type": "tuple[]"
 					}
 				],
-				"name": "AddPrivateSale",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
-				"name": "AirdropChanged",
+				"name": "AddBeneficiary",
 				"type": "event"
 			},
 			{
@@ -140,19 +127,6 @@
 				"anonymous": false,
 				"inputs": [
 					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					}
-				],
-				"name": "ChangePrivatePlacementAddress",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
 						"indexed": false,
 						"internalType": "address",
 						"name": "from",
@@ -205,6 +179,19 @@
 					{
 						"indexed": true,
 						"internalType": "address",
+						"name": "to",
+						"type": "address"
+					}
+				],
+				"name": "Change_PP_Address",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
 						"name": "from",
 						"type": "address"
 					},
@@ -215,7 +202,7 @@
 						"type": "address[]"
 					}
 				],
-				"name": "DeletePrivateSale",
+				"name": "DeleteBeneficiary",
 				"type": "event"
 			},
 			{
@@ -241,7 +228,7 @@
 						"type": "address"
 					}
 				],
-				"name": "InitiatePrivateSale",
+				"name": "InitiateWhitelist",
 				"type": "event"
 			},
 			{
@@ -261,50 +248,6 @@
 					}
 				],
 				"name": "OwnershipTransferred",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
-				"name": "PenaltyChanged",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "user",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "timestamp",
-						"type": "uint256"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "releaseTime",
-						"type": "uint256"
-					}
-				],
-				"name": "Staked",
 				"type": "event"
 			},
 			{
@@ -406,35 +349,34 @@
 						"type": "tuple[]"
 					}
 				],
-				"name": "addMultipleBeneficiary",
+				"name": "add_PP_Beneficiaries",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "airdropRate",
-				"outputs": [
+				"inputs": [
 					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
+						"components": [
+							{
+								"internalType": "address",
+								"name": "user",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "amount",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct TalaxToken.Beneficiary[]",
+						"name": "benefs",
+						"type": "tuple[]"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "airdropSince",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
+				"name": "add_PS_Beneficiaries",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -445,19 +387,6 @@
 						"internalType": "bool",
 						"name": "",
 						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "airdropWeek",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -617,19 +546,6 @@
 				"inputs": [
 					{
 						"internalType": "address",
-						"name": "_input",
-						"type": "address"
-					}
-				],
-				"name": "changePrivatePlacementAddress",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
 						"name": "address1",
 						"type": "address"
 					},
@@ -663,6 +579,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_input",
+						"type": "address"
+					}
+				],
+				"name": "change_PP_Address",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "claimAirdrop",
 				"outputs": [],
@@ -671,7 +600,14 @@
 			},
 			{
 				"inputs": [],
-				"name": "claimPrivateSale",
+				"name": "claim_PP",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "claim_PS",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -734,111 +670,22 @@
 						"type": "address[]"
 					}
 				],
-				"name": "deleteMultipleBeneficiary",
+				"name": "delete_PP_Beneficiaries",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "hasMultilockable",
-				"outputs": [
+				"inputs": [
 					{
-						"components": [
-							{
-								"internalType": "uint256",
-								"name": "lockedAmount",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint256",
-								"name": "amount",
-								"type": "uint256"
-							},
-							{
-								"internalType": "bool",
-								"name": "isPhase1Claimed",
-								"type": "bool"
-							},
-							{
-								"internalType": "uint256",
-								"name": "latestClaimDay",
-								"type": "uint256"
-							}
-						],
-						"internalType": "struct Multilockable.Multilock",
-						"name": "",
-						"type": "tuple"
+						"internalType": "address[]",
+						"name": "benefs",
+						"type": "address[]"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "hasStake",
-				"outputs": [
-					{
-						"components": [
-							{
-								"internalType": "uint256",
-								"name": "total_amount",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint256",
-								"name": "penalty",
-								"type": "uint256"
-							},
-							{
-								"components": [
-									{
-										"internalType": "address",
-										"name": "user",
-										"type": "address"
-									},
-									{
-										"internalType": "uint256",
-										"name": "amount",
-										"type": "uint256"
-									},
-									{
-										"internalType": "uint256",
-										"name": "since",
-										"type": "uint256"
-									},
-									{
-										"internalType": "uint256",
-										"name": "claimable",
-										"type": "uint256"
-									},
-									{
-										"internalType": "uint256",
-										"name": "claimable_airdrop",
-										"type": "uint256"
-									},
-									{
-										"internalType": "uint256",
-										"name": "rewardAPY",
-										"type": "uint256"
-									},
-									{
-										"internalType": "uint256",
-										"name": "releaseTime",
-										"type": "uint256"
-									}
-								],
-								"internalType": "struct Stakable.Stake",
-								"name": "stake",
-								"type": "tuple"
-							}
-						],
-						"internalType": "struct Stakable.StakingSummary",
-						"name": "",
-						"type": "tuple"
-					}
-				],
-				"stateMutability": "view",
+				"name": "delete_PS_Beneficiaries",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -880,28 +727,9 @@
 			},
 			{
 				"inputs": [],
-				"name": "initiateLockedWallet_PrivateSale_Airdrop",
+				"name": "initiateLockedWallet__PS__Airdrop",
 				"outputs": [],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_staker",
-						"type": "address"
-					}
-				],
-				"name": "isVoter",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -976,32 +804,6 @@
 			},
 			{
 				"inputs": [],
-				"name": "privateSaleAmount",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "privateSaleUsers",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "private_placement_address",
 				"outputs": [
 					{
@@ -1016,13 +818,6 @@
 			{
 				"inputs": [],
 				"name": "renounceOwnership",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "retractVote",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -1047,33 +842,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "stakingPenaltyRate",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "stakingReward",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "startPrivateSale",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -1172,19 +941,6 @@
 			{
 				"inputs": [],
 				"name": "totalSupply",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "totalVoters",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -1315,13 +1071,6 @@
 			},
 			{
 				"inputs": [],
-				"name": "unlockPrivatePlacementWallet",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "unlockStrategicPartnerWallet_1",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -1360,51 +1109,6 @@
 				"name": "unlockTeamAndProjectCoordinatorWallet_3",
 				"outputs": [],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "vote",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "votedUsers",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"name": "voters",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "votingRight",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -1474,11 +1178,6 @@
 			"version": 1
 		},
 		"userdoc": {
-			"events": {
-				"Staked(address,uint256,uint256,uint256)": {
-					"notice": "Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable"
-				}
-			},
 			"kind": "user",
 			"methods": {},
 			"version": 1
@@ -1557,43 +1256,27 @@
 			]
 		},
 		"contracts/Data.sol": {
-			"keccak256": "0x56298dc77e17130428a71f17ea7f021e0c3d4006f6542fbd5f45b840ab3d570d",
+			"keccak256": "0x61272dde54b2fbf1fa3b048be1c132455ead0c70da9b2bd662bc8fdf7185be75",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://33cb3e687986230b2637e15fc9b02320b43b967380529f72875d385daa1ef439",
-				"dweb:/ipfs/QmVjwJ2tqqWJhtS8MaGJsnRZE4ux9J5aGBgmicVf4oVSZU"
+				"bzz-raw://5d58482354c0272327c160a263eb56c5182f49b5026a74ffd5265a5d7a064965",
+				"dweb:/ipfs/Qme2f2MvjHwWDTowZQK6QSdaPn6mDfGxBtUBVbCNpn8FEn"
 			]
 		},
-		"contracts/Lockable.sol": {
-			"keccak256": "0xc8ed46fd301f1f99f066959e704cea543db0874889b2c2a99ea72f252ce6d169",
+		"contracts/Interfaces.sol": {
+			"keccak256": "0x3e6787e58214b5af4af523a2a603f03dbdf4e397be411edd1ce47d792872ad03",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://103aae5ba6c66984bc16d3d7f0425ea2429fc088c2ca1670e126adf2b291338d",
-				"dweb:/ipfs/QmRD7Aq88YggcZw1H9cCkTvVPYZfidY2WEAy2avWTG6bMy"
-			]
-		},
-		"contracts/Multilockable.sol": {
-			"keccak256": "0xda9f7f5a51045ae7e3c2dd2b3b0a7602dda797ef3549642d274f357485f8be19",
-			"license": "UNLICENSED",
-			"urls": [
-				"bzz-raw://e5fe900bc4f149ecf60864a48320f2f743bcd2af7ffc8d69c70210ab2073a221",
-				"dweb:/ipfs/QmWjsvWA841Hw9Cs75Nywf39SrjpgNu9WvNZEm4h5eomjn"
-			]
-		},
-		"contracts/Stakable.sol": {
-			"keccak256": "0xdb7c3cb146bb07afead78e844d9e32c286d67f1863164085755e96aebc1ca309",
-			"license": "UNLICENSED",
-			"urls": [
-				"bzz-raw://793d6cd81eb6c29c499d590ade25ce8bcbcc50cdb10daefff3037c2f2da04d75",
-				"dweb:/ipfs/QmTvPSRnWsMuTa6LbY22QbK33Dmg2woAvE7983R5Q3si93"
+				"bzz-raw://3ceac46a908c7381881ed80661864bf9214de9b777f353a86b3d79f6d0dcf537",
+				"dweb:/ipfs/QmewThGMZUjU2i4LkFmqMD8zFt8QtMJpV7nCn59opjZ48B"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x559b7da30efe7b931ade3d206b0a5db123be617dc0f48bed359e1f88e8525ab3",
+			"keccak256": "0x52d12f305e07f4afdeac2ef6193c0a1741329d80389306b3980cdd84bd37e929",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://cafcdb6fc4fe17bed4233864137580e69f36fd08393e964a20dc76b6edf0ebe4",
-				"dweb:/ipfs/QmRoTbBPvM1pU4wF5uTB9ic5xV9HCB8f9RNSTSpNRCSe8w"
+				"bzz-raw://b368442255fe919096d7d51938340c6c50cd260ec6243c7f0f735516a0d0f235",
+				"dweb:/ipfs/Qmdzxq98crXTpjaSMW34sEU8qvHqH9ptURe6tAoMLjzRRP"
 			]
 		}
 	},

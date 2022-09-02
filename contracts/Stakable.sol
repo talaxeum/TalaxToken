@@ -70,7 +70,7 @@ contract Stakable {
     }
 
     /**
-     * @notice
+     * @noticef
      * A stake struct is used to represent the way we store stakes,
      * A Stake will contain the users address, the amount staked and a timestamp,
      * Since which is when the stake was made
