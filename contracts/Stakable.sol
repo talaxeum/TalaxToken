@@ -65,6 +65,10 @@ contract Stakable {
         _owner = talax;
     }
 
+    function getOwner() public view returns (address) {
+        return _owner;
+    }
+
     /**
      * @notice
      * A stake struct is used to represent the way we store stakes,
@@ -118,10 +122,6 @@ contract Stakable {
 
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
-
-    function setTalaxAddress(address talax) external onlyTalax {
-        _owner = talax;
-    }
 
     function getVoters(address user) external view returns (bool, bool) {
         return (voters[user].votingRight, voters[user].voted[_votingId]);

@@ -40,6 +40,10 @@ contract Whitelist {
         _owner = talax;
     }
 
+    function getOwner() public view returns (address) {
+        return _owner;
+    }
+
     function beneficiary(address user)
         external
         view
