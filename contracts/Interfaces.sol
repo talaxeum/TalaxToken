@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
+struct WhitelistStruct {
+    uint256 lockedAmount;
+    uint256 amount;
+    bool isPhase1Claimed;
+    uint256 latestClaimDay;
+}
+
+struct Beneficiary {
+    address user;
+    uint256 amount;
+}
+
 interface IStakable {
     function stakingPenaltyRate() external view returns (uint256);
 

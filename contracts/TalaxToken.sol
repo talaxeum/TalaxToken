@@ -8,8 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./Data.sol";
-
 import "./Interfaces.sol";
+import "./VestingWallet.sol";
 
 contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     using SafeMath for uint256;
@@ -31,10 +31,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     bool public airdropStatus;
     bool public initializationStatus;
 
-    /* ------------------------------------------ Addresses ----------------------------------------- */
+    uint256 public vesting_start;
 
-    // Later moved to Data.sol
-    address private cex_listing_address;
+    /* ------------------------------------------ Addresses ----------------------------------------- */
 
     // Changeable address by owner
     address public timelockController;
@@ -43,12 +42,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         0xd9145CCE52D386f254917e481eB44e9943F39138; //test account 1
     // address public private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
 
-    address public strategic_partner_address_1 =
-        0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8;
-    address public strategic_partner_address_2 =
-        0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C;
-    address public strategic_partner_address_3 =
-        0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC;
+    address public strategic_partner_address = address(0);
 
     /*
      * Notes
@@ -63,33 +57,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     IStakable S_contract;
     IWhitelist PP_contract;
     IWhitelist PS_contract;
-    ILockable M_contract_1;
-    ILockable M_contract_2;
-    ILockable M_contract_3;
-    ILockable SP_contract_1;
-    ILockable SP_contract_2;
-    ILockable SP_contract_3;
-    ILockable TPC_contract_1;
-    ILockable TPC_contract_2;
-    ILockable TPC_contract_3;
-
-    /* ------------------------------------------ Lockable ------------------------------------------ */
-
-    // Lockable internal PP_contract;
-    // Lockable internal M_contract_1;
-    // Lockable internal M_contract_2;
-    // Lockable internal M_contract_3;
-    // Lockable internal SP_contract_1;
-    // Lockable internal SP_contract_2;
-    // Lockable internal SP_contract_3;
-    // Lockable internal TPC_contract_1;
-    // Lockable internal TPC_contract_2;
-    // Lockable internal TPC_contract_3;
-
-    struct Beneficiary {
-        address user;
-        uint256 amount;
-    }
+    IWhitelist SP_contract;
+    VestingWallet public M_contract_1;
+    VestingWallet public M_contract_2;
+    VestingWallet public M_contract_3;
+    VestingWallet public TPC_contract_1;
+    VestingWallet public TPC_contract_2;
+    VestingWallet public TPC_contract_3;
 
     constructor() ERC20("TALAXEUM", "TALAX") {
         _totalSupply = 21 * 1e9 * 1e18;
@@ -102,13 +76,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         // Staking APY in percentage
         _stakingPackage[90 days] = 6;
         _stakingPackage[180 days] = 7;
-        _stakingPackage[360 days] = 8;
+        _stakingPackage[365 days] = 8;
 
         /*
          * 1.     Public Sale                   -
          * 2.     Private Placement             -
-         * 3.     Private Sale                  -
-         * 4.     Strategic Partner & Advisory  -
+         * 3.     Private Sale                  - // Whitelist
+         * 4.     Strategic Partner & Advisory  - // Whitelist
          * 5.     Team                          -
          * 6.     Marketing                     -
          * 7.     CEX Listing                   -
@@ -117,26 +91,29 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
          * 10.    DAO Project Launcher Pool     -
          */
 
-        _balances[public_sale_address] = 396900 * 1e3 * 1e18;
-        _balances[cex_listing_address] = 1050000 * 1e3 * 1e18;
-        stakingReward = 2685900 * 1e3 * 1e18;
-        daoProjectPool = 4200000 * 1e3 * 1e18;
-        _balances[msg.sender] = 4200000 * 1e3 * 1e18; // for testing and staging
-        // _balances[address(this)] = 4200000 * 1e3 * 1e18;
+        /* --------------------------------------------- TGE -------------------------------------------- */
+        _balances[public_sale_address] = 193200 * 1e3 * 1e18;
+        _balances[marketing_address_1] = 14000 * 1e3 * 1e18;
+        _balances[marketing_address_2] = 14000 * 1e3 * 1e18;
+        _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
+        _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
+        _balances[staking_reward_address] = 56538462 * 1e18;
+        _balances[msg.sender] = 88846154 * 1e18; // for testing and staging
+        // _balances[address(this)] = 88846154 * 1e18;
+        // _balances[timeLockController] = 88846154 * 1e18;
+        _balances[dao_pool] = 100961538 * 1e18;
 
         /* ------------------------------------- Interfaces Contract ------------------------------------ */
         S_contract = IStakable(stake_address);
         PP_contract = IWhitelist(private_placement_address);
         PS_contract = IWhitelist(private_sale_address);
-        M_contract_1 = ILockable(marketing_address_1);
-        M_contract_2 = ILockable(marketing_address_2);
-        M_contract_3 = ILockable(marketing_address_3);
-        SP_contract_1 = ILockable(strategic_partner_address_1);
-        SP_contract_2 = ILockable(strategic_partner_address_2);
-        SP_contract_3 = ILockable(strategic_partner_address_3);
-        TPC_contract_1 = ILockable(team_and_project_coordinator_address_1);
-        TPC_contract_2 = ILockable(team_and_project_coordinator_address_2);
-        TPC_contract_3 = ILockable(team_and_project_coordinator_address_3);
+        SP_contract = IWhitelist(strategic_partner_address);
+        // M_contract_1 = ILockable(marketing_address_1);
+        // M_contract_2 = ILockable(marketing_address_2);
+        // M_contract_3 = ILockable(marketing_address_3);
+        // TPC_contract_1 = ILockable(team_and_project_coordinator_address_1);
+        // TPC_contract_2 = ILockable(team_and_project_coordinator_address_2);
+        // TPC_contract_3 = ILockable(team_and_project_coordinator_address_3);
         /* ---------------------------------------------- - --------------------------------------------- */
 
         // Public Sale, CEX Listing - EOA Type Balance
@@ -182,7 +159,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     event DeleteBeneficiary(address indexed from, address[] beneficiary);
 
     event InitiateWhitelist(address indexed from);
-    event InitiateLockedWallet(address indexed from);
+    event InitiateVesting(address indexed from);
 
     event TransferStakingReward(
         address indexed from,
@@ -267,7 +244,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit Transfer(from, to, taxedAmount);
     }
 
-     function _mint(address account, uint256 amount) internal override {
+    function _mint(address account, uint256 amount) internal override {
         require(account != address(0), "ERC20: mint to the zero address");
 
         _beforeTokenTransfer(address(0), account, amount);
@@ -569,27 +546,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit TransferDAOPool(address(this), to_, amount_);
     }
 
-    function change_PP_Address(address _input) external onlyOwner {
-        private_placement_address = _input;
-        emit Change_PP_Address(_input);
-    }
-
-    function changeStrategicPartnerAddress(
-        address address1,
-        address address2,
-        address address3
-    ) external onlyOwner {
-        strategic_partner_address_1 = address1;
-        strategic_partner_address_2 = address2;
-        strategic_partner_address_3 = address3;
-        emit ChangeStrategicPartnerAddress(
-            msg.sender,
-            address1,
-            address2,
-            address3
-        );
-    }
-
     function mintStakingReward(uint256 amount_) public onlyOwner {
         _mintStakingReward(amount_);
     }
@@ -676,142 +632,56 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
     }
 
-    /* -------------------------------------------------------------------------- */
-    /*                                Locked Wallet                               */
-    /* -------------------------------------------------------------------------- */
-    function initiateLockedWallet__PS__Airdrop() external onlyOwner {
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                             Vesting                                            */
+    /* ---------------------------------------------------------------------------------------------- */
+    function initiateVesting_Whitelist_Airdrop() external onlyOwner {
         require(initializationStatus == false, "Nothing to initialize");
 
         initializationStatus = true;
-        M_contract_1.initiateLockedWallet();
-        // M_contract_2.initiateLockedWallet();
-        // M_contract_3.initiateLockedWallet();
-        // SP_contract_1.initiateLockedWallet();
-        // SP_contract_2.initiateLockedWallet();
-        // SP_contract_3.initiateLockedWallet();
-        // TPC_contract_1.initiateLockedWallet();
-        // TPC_contract_2.initiateLockedWallet();
-        // TPC_contract_3.initiateLockedWallet();
-        emit InitiateLockedWallet(_msgSender());
+        vesting_start = block.timestamp;
 
-        PS_contract.initiateWhitelist();
+        M_contract_1 = new VestingWallet(
+            marketing_address_1,
+            uint64(vesting_start),
+            35 * 30 days
+        );
+        M_contract_2 = new VestingWallet(
+            marketing_address_2,
+            uint64(vesting_start),
+            35 * 30 days
+        );
+        M_contract_3 = new VestingWallet(
+            marketing_address_3,
+            uint64(vesting_start),
+            35 * 30 days
+        );
+
+        TPC_contract_1 = new VestingWallet(
+            team_and_project_coordinator_address_1,
+            uint64(vesting_start) + (11 * 30 days),
+            36 * 30 days
+        );
+        TPC_contract_2 = new VestingWallet(
+            team_and_project_coordinator_address_2,
+            uint64(vesting_start) + (11 * 30 days),
+            36 * 30 days
+        );
+        TPC_contract_3 = new VestingWallet(
+            team_and_project_coordinator_address_3,
+            uint64(vesting_start) + (11 * 30 days),
+            36 * 30 days
+        );
+        emit InitiateVesting(_msgSender());
+
         // PP_contract.initiateWhitelist();
+        PS_contract.initiateWhitelist();
+        // SP_contract.initiateWhitelist();
         emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;
         S_contract.startAirdropSince();
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
-    }
-
-    /* ------------------------------------------ Marketing ----------------------------------------- */
-    function unlockMarketingWallet_1()
-        external
-        isInitialized
-        onlyWalletOwner(M_contract_1.beneficiary())
-    {
-        uint256 timeLockedAmount = M_contract_1.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockMarketingWallet_2()
-        external
-        isInitialized
-        onlyWalletOwner(M_contract_2.beneficiary())
-    {
-        uint256 timeLockedAmount = M_contract_2.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockMarketingWallet_3()
-        external
-        isInitialized
-        onlyWalletOwner(M_contract_3.beneficiary())
-    {
-        uint256 timeLockedAmount = M_contract_3.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /* -------------------------------------- Strategic Partner ------------------------------------- */
-    function unlockStrategicPartnerWallet_1()
-        external
-        isInitialized
-        onlyWalletOwner(SP_contract_1.beneficiary())
-    {
-        uint256 timeLockedAmount = SP_contract_1.releaseClaimable(
-            strategicPartnerReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockStrategicPartnerWallet_2()
-        external
-        isInitialized
-        onlyWalletOwner(SP_contract_2.beneficiary())
-    {
-        uint256 timeLockedAmount = SP_contract_2.releaseClaimable(
-            strategicPartnerReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockStrategicPartnerWallet_3()
-        external
-        isInitialized
-        onlyWalletOwner(SP_contract_3.beneficiary())
-    {
-        uint256 timeLockedAmount = SP_contract_3.releaseClaimable(
-            strategicPartnerReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /* -------------------------------- Team and Project Coordinator -------------------------------- */
-    function unlockTeamAndProjectCoordinatorWallet_1()
-        external
-        isInitialized
-        onlyWalletOwner(TPC_contract_1.beneficiary())
-    {
-        uint256 timeLockedAmount = TPC_contract_1.releaseClaimable(
-            teamAndProjectCoordinatorReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockTeamAndProjectCoordinatorWallet_2()
-        external
-        isInitialized
-        onlyWalletOwner(TPC_contract_2.beneficiary())
-    {
-        uint256 timeLockedAmount = TPC_contract_2.releaseClaimable(
-            teamAndProjectCoordinatorReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockTeamAndProjectCoordinatorWallet_3()
-        external
-        isInitialized
-        onlyWalletOwner(TPC_contract_3.beneficiary())
-    {
-        uint256 timeLockedAmount = TPC_contract_3.releaseClaimable(
-            teamAndProjectCoordinatorReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -858,12 +728,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit AddBeneficiary(msg.sender, benefs);
     }
 
-    // function deleteBeneficiary(address user) external onlyOwner {
-    //     require(_PS_Status == true, "Private Sale not yet started");
-    //     uint256 amount = _deleteBeneficiary(user);
-    //     _PS_ += amount;
-    //     emit DeleteBeneficiary(msg.sender, user);
-    // }
+    function add_SP_Beneficiaries(Beneficiary[] calldata benefs)
+        external
+        onlyOwner
+        isInitialized
+    {
+        require(benefs.length > 0, "Nothing to add");
+        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
+            _checkBeneficiaryAmount(benefs[i].amount);
+            SP_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
+        }
+        emit AddBeneficiary(msg.sender, benefs);
+    }
 
     function delete_PP_Beneficiaries(address[] calldata benefs)
         external
@@ -889,6 +765,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit DeleteBeneficiary(msg.sender, benefs);
     }
 
+    function delete_SP_Beneficiaries(address[] calldata benefs)
+        external
+        onlyOwner
+        isInitialized
+    {
+        require(benefs.length > 0, "Nothing to delete");
+        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
+            SP_contract.deleteBeneficiary(benefs[i]);
+        }
+        emit DeleteBeneficiary(msg.sender, benefs);
+    }
+
     function claim_PP() external isInitialized {
         _balances[_msgSender()] = _balances[_msgSender()].add(
             PP_contract.releaseClaimable(_msgSender())
@@ -897,7 +785,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
 
     function claim_PS() external isInitialized {
         _balances[_msgSender()] = _balances[_msgSender()].add(
-            PS_contract.releaseClaimable(_msgSender())
+            PP_contract.releaseClaimable(_msgSender())
+        );
+    }
+
+    function claim_SP() external isInitialized {
+        _balances[_msgSender()] = _balances[_msgSender()].add(
+            SP_contract.releaseClaimable(_msgSender())
         );
     }
 }
