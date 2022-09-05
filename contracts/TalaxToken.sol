@@ -639,71 +639,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         require(initializationStatus == false, "Nothing to initialize");
 
         initializationStatus = true;
-        M_contract_1.initiateLockedWallet();
-        // M_contract_2.initiateLockedWallet();
-        // M_contract_3.initiateLockedWallet();
-        // SP_contract_1.initiateLockedWallet();
-        // SP_contract_2.initiateLockedWallet();
-        // SP_contract_3.initiateLockedWallet();
-        // TPC_contract_1.initiateLockedWallet();
-        // TPC_contract_2.initiateLockedWallet();
-        // TPC_contract_3.initiateLockedWallet();
-        emit InitiateLockedWallet(_msgSender());
-
-        PS_contract.initiateWhitelist();
-        // PP_contract.initiateWhitelist();
-        emit InitiateWhitelist(_msgSender());
-
-        airdropStatus = true;
-        S_contract.startAirdropSince();
-        emit ChangeAirdropStatus(_msgSender(), airdropStatus);
-    }
-
-    /* ------------------------------------------ Marketing ----------------------------------------- */
-    function unlockMarketingWallet_1()
-        external
-        isInitialized
-        onlyWalletOwner(M_contract_1.beneficiary())
-    {
-        uint256 timeLockedAmount = M_contract_1.releaseClaimable(
-            marketingReleaseAmount()
+        M_contract_1 = new VestingWallet(
+            marketing_address_1,
+            uint64(vesting_start),
+            35 * 30 days
         );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockMarketingWallet_2()
-        external
-        isInitialized
-        onlyWalletOwner(M_contract_2.beneficiary())
-    {
-        uint256 timeLockedAmount = M_contract_2.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockMarketingWallet_3()
-        external
-        isInitialized
-        onlyWalletOwner(M_contract_3.beneficiary())
-    {
-        uint256 timeLockedAmount = M_contract_3.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /* -------------------------------------- Strategic Partner ------------------------------------- */
-    function unlockStrategicPartnerWallet_1()
-        external
-        isInitialized
-        onlyWalletOwner(SP_contract_1.beneficiary())
-    {
-        uint256 timeLockedAmount = SP_contract_1.releaseClaimable(
-            strategicPartnerReleaseAmount()
+        M_contract_2 = new VestingWallet(
+            marketing_address_2,
+            uint64(vesting_start),
+            35 * 30 days
         );
         M_contract_3 = new VestingWallet(
             marketing_address_3,
