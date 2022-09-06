@@ -20,9 +20,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
 
     uint256 private _totalSupply;
 
-    string private _name;
-    string private _symbol;
-
+    /* ------------------------------------- Additional Settings ------------------------------------ */
     mapping(uint256 => uint256) internal _stakingPackage;
     uint256 public stakingReward;
     uint256 public daoProjectPool;
@@ -32,9 +30,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     bool public initializationStatus;
 
     uint256 public vesting_start;
-
     /* ------------------------------------------ Addresses ----------------------------------------- */
-
     // Changeable address by owner
     address public timelockController;
 
@@ -67,8 +63,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
 
     constructor() ERC20("TALAXEUM", "TALAX") {
         _totalSupply = 21 * 1e9 * 1e18;
-        _name = "TALAXEUM";
-        _symbol = "TALAX";
 
         // later divided by 100 to make percentage
         taxFee = 1;
@@ -97,7 +91,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         _balances[marketing_address_2] = 14000 * 1e3 * 1e18;
         _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
         _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
-        _balances[staking_reward_address] = 56538462 * 1e18;
+        _balances[staking_reward] = 56538462 * 1e18;
         _balances[msg.sender] = 88846154 * 1e18; // for testing and staging
         // _balances[address(this)] = 88846154 * 1e18;
         // _balances[timeLockController] = 88846154 * 1e18;
@@ -108,12 +102,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         PP_contract = IWhitelist(private_placement_address);
         PS_contract = IWhitelist(private_sale_address);
         SP_contract = IWhitelist(strategic_partner_address);
-        // M_contract_1 = ILockable(marketing_address_1);
-        // M_contract_2 = ILockable(marketing_address_2);
-        // M_contract_3 = ILockable(marketing_address_3);
-        // TPC_contract_1 = ILockable(team_and_project_coordinator_address_1);
-        // TPC_contract_2 = ILockable(team_and_project_coordinator_address_2);
-        // TPC_contract_3 = ILockable(team_and_project_coordinator_address_3);
         /* ---------------------------------------------- - --------------------------------------------- */
 
         // Public Sale, CEX Listing - EOA Type Balance
@@ -194,86 +182,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         _;
     }
 
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                       INTERNAL FUNCTIONS                                       */
-    /* ---------------------------------------------------------------------------------------------- */
-
-    /**
-     * @dev Moves tokens `amount` from `sender` to `recipient`.
-     *
-     * This is internal function is equivalent to {transfer}, and can be used to
-     * e.g. implement automatic token fees, slashing mechanisms, etc.
-     *
-     * Emits a {Transfer} event.
-     *
-     * Requirements:
-     *
-     * - `sender` cannot be the zero address.
-     * - `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     */
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override {
-        require(from != address(0), "Transfer from zero address");
-        require(to != address(0), "Transfer to zero address");
-
-        _beforeTokenTransfer(from, to, amount);
-
-        uint256 fromBalance = _balances[from];
-        require(
-            fromBalance >= amount,
-            "ERC20: transfer amount exceeds balance"
-        );
-        unchecked {
-            _balances[from] = fromBalance - amount;
-        }
-
-        uint256 tax = SafeMath.div(SafeMath.mul(amount, taxFee), 100);
-        uint256 taxedAmount = SafeMath.sub(amount, tax);
-
-        uint256 teamFee = SafeMath.div(SafeMath.mul(taxedAmount, 2), 10);
-        uint256 liquidityFee = SafeMath.div(SafeMath.mul(taxedAmount, 8), 10);
-
-        _addThirdOfValue(teamFee);
-        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
-
-        _balances[to] = _balances[to].add(taxedAmount);
-        emit Transfer(from, to, taxedAmount);
-    }
-
-    function _mint(address account, uint256 amount) internal override {
-        require(account != address(0), "ERC20: mint to the zero address");
-
-        _beforeTokenTransfer(address(0), account, amount);
-
-        _totalSupply += amount;
-        _balances[account] += amount;
-        emit Transfer(address(0), account, amount);
-
-        _afterTokenTransfer(address(0), account, amount);
-    }
-
-    /**
-     * @notice ERC20 FUNCTIONS
-     */
-
-    /**
-     * @dev Returns the name of the token.
-     */
-    function name() public view override returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() public view override returns (string memory) {
-        return _symbol;
-    }
+    /* ------------------------------------ ERC20 token functions ----------------------------------- */
 
     /**
      * @dev See {IERC20-totalSupply}.
@@ -420,8 +329,62 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         return true;
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
+    /**
+     * @dev Moves tokens `amount` from `sender` to `recipient`.
+     *
+     * This is internal function is equivalent to {transfer}, and can be used to
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+     *
+     * Emits a {Transfer} event.
+     *
+     * Requirements:
+     *
+     * - `sender` cannot be the zero address.
+     * - `recipient` cannot be the zero address.
+     * - `sender` must have a balance of at least `amount`.
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        require(from != address(0), "Transfer from zero address");
+        require(to != address(0), "Transfer to zero address");
+
+        _beforeTokenTransfer(from, to, amount);
+
+        uint256 fromBalance = _balances[from];
+        require(
+            fromBalance >= amount,
+            "ERC20: transfer amount exceeds balance"
+        );
+        unchecked {
+            _balances[from] = fromBalance - amount;
+        }
+
+        uint256 tax = SafeMath.div(SafeMath.mul(amount, taxFee), 100);
+        uint256 taxedAmount = SafeMath.sub(amount, tax);
+
+        uint256 teamFee = SafeMath.div(SafeMath.mul(taxedAmount, 2), 10);
+        uint256 liquidityFee = SafeMath.div(SafeMath.mul(taxedAmount, 8), 10);
+
+        _addThirdOfValue(teamFee);
+        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
+
+        _balances[to] = _balances[to].add(taxedAmount);
+        emit Transfer(from, to, taxedAmount);
+    }
+
+    function _mint(address account, uint256 amount) internal override {
+        require(account != address(0), "ERC20: mint to the zero address");
+
+        _beforeTokenTransfer(address(0), account, amount);
+
+        _totalSupply += amount;
+        _balances[account] += amount;
+        emit Transfer(address(0), account, amount);
+
+        _afterTokenTransfer(address(0), account, amount);
     }
 
     /**
@@ -500,6 +463,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         }
     }
 
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                  End of ERC20 token functions                                  */
+    /* ---------------------------------------------------------------------------------------------- */
+
     function _addThirdOfValue(uint256 amount_) internal {
         uint256 thirdOfValue = SafeMath.div(amount_, 3);
         _balances[team_and_project_coordinator_address_1] = _balances[
@@ -521,11 +492,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit TransferStakingReward(address(0), address(this), amount_);
     }
 
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                       External Functions                                       */
-    /* ---------------------------------------------------------------------------------------------- */
-
-    function startTransferDAOVoting() external onlyOwner {
+    /* --------------------------------- Added functions (external) --------------------------------- */
+    
+    function startTransferDAOVoting() external onlyOwner { //moveable
         S_contract.startVoting();
     }
 
@@ -574,12 +543,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit ChangeTax(_msgSender(), taxFee_);
     }
 
-    function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
+    function changePenaltyFee(uint256 penaltyFee_) external onlyOwner { //moveable
         S_contract.changePenaltyFee(penaltyFee_);
         emit ChangePenaltyFee(_msgSender(), penaltyFee_);
     }
 
-    function changeAirdropPercentage(uint256 airdrop_) external onlyOwner {
+    function changeAirdropPercentage(uint256 airdrop_) external onlyOwner { //moveable
         S_contract.changeAirdropPercentage(airdrop_);
         emit ChangeAirdropPercentage(_msgSender(), airdrop_);
     }
@@ -682,17 +651,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
-    /* -------------------------------------------------------------------------- */
-    /*                                Private Sale                                */
-    /* -------------------------------------------------------------------------- */
-
-    function _checkBeneficiaryAmount(uint256 amount)
-        internal
-        view
-        isInitialized
-    {
-        require(amount != 0, "Amount cannot be zero");
-    }
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                            Whitelist                                           */
+    /* ---------------------------------------------------------------------------------------------- */
 
     function unsafeInc(uint256 x) internal pure returns (uint256) {
         unchecked {
@@ -707,7 +668,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     {
         require(benefs.length > 0, "Nothing to add");
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            _checkBeneficiaryAmount(benefs[i].amount);
             PP_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
         }
         emit AddBeneficiary(msg.sender, benefs);
@@ -720,7 +680,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     {
         require(benefs.length > 0, "Nothing to add");
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            _checkBeneficiaryAmount(benefs[i].amount);
             PS_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
         }
         emit AddBeneficiary(msg.sender, benefs);
@@ -733,7 +692,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     {
         require(benefs.length > 0, "Nothing to add");
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            _checkBeneficiaryAmount(benefs[i].amount);
             SP_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
         }
         emit AddBeneficiary(msg.sender, benefs);

@@ -33,7 +33,7 @@
 							}
 						],
 						"indexed": false,
-						"internalType": "struct TalaxToken.Beneficiary[]",
+						"internalType": "struct Beneficiary[]",
 						"name": "beneficiary",
 						"type": "tuple[]"
 					}
@@ -215,7 +215,7 @@
 						"type": "address"
 					}
 				],
-				"name": "InitiateLockedWallet",
+				"name": "InitiateVesting",
 				"type": "event"
 			},
 			{
@@ -330,6 +330,84 @@
 				"type": "fallback"
 			},
 			{
+				"inputs": [],
+				"name": "M_contract_1",
+				"outputs": [
+					{
+						"internalType": "contract VestingWallet",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "M_contract_2",
+				"outputs": [
+					{
+						"internalType": "contract VestingWallet",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "M_contract_3",
+				"outputs": [
+					{
+						"internalType": "contract VestingWallet",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "TPC_contract_1",
+				"outputs": [
+					{
+						"internalType": "contract VestingWallet",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "TPC_contract_2",
+				"outputs": [
+					{
+						"internalType": "contract VestingWallet",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "TPC_contract_3",
+				"outputs": [
+					{
+						"internalType": "contract VestingWallet",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"components": [
@@ -344,7 +422,7 @@
 								"type": "uint256"
 							}
 						],
-						"internalType": "struct TalaxToken.Beneficiary[]",
+						"internalType": "struct Beneficiary[]",
 						"name": "benefs",
 						"type": "tuple[]"
 					}
@@ -369,12 +447,37 @@
 								"type": "uint256"
 							}
 						],
-						"internalType": "struct TalaxToken.Beneficiary[]",
+						"internalType": "struct Beneficiary[]",
 						"name": "benefs",
 						"type": "tuple[]"
 					}
 				],
 				"name": "add_PS_Beneficiaries",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "user",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "amount",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct Beneficiary[]",
+						"name": "benefs",
+						"type": "tuple[]"
+					}
+				],
+				"name": "add_SP_Beneficiaries",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -545,48 +648,12 @@
 			{
 				"inputs": [
 					{
-						"internalType": "address",
-						"name": "address1",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "address2",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "address3",
-						"type": "address"
-					}
-				],
-				"name": "changeStrategicPartnerAddress",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
 						"internalType": "uint8",
 						"name": "taxFee_",
 						"type": "uint8"
 					}
 				],
 				"name": "changeTaxFee",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_input",
-						"type": "address"
-					}
-				],
-				"name": "change_PP_Address",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -608,6 +675,13 @@
 			{
 				"inputs": [],
 				"name": "claim_PS",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "claim_SP",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -691,6 +765,19 @@
 			{
 				"inputs": [
 					{
+						"internalType": "address[]",
+						"name": "benefs",
+						"type": "address[]"
+					}
+				],
+				"name": "delete_SP_Beneficiaries",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "address",
 						"name": "spender",
 						"type": "address"
@@ -727,7 +814,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "initiateLockedWallet__PS__Airdrop",
+				"name": "initiateVesting_Whitelist_Airdrop",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -862,33 +949,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "strategic_partner_address_1",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "strategic_partner_address_2",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "strategic_partner_address_3",
+				"name": "strategic_partner_address",
 				"outputs": [
 					{
 						"internalType": "address",
@@ -1050,65 +1111,15 @@
 			},
 			{
 				"inputs": [],
-				"name": "unlockMarketingWallet_1",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockMarketingWallet_2",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockMarketingWallet_3",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockStrategicPartnerWallet_1",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockStrategicPartnerWallet_2",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockStrategicPartnerWallet_3",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockTeamAndProjectCoordinatorWallet_1",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockTeamAndProjectCoordinatorWallet_2",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "unlockTeamAndProjectCoordinatorWallet_3",
-				"outputs": [],
-				"stateMutability": "nonpayable",
+				"name": "vesting_start",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -1239,6 +1250,22 @@
 				"dweb:/ipfs/QmZQg6gn1sUpM8wHzwNvSnihumUCAhxD119MpXeKp8B9s8"
 			]
 		},
+		"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol": {
+			"keccak256": "0xc3d946432c0ddbb1f846a0d3985be71299df331b91d06732152117f62f0be2b5",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4632c341a06ba5c079b51ca5a915efab4e6ab57735b37839b3e8365ff806a43e",
+				"dweb:/ipfs/QmTHT3xHYed2wajEoA5qu7ii2BxLpPhQZHwAhtLK5Z7ANK"
+			]
+		},
+		"@openzeppelin/contracts/utils/Address.sol": {
+			"keccak256": "0x2ccf9d2313a313d41a791505f2b5abfdc62191b5d4334f7f7a82691c088a1c87",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b3a57d0854b2fdce6ebff933a48dca2445643d1eccfc27f00292e937f26c6a58",
+				"dweb:/ipfs/QmW45rZooS9TqR4YXUbjRbtf2Bpb5ouSarBvfW1LdGprvV"
+			]
+		},
 		"@openzeppelin/contracts/utils/Context.sol": {
 			"keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
 			"license": "MIT",
@@ -1256,27 +1283,35 @@
 			]
 		},
 		"contracts/Data.sol": {
-			"keccak256": "0x61272dde54b2fbf1fa3b048be1c132455ead0c70da9b2bd662bc8fdf7185be75",
+			"keccak256": "0xaca6bfa6560f9ffc63674411505e2c4ee778c11f4aeefacb906e31d25b5a325a",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://5d58482354c0272327c160a263eb56c5182f49b5026a74ffd5265a5d7a064965",
-				"dweb:/ipfs/Qme2f2MvjHwWDTowZQK6QSdaPn6mDfGxBtUBVbCNpn8FEn"
+				"bzz-raw://65212caa03d5e7017e13db2bb8268b201f0162a2d75e9c40e14c68c542453a44",
+				"dweb:/ipfs/QmZAEEWATsg1bPNsKyAXHKrVoAfCSvCKMEmWfXtRkyhWLR"
 			]
 		},
 		"contracts/Interfaces.sol": {
-			"keccak256": "0x3e6787e58214b5af4af523a2a603f03dbdf4e397be411edd1ce47d792872ad03",
+			"keccak256": "0x940ad15c38896e64ab8ba9afa6b360c0f2761ae676cdcb8bb732d8a655d77187",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://3ceac46a908c7381881ed80661864bf9214de9b777f353a86b3d79f6d0dcf537",
-				"dweb:/ipfs/QmewThGMZUjU2i4LkFmqMD8zFt8QtMJpV7nCn59opjZ48B"
+				"bzz-raw://6333d0ee57a538509afd6313ef6748d6e19e9ee45e4ef96b9dafa508c4eb7038",
+				"dweb:/ipfs/QmPFPogeVAacf72D6U5DJLztm5yYU5jCYQ9qn7Wquj13m8"
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x52d12f305e07f4afdeac2ef6193c0a1741329d80389306b3980cdd84bd37e929",
+			"keccak256": "0x39d08b4c237c93544b98844c0f77ce0be31a94638540498f8fc5d57cc6fb35c9",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://b368442255fe919096d7d51938340c6c50cd260ec6243c7f0f735516a0d0f235",
-				"dweb:/ipfs/Qmdzxq98crXTpjaSMW34sEU8qvHqH9ptURe6tAoMLjzRRP"
+				"bzz-raw://f26b7f33efee09c417b85ae7ae983638a30b548af17839c0cd9e749ac09ea9bc",
+				"dweb:/ipfs/QmNXZSUeDPEirVH14kMWvUE6TnPHAtHCMNWinkNfwsd4yz"
+			]
+		},
+		"contracts/VestingWallet.sol": {
+			"keccak256": "0x6dad433afc18d956144663f30fb58a3898d24376af663474583c7b7514f636c6",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7408ba71f4b87b2dce505dc2002f0856d475eebf9d45f5ee21b2f887fd3a4ae0",
+				"dweb:/ipfs/QmdnGj6nFM5naiVFQE5VLtFyBuqHwMw4KaaXHpNB3URwDg"
 			]
 		}
 	},
