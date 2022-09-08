@@ -17,16 +17,18 @@ contract Whitelist {
     // beneficiary of tokens after they are released
     mapping(address => WhitelistStruct) private _beneficiary;
 
-    address _owner;
+    address public _talax;
+    address public _owner;
 
     constructor() {
         privateSaleAmount = 1467900000 * 1e18;
+        _talax = msg.sender;
         _owner = msg.sender;
     }
 
     /* ------------------------------------------ modifier ------------------------------------------ */
     function _onlyTalax() internal view {
-        require(msg.sender == _owner, "Not authorized");
+        require(msg.sender == _talax, "Not authorized");
     }
 
     modifier onlyTalax() {
@@ -37,11 +39,7 @@ contract Whitelist {
     /* ---------------------------------------------- - --------------------------------------------- */
 
     function changeTalaxAddress(address talax) external onlyTalax {
-        _owner = talax;
-    }
-
-    function getOwner() public view returns (address) {
-        return _owner;
+        _talax = talax;
     }
 
     function beneficiary(address user)
@@ -97,8 +95,8 @@ contract Whitelist {
                     )
                 );
                 _beneficiary[user].isPhase1Claimed = true;
+                _beneficiary[user].latestClaimDay = 15 * 30;
             }
-            _beneficiary[user].latestClaimDay = 15 * 30;
         }
         //Phase 2 of locked wallet release - daily
         else if (lockDuration >= 16 * 30 && lockDuration < 28 * 30) {
@@ -123,23 +121,25 @@ contract Whitelist {
                     )
                 );
             _beneficiary[user].latestClaimDay = lockDuration;
+        } else {
+            return 0;
         }
 
-        require(claimable != 0, "Nothing to claim yet");
         return claimable;
     }
 
     function addBeneficiary(address user, uint256 amount) external onlyTalax {
         require(amount <= privateSaleAmount, "Insufficient Total Balance");
-        require(_beneficiary[user].amount == 0, "Cannot add Registered User");
 
-        _beneficiary[user].lockedAmount = amount;
-        _beneficiary[user].amount = amount;
-        _beneficiary[user].isPhase1Claimed = false;
-        _beneficiary[user].latestClaimDay = 1;
+        if (_beneficiary[user].amount > 0) {
+            _beneficiary[user].lockedAmount = amount;
+            _beneficiary[user].amount = amount;
+            _beneficiary[user].isPhase1Claimed = false;
+            _beneficiary[user].latestClaimDay = 1;
 
-        privateSaleUsers += 1;
-        privateSaleAmount -= amount;
+            privateSaleUsers += 1;
+            privateSaleAmount -= amount;
+        }
     }
 
     function deleteBeneficiary(address user)
@@ -147,13 +147,16 @@ contract Whitelist {
         onlyTalax
         returns (uint256)
     {
-        require(_beneficiary[user].amount != 0, "User not Registered");
-        privateSaleUsers -= 1;
-        privateSaleAmount += _beneficiary[user].amount;
-        uint256 ex_amount = _beneficiary[user].amount;
+        if (_beneficiary[user].amount > 0) {
+            privateSaleUsers -= 1;
+            privateSaleAmount += _beneficiary[user].amount;
+            uint256 ex_amount = _beneficiary[user].amount;
 
-        delete _beneficiary[user];
-        return ex_amount;
+            delete _beneficiary[user];
+            return ex_amount;
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -164,17 +167,21 @@ contract Whitelist {
         onlyTalax
         returns (uint256)
     {
-        require(_beneficiary[user].amount > 0, "No Tokens Left");
+        if (_beneficiary[user].amount > 0) {
+            uint256 claimableLockedAmount = _calculateClaimableAmount(user);
 
-        uint256 claimableLockedAmount = _calculateClaimableAmount(user);
+            if (claimableLockedAmount > 0) {
+                _beneficiary[user].amount = SafeMath.sub(
+                    _beneficiary[user].amount,
+                    claimableLockedAmount
+                );
 
-        require(claimableLockedAmount > 0, "No Tokens to Release for Now");
-
-        _beneficiary[user].amount = SafeMath.sub(
-            _beneficiary[user].amount,
-            claimableLockedAmount
-        );
-
-        return claimableLockedAmount;
+                return claimableLockedAmount;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
     }
 }

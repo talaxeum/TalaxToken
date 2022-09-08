@@ -61,6 +61,40 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     VestingWallet public TPC_contract_2;
     VestingWallet public TPC_contract_3;
 
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                             EVENTS                                             */
+    /* ---------------------------------------------------------------------------------------------- */
+
+    event ChangeTax(address indexed who, uint256 amount);
+    event ChangeAirdropStatus(address indexed who, bool status);
+
+    event Change_PP_Address(address indexed to);
+
+    event ChangeStrategicPartnerAddress(
+        address from,
+        address indexed to1,
+        address indexed to2,
+        address indexed to3
+    );
+
+    event AddBeneficiary(address indexed from, Beneficiary[] beneficiary);
+    event DeleteBeneficiary(address indexed from, address[] beneficiary);
+
+    event InitiateWhitelist(address indexed from);
+    event InitiateVesting(address indexed from);
+
+    event TransferStakingReward(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
+    event TransferDAOPool(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
     constructor() ERC20("TALAXEUM", "TALAX") {
         _totalSupply = 21 * 1e9 * 1e18;
 
@@ -124,42 +158,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     receive() external payable {
         _addThirdOfValue(msg.value);
     }
-
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                             EVENTS                                             */
-    /* ---------------------------------------------------------------------------------------------- */
-
-    event ChangeTax(address indexed who, uint256 amount);
-    event ChangeAirdropStatus(address indexed who, bool status);
-    event ChangePenaltyFee(address indexed from, uint256 amount);
-    event ChangeAirdropPercentage(address indexed from, uint256 amount);
-
-    event Change_PP_Address(address indexed to);
-
-    event ChangeStrategicPartnerAddress(
-        address from,
-        address indexed to1,
-        address indexed to2,
-        address indexed to3
-    );
-
-    event AddBeneficiary(address indexed from, Beneficiary[] beneficiary);
-    event DeleteBeneficiary(address indexed from, address[] beneficiary);
-
-    event InitiateWhitelist(address indexed from);
-    event InitiateVesting(address indexed from);
-
-    event TransferStakingReward(
-        address indexed from,
-        address indexed to,
-        uint256 amount
-    );
-
-    event TransferDAOPool(
-        address indexed from,
-        address indexed to,
-        uint256 amount
-    );
 
     /* ---------------------------------------------------------------------------------------------- */
     /*                                            MODIFIERS                                           */
@@ -493,17 +491,20 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /* --------------------------------- Added functions (external) --------------------------------- */
-    
-    function startTransferDAOVoting() external onlyOwner { //moveable
+
+    function startTransferDAOVoting() external onlyOwner {
+        //moveable
         S_contract.startVoting();
     }
 
     function transferToDAOPool(uint256 amount_) external {
+        // removeable if address exist
         _balances[msg.sender] = _balances[msg.sender].sub(amount_);
         daoProjectPool += amount_;
     }
 
     function transferDAOPool(address to_, uint256 amount_) external onlyOwner {
+        // removeable if address exist
         bool result = S_contract.getVotingResult();
 
         if (result == true) {
@@ -516,22 +517,26 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     }
 
     function mintStakingReward(uint256 amount_) public onlyOwner {
+        // removeable if address exist
         _mintStakingReward(amount_);
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
+        // removeable if address exist
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
         emit Transfer(address(0), address(this), amount_);
     }
 
     function burnStakingReward(uint256 amount_) external onlyOwner {
+        // removeable if address exist
         stakingReward = stakingReward.sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
         emit TransferStakingReward(address(this), address(0), amount_);
     }
 
     function burnLiquidityReserve(uint256 amount_) external onlyOwner {
+        // removeable if address exist
         _balances[address(this)] = _balances[address(this)].sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
         emit Transfer(address(this), address(0), amount_);
@@ -543,16 +548,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit ChangeTax(_msgSender(), taxFee_);
     }
 
-    function changePenaltyFee(uint256 penaltyFee_) external onlyOwner { //moveable
-        S_contract.changePenaltyFee(penaltyFee_);
-        emit ChangePenaltyFee(_msgSender(), penaltyFee_);
-    }
-
-    function changeAirdropPercentage(uint256 airdrop_) external onlyOwner { //moveable
-        S_contract.changeAirdropPercentage(airdrop_);
-        emit ChangeAirdropPercentage(_msgSender(), airdrop_);
-    }
-
     /* ------------------------ Stake function with burn function ------------------------ */
     function stake(uint256 _amount, uint256 _stakePeriod) external {
         // Make sure staker actually is good for it
@@ -560,7 +555,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
             _stakePeriod == 90 days ||
                 _stakePeriod == 180 days ||
                 _stakePeriod == 365 days,
-            "Staking option doesnt exist"
+            "Staking option doesn't exist"
         );
 
         // Burn the amount of tokens on the sender
@@ -661,12 +656,22 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         }
     }
 
+    function _checkBeneficiary(uint256 len) internal pure {
+        require(len > 0, "Input can't empty");
+    }
+
+    /* ------------------------------------------ moveable ------------------------------------------ */
+    /**
+     * ? Token needs to be transferred to the vesting wallet
+     * ? When user want to claim the vesting, vesting wallet will transfer the token to the beneficiary address
+     */
+
     function add_PP_Beneficiaries(Beneficiary[] calldata benefs)
         external
         onlyOwner
         isInitialized
     {
-        require(benefs.length > 0, "Nothing to add");
+        _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             PP_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
         }
@@ -678,7 +683,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         onlyOwner
         isInitialized
     {
-        require(benefs.length > 0, "Nothing to add");
+        _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             PS_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
         }
@@ -690,7 +695,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         onlyOwner
         isInitialized
     {
-        require(benefs.length > 0, "Nothing to add");
+        _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             SP_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
         }
@@ -702,7 +707,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         onlyOwner
         isInitialized
     {
-        require(benefs.length > 0, "Nothing to delete");
+        _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             PP_contract.deleteBeneficiary(benefs[i]);
         }
@@ -714,7 +719,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         onlyOwner
         isInitialized
     {
-        require(benefs.length > 0, "Nothing to delete");
+        _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             PS_contract.deleteBeneficiary(benefs[i]);
         }
@@ -726,12 +731,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         onlyOwner
         isInitialized
     {
-        require(benefs.length > 0, "Nothing to delete");
+        _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
             SP_contract.deleteBeneficiary(benefs[i]);
         }
         emit DeleteBeneficiary(msg.sender, benefs);
     }
+
+    /* ---------------------------------------------- - --------------------------------------------- */
 
     function claim_PP() external isInitialized {
         _balances[_msgSender()] = _balances[_msgSender()].add(

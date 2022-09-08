@@ -3,13 +3,11 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-error Voting___votingStatus();
-
 contract Stakable {
     using SafeMath for uint256;
     /**
-     * @notice Constructor since this contract is not ment to be used without inheritance
-     * push once to stakeholders for it to work proplerly
+     * @notice Constructor since this contract is not meant to be used without inheritance
+     * push once to stakeholders for it to work properly
      */
 
     struct Voter {
@@ -27,70 +25,31 @@ contract Stakable {
     mapping(address => Voter) public voters;
     mapping(uint256 => uint256) public votedUsers;
 
-    address _owner;
+    address public _talax;
+    address public _owner;
 
     constructor() {
         //Staking penalty and Airdrop in 0.1 times percentage
         stakingPenaltyRate = 15;
         airdropRate = 80;
+        _talax = msg.sender;
         _owner = msg.sender;
     }
 
-    /* ------------------------------------------ Modifier ------------------------------------------ */
-    function isTalax() internal view {
-        require(msg.sender == _owner, "Not authorized");
-    }
-
-    modifier onlyTalax() {
-        isTalax();
-        _;
-    }
-
-    function _checkUserStake(uint256 amount) internal pure {
-        require(amount > 0, "No Stake Found");
-    }
-
-    function _checkVotingStatus() internal view {
-        require(_votingStatus, "Voting is not available");
-    }
-
-    modifier votingStatusTrue() {
-        _checkVotingStatus();
-        _;
-    }
-
-    /* ---------------------------------------------- - --------------------------------------------- */
-
-    function changeTalaxAddress(address talax) external onlyTalax {
-        _owner = talax;
-    }
-
-    function getOwner() public view returns (address) {
-        return _owner;
-    }
-
     /**
-     * @noticef
+     * @notice
      * A stake struct is used to represent the way we store stakes,
      * A Stake will contain the users address, the amount staked and a timestamp,
      * Since which is when the stake was made
      */
     struct Stake {
-        address user;
         uint256 amount;
         uint256 since;
-        // This claimable field is new and used to tell how big of a reward is currently available
-        uint256 claimable;
-        uint256 claimable_airdrop;
         uint256 rewardAPY;
         uint256 releaseTime;
-    }
-    /**
-     * @notice Stakeholder is a staker that has active stakes
-     */
-    struct Stakeholder {
-        Stake stake;
-        address user;
+        // This claimable field is new and used to tell how big of a reward is currently available
+        uint256 claimable;
+        uint256 claimableAirdrop;
         uint256 latestClaimDrop;
     }
 
@@ -108,7 +67,7 @@ contract Stakable {
      * @notice
      * stakes is used to keep track of the INDEX for the stakers in the stakes array
      */
-    mapping(address => Stakeholder) internal stakeholders;
+    mapping(address => Stake) internal stakeholders;
 
     /**
      * @notice Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable
@@ -122,6 +81,49 @@ contract Stakable {
 
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
+
+    /* ------------------------------------------ Modifier ------------------------------------------ */
+    function isTalax() internal view {
+        require(msg.sender == _talax, "Not authorized");
+    }
+
+    modifier onlyTalax() {
+        isTalax();
+        _;
+    }
+
+    function isOwner() internal view {
+        require(msg.sender == _owner, "Not authorized");
+    }
+
+    modifier onlyOwner() {
+        isOwner();
+        _;
+    }
+
+    function _isVoter() internal view {
+        require(voters[msg.sender].votingRight == true, "You are not a voter");
+    }
+
+    modifier isVoter() {
+        _isVoter();
+        _;
+    }
+
+    function _checkVotingStatus() internal view {
+        require(_votingStatus, "Voting is not available");
+    }
+
+    modifier votingStatusTrue() {
+        _checkVotingStatus();
+        _;
+    }
+
+    /* ---------------------------------------------- - --------------------------------------------- */
+
+    function changeTalaxAddress(address talax) external onlyOwner {
+        _talax = talax;
+    }
 
     function getVoters(address user) external view returns (bool, bool) {
         return (voters[user].votingRight, voters[user].voted[_votingId]);
@@ -148,7 +150,7 @@ contract Stakable {
     ) external onlyTalax {
         // Simple check so that user does not stake 0
         require(amount > 0, "Cannot stake nothing");
-        require(stakeholders[user].stake.amount == 0, "User is a staker");
+        require(stakeholders[user].amount == 0, "User is a staker");
 
         totalVoters += 1;
         voters[user].votingRight = true;
@@ -158,26 +160,27 @@ contract Stakable {
 
         // Use the index to push a new Stake
         // push a newly created Stake with the current block timestamp.
-        stakeholders[user].stake = Stake(
-            user,
+
+        stakeholders[user] = Stake(
             amount,
             timestamp,
-            0,
-            0,
             rewardRate,
-            (stakePeriod + timestamp)
+            (stakePeriod + timestamp),
+            0,
+            0,
+            0
         );
         // Emit an event that the stake has occured
         emit Staked(user, amount, timestamp, (stakePeriod + timestamp));
     }
 
-    function changePenaltyFee(uint256 amount) external onlyTalax {
+    function changePenaltyFee(uint256 amount) external onlyOwner {
         require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
         stakingPenaltyRate = amount;
         emit PenaltyChanged(amount);
     }
 
-    function changeAirdropPercentage(uint256 amount) external onlyTalax {
+    function changeAirdropPercentage(uint256 amount) external onlyOwner {
         require(amount <= 200, "Airdrop Percentage cannot exceed 20 percent.");
         airdropRate = amount;
         emit AirdropChanged(amount);
@@ -188,8 +191,6 @@ contract Stakable {
         view
         returns (uint256)
     {
-        require(since > 0, "Error timestamp 0");
-
         // times by 1e24 so theres no missing value
         return
             SafeMath.div(
@@ -214,17 +215,6 @@ contract Stakable {
                 _calculateStakingDuration(user_stake.since)) / 1e26;
     }
 
-    function _calculatePenalty(uint256 amount, uint256 reward)
-        internal
-        view
-        returns (uint256, uint256)
-    {
-        return (
-            SafeMath.div(SafeMath.mul(amount, stakingPenaltyRate), 1000),
-            SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000)
-        );
-    }
-
     function _calculateStakingWithPenalty(uint256 amount, uint256 reward)
         internal
         view
@@ -233,14 +223,15 @@ contract Stakable {
         if (amount == 0) {
             return (0, 0);
         }
-
-        (uint256 amount_penalty, uint256 reward_penalty) = _calculatePenalty(
-            amount,
-            reward
-        );
         return (
-            SafeMath.sub(amount, amount_penalty),
-            SafeMath.sub(reward, reward_penalty)
+            SafeMath.sub(
+                amount,
+                SafeMath.div(SafeMath.mul(amount, stakingPenaltyRate), 1000)
+            ),
+            SafeMath.sub(
+                reward,
+                SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000)
+            )
         );
     }
 
@@ -248,7 +239,7 @@ contract Stakable {
      * @notice
      * withdrawStake takes in an amount and a index of the stake and will remove tokens from that stake
      * Notice index of the stake is the users stake counter, starting at 0 for the first stake
-     * Will return the amount to MINT onto the acount
+     * Will return the amount to MINT onto the account
      * Will also _calculateStakeReward and reset timer
      */
     function withdrawStake(address user)
@@ -256,50 +247,52 @@ contract Stakable {
         onlyTalax
         returns (uint256, uint256)
     {
+        //can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
-        Stake memory user_stake = stakeholders[user].stake;
-
-        uint256 reward = _calculateStakeReward(user_stake);
+        Stake memory user_stake = stakeholders[user];
 
         delete stakeholders[user];
 
         if (user_stake.releaseTime > block.timestamp) {
             totalVoters -= 1;
             delete voters[user].voted[_votingId];
-            return _calculateStakingWithPenalty(user_stake.amount, reward);
+            return
+                _calculateStakingWithPenalty(
+                    user_stake.amount,
+                    _calculateStakeReward(user_stake)
+                );
         }
 
         totalVoters -= 1;
         delete voters[user].voted[_votingId];
-        return (user_stake.amount, reward);
+        return (user_stake.amount, _calculateStakeReward(user_stake));
     }
 
     function hasStake() external view returns (StakingSummary memory) {
-        Stakeholder memory data = stakeholders[msg.sender];
-        StakingSummary memory summary = StakingSummary(0, 0, data.stake);
-        _checkUserStake(summary.stake.amount);
+        Stake memory user_stake = stakeholders[msg.sender];
+        require(user_stake.amount > 0, "No Stake Found");
+        StakingSummary memory summary = StakingSummary(0, 0, user_stake);
 
-        uint256 availableReward = _calculateStakeReward(summary.stake);
-        uint256 penalty;
+        uint256 reward = _calculateStakeReward(user_stake);
 
         if (summary.stake.releaseTime > block.timestamp) {
-            (
-                uint256 amount_penalty,
-                uint256 reward_penalty
-            ) = _calculatePenalty(summary.stake.amount, availableReward);
-            penalty = amount_penalty + reward_penalty;
+            summary.penalty =
+                SafeMath.div(
+                    SafeMath.mul(user_stake.amount, stakingPenaltyRate),
+                    1000
+                ) +
+                SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000);
         }
 
-        if (_calculateWeek(data.latestClaimDrop) > 0) {
-            uint256 airdrop = _calculateAirdrop(summary.stake.amount);
-            summary.stake.claimable_airdrop = airdrop;
+        if (_calculateWeek(user_stake.latestClaimDrop) > 0) {
+            uint256 airdrop = _calculateAirdrop(user_stake.amount);
+            summary.stake.claimableAirdrop = airdrop;
         } else {
-            summary.stake.claimable_airdrop = 0;
+            summary.stake.claimableAirdrop = 0;
         }
 
-        summary.stake.claimable = availableReward;
-        summary.penalty = penalty;
-        summary.total_amount = summary.stake.amount;
+        summary.stake.claimable = reward;
+        summary.total_amount = user_stake.amount;
 
         return summary;
     }
@@ -319,19 +312,22 @@ contract Stakable {
         onlyTalax
         returns (uint256)
     {
-        Stakeholder memory stakeholder = stakeholders[user];
+        //can be simplified if using address
+        Stake memory staker = stakeholders[user];
 
-        _checkUserStake(stakeholder.stake.amount);
+        if (staker.amount > 0) {
+            require(
+                _calculateWeek(staker.latestClaimDrop) > 0,
+                "Claimable once a week"
+            );
 
-        require(
-            _calculateWeek(stakeholder.latestClaimDrop) > 0,
-            "Claimable once a week"
-        );
+            staker.claimableAirdrop = 0;
+            staker.latestClaimDrop = block.timestamp;
 
-        stakeholder.stake.claimable_airdrop = 0;
-        stakeholder.latestClaimDrop = block.timestamp;
-
-        return _calculateAirdrop(stakeholder.stake.amount);
+            return _calculateAirdrop(staker.amount);
+        } else {
+            return 0;
+        }
     }
 
     function airdropWeek() public view returns (uint256) {
@@ -343,20 +339,15 @@ contract Stakable {
     }
 
     /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
+
+    //can be simplified since not connected directly
     function startVoting() external onlyTalax {
         require(_votingStatus == false, "Voting is already running");
         _votingStatus = true;
         _votingId += 1;
     }
 
-    function isVoter(address user) public view returns (bool) {
-        require(user != address(0), "Invalid address");
-
-        return voters[user].votingRight;
-    }
-
-    function vote() public votingStatusTrue {
-        require(voters[msg.sender].votingRight == true, "You are not a voter");
+    function vote() public votingStatusTrue isVoter {
         require(
             voters[msg.sender].voted[_votingId] == false,
             "You have voted before"
@@ -366,8 +357,7 @@ contract Stakable {
         votedUsers[_votingId] += 1;
     }
 
-    function retractVote() public votingStatusTrue {
-        require(voters[msg.sender].votingRight == true, "You are not a voter");
+    function retractVote() public votingStatusTrue isVoter {
         require(
             voters[msg.sender].voted[_votingId] == true,
             "You have not voted yet"
