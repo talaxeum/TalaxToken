@@ -17,6 +17,16 @@ contract Whitelist {
     // beneficiary of tokens after they are released
     mapping(address => WhitelistStruct) private _beneficiary;
 
+    /**
+     * @notice Error handling message for Modifier
+     */
+    error Function__notAuthorized();
+
+    /**
+     * @notice Error handling message for Main Function
+     */
+    error MainFunction__insufficientBalance();
+
     address public _talax;
     address public _owner;
 
@@ -28,7 +38,10 @@ contract Whitelist {
 
     /* ------------------------------------------ modifier ------------------------------------------ */
     function _onlyTalax() internal view {
-        require(msg.sender == _talax, "Not authorized");
+        // require(msg.sender == _talax, "Not authorized");
+        if (msg.sender != _talax) {
+            revert Function__notAuthorized();
+        }
     }
 
     modifier onlyTalax() {
@@ -129,7 +142,10 @@ contract Whitelist {
     }
 
     function addBeneficiary(address user, uint256 amount) external onlyTalax {
-        require(amount <= privateSaleAmount, "Insufficient Total Balance");
+        // require(amount <= privateSaleAmount, "Insufficient Total Balance");
+        if (amount > privateSaleAmount) {
+            revert MainFunction__insufficientBalance();
+        }
 
         if (_beneficiary[user].amount > 0) {
             _beneficiary[user].lockedAmount = amount;
