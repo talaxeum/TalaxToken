@@ -11,6 +11,16 @@ import "./Data.sol";
 import "./Interfaces.sol";
 import "./VestingWallet.sol";
 
+/**
+ * @notice Custom error
+ */
+error Airdrop__notStarted();
+error Init__nothingToInitialize();
+error Init__notInitialized();
+error Staking__optionNotExist();
+error Tax__maxFivePercent();
+error Ownable__notWalletOwner();
+
 contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     using SafeMath for uint256;
 
@@ -163,7 +173,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     /*                                            MODIFIERS                                           */
     /* ---------------------------------------------------------------------------------------------- */
     function _isInitializationStarted() internal view {
-        require(initializationStatus == true, "Not yet started");
+        if (initializationStatus != true) {
+            revert Init__notInitialized();
+        }
     }
 
     modifier isInitialized() {
@@ -172,7 +184,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     }
 
     function _onlyWalletOwner(address walletOwner) internal view {
-        require(_msgSender() == walletOwner, "Wallet owner only");
+        if (_msgSender() != walletOwner) {
+            revert Ownable__notWalletOwner();
+        }
     }
 
     modifier onlyWalletOwner(address walletOwner) {
@@ -543,20 +557,22 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     }
 
     function changeTaxFee(uint8 taxFee_) external onlyOwner {
-        require(taxFee_ < 5, "Tax Fee maximum is 5%");
+        if (taxFee_ > 5) {
+            revert Tax__maxFivePercent();
+        }
         taxFee = taxFee_;
         emit ChangeTax(_msgSender(), taxFee_);
     }
 
     /* ------------------------ Stake function with burn function ------------------------ */
     function stake(uint256 _amount, uint256 _stakePeriod) external {
-        // Make sure staker actually is good for it
-        require(
-            _stakePeriod == 90 days ||
+        if (
+            !(_stakePeriod == 90 days ||
                 _stakePeriod == 180 days ||
-                _stakePeriod == 365 days,
-            "Staking option doesn't exist"
-        );
+                _stakePeriod == 365 days)
+        ) {
+            revert Staking__optionNotExist();
+        }
 
         // Burn the amount of tokens on the sender
         _burn(_msgSender(), _amount);
@@ -590,7 +606,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     }
 
     function claimAirdrop() external isInitialized {
-        require(airdropStatus == true, "Airdrop not yet started");
+        if (airdropStatus != true) {
+            revert Airdrop__notStarted();
+        }
         uint256 airdrop = S_contract.claimAirdrop(_msgSender());
         _balances[address(this)] = _balances[address(this)].sub(airdrop);
         _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
@@ -600,7 +618,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     /*                                             Vesting                                            */
     /* ---------------------------------------------------------------------------------------------- */
     function initiateVesting_Whitelist_Airdrop() external onlyOwner {
-        require(initializationStatus == false, "Nothing to initialize");
+        if (initializationStatus != false) {
+            revert Init__nothingToInitialize();
+        }
 
         initializationStatus = true;
         M_contract_1 = new VestingWallet(

@@ -3,6 +3,35 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+/**
+ * @notice Error handling message for Modifier
+ */
+error Function__notAuthorized();
+error Function__notAVoter();
+error Function__votingNotAvailable();
+
+/**
+ * @notice Error handling message for Staking functions
+ */
+error Staking__cannotStakeNothing();
+error Staking__userIsStaker();
+error Staking__penaltyExceed3Percent();
+error Staking__airdropExceed20Percent();
+error Staking__noStakingFound();
+
+/**
+ * @notice Error handling message for Airdrop functions
+ */
+error Airdrop__claimableOnceAWeek();
+
+/**
+ * @notice Error handling message for Voting functions
+ */
+error Voting__votingIsRunning();
+error Voting__alreadyVoted();
+error Voting__notYetVoted();
+error Voting__notEnoughVoters();
+
 contract Stakable {
     using SafeMath for uint256;
     /**
@@ -81,35 +110,6 @@ contract Stakable {
 
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
-
-    /**
-     * @notice Error handling message for Modifier
-     */
-    error Function__notAuthorized();
-    error Function__notAVoter();
-    error Function__votingNotAvailable();
-
-    /**
-     * @notice Error handling message for Staking functions
-     */
-    error Staking__cannotStakeNothing();
-    error Staking__userIsStaker();
-    error Staking__penaltyExceed3Percent();
-    error Staking__airdropExceed20Percent();
-    error Staking__noStakingFound();
-
-    /**
-     * @notice Error handling message for Airdrop functions
-     */
-    error Airdrop__claimableOnceAWeek();
-
-    /**
-     * @notice Error handling message for Voting functions
-     */
-    error Voting__votingIsRunning();
-    error Voting__alreadyVoted();
-    error Voting__notYetVoted();
-    error Voting__notEnoughVoters();
 
     /* ------------------------------------------ Modifier ------------------------------------------ */
     function isTalax() internal view {
@@ -216,15 +216,6 @@ contract Stakable {
         }
         stakingPenaltyRate = amount;
         emit PenaltyChanged(amount);
-    }
-
-    function changeAirdropPercentage(uint256 amount) external onlyOwner {
-        // require(amount <= 200, "Airdrop Percentage cannot exceed 20 percent.");
-        if (amount > 200) {
-            revert Staking__airdropExceed20Percent();
-        }
-        airdropRate = amount;
-        emit AirdropChanged(amount);
     }
 
     function _calculateStakingDuration(uint256 since)
@@ -352,7 +343,9 @@ contract Stakable {
     }
 
     function changeAirdropPercentage(uint256 amount) external onlyOwner {
-        require(amount <= 200, "Airdrop Percentage cannot exceed 20 percent.");
+        if (amount > 200) {
+            revert Staking__airdropExceed20Percent();
+        }
         airdropRate = amount;
         emit AirdropChanged(amount);
     }
