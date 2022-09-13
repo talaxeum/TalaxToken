@@ -82,9 +82,41 @@ contract Stakable {
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
 
+    /**
+     * @notice Error handling message for Modifier
+     */
+    error Function__notAuthorized();
+    error Function__notAVoter();
+    error Function__votingNotAvailable();
+
+    /**
+     * @notice Error handling message for Staking functions
+     */
+    error Staking__cannotStakeNothing();
+    error Staking__userIsStaker();
+    error Staking__penaltyExceed3Percent();
+    error Staking__airdropExceed20Percent();
+    error Staking__noStakingFound();
+
+    /**
+     * @notice Error handling message for Airdrop functions
+     */
+    error Airdrop__claimableOnceAWeek();
+
+    /**
+     * @notice Error handling message for Voting functions
+     */
+    error Voting__votingIsRunning();
+    error Voting__alreadyVoted();
+    error Voting__notYetVoted();
+    error Voting__notEnoughVoters();
+
     /* ------------------------------------------ Modifier ------------------------------------------ */
     function isTalax() internal view {
-        require(msg.sender == _talax, "Not authorized");
+        // require(msg.sender == _talax, "Not authorized");
+        if (msg.sender != _talax) {
+            revert Function__notAuthorized();
+        }
     }
 
     modifier onlyTalax() {
@@ -93,7 +125,10 @@ contract Stakable {
     }
 
     function isOwner() internal view {
-        require(msg.sender == _owner, "Not authorized");
+        // require(msg.sender == _owner, "Not authorized");
+        if (msg.sender != _owner) {
+            revert Function__notAuthorized();
+        }
     }
 
     modifier onlyOwner() {
@@ -102,7 +137,10 @@ contract Stakable {
     }
 
     function _isVoter() internal view {
-        require(voters[msg.sender].votingRight == true, "You are not a voter");
+        // require(voters[msg.sender].votingRight == true, "You are not a voter");
+        if (voters[msg.sender].votingRight == false) {
+            revert Function__notAVoter();
+        }
     }
 
     modifier isVoter() {
@@ -111,7 +149,10 @@ contract Stakable {
     }
 
     function _checkVotingStatus() internal view {
-        require(_votingStatus, "Voting is not available");
+        // require(_votingStatus, "Voting is not available");
+        if (!_votingStatus) {
+            revert Function__votingNotAvailable();
+        }
     }
 
     modifier votingStatusTrue() {
@@ -137,8 +178,14 @@ contract Stakable {
         uint256 rewardRate
     ) external onlyTalax {
         // Simple check so that user does not stake 0
-        require(amount > 0, "Cannot stake nothing");
-        require(stakeholders[user].amount == 0, "User is a staker");
+        // require(amount > 0, "Cannot stake nothing");
+        if (amount <= 0) {
+            revert Staking__cannotStakeNothing();
+        }
+        // require(stakeholders[user].amount == 0, "User is a staker");
+        if (stakeholders[user].amount != 0) {
+            revert Staking__userIsStaker();
+        }
 
         totalVoters += 1;
         voters[user].votingRight = true;
@@ -163,9 +210,21 @@ contract Stakable {
     }
 
     function changePenaltyFee(uint256 amount) external onlyOwner {
-        require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
+        // require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
+        if (amount > 30) {
+            revert Staking__penaltyExceed3Percent();
+        }
         stakingPenaltyRate = amount;
         emit PenaltyChanged(amount);
+    }
+
+    function changeAirdropPercentage(uint256 amount) external onlyOwner {
+        // require(amount <= 200, "Airdrop Percentage cannot exceed 20 percent.");
+        if (amount > 200) {
+            revert Staking__airdropExceed20Percent();
+        }
+        airdropRate = amount;
+        emit AirdropChanged(amount);
     }
 
     function _calculateStakingDuration(uint256 since)
@@ -252,7 +311,10 @@ contract Stakable {
 
     function hasStake() external view returns (StakingSummary memory) {
         Stake memory user_stake = stakeholders[msg.sender];
-        require(user_stake.amount > 0, "No Stake Found");
+        // require(user_stake.amount > 0, "No Stake Found");
+        if (user_stake.amount <= 0) {
+            revert Staking__noStakingFound();
+        }
         StakingSummary memory summary = StakingSummary(0, 0, user_stake);
 
         uint256 reward = _calculateStakeReward(user_stake);
@@ -313,10 +375,13 @@ contract Stakable {
         Stake memory staker = stakeholders[user];
 
         if (staker.amount > 0) {
-            require(
-                _calculateWeek(staker.latestClaimDrop) > 0,
-                "Claimable once a week"
-            );
+            // require(
+            //     _calculateWeek(staker.latestClaimDrop) > 0,
+            //     "Claimable once a week"
+            // );
+            if (_calculateWeek(staker.latestClaimDrop) <= 0) {
+                revert Airdrop__claimableOnceAWeek();
+            }
 
             staker.claimableAirdrop = 0;
             staker.latestClaimDrop = block.timestamp;
@@ -343,26 +408,36 @@ contract Stakable {
 
     //can be simplified since not connected directly
     function startVoting() external onlyTalax {
-        require(_votingStatus == false, "Voting is already running");
+        // require(_votingStatus == false, "Voting is already running");
+        if (_votingStatus == true) {
+            revert Voting__votingIsRunning();
+        }
+
         _votingStatus = true;
         _votingId += 1;
     }
 
     function vote() public votingStatusTrue isVoter {
-        require(
-            voters[msg.sender].voted[_votingId] == false,
-            "You have voted before"
-        );
+        // require(
+        //     voters[msg.sender].voted[_votingId] == false,
+        //     "You have voted before"
+        // );
+        if (voters[msg.sender].voted[_votingId] == true) {
+            revert Voting__alreadyVoted();
+        }
 
         voters[msg.sender].voted[_votingId] = true;
         votedUsers[_votingId] += 1;
     }
 
     function retractVote() public votingStatusTrue isVoter {
-        require(
-            voters[msg.sender].voted[_votingId] == true,
-            "You have not voted yet"
-        );
+        // require(
+        //     voters[msg.sender].voted[_votingId] == true,
+        //     "You have not voted yet"
+        // );
+        if (voters[msg.sender].voted[_votingId] == false) {
+            revert Voting__notYetVoted();
+        }
 
         voters[msg.sender].voted[_votingId] == false;
         votedUsers[_votingId] -= 1;
@@ -375,7 +450,10 @@ contract Stakable {
         votingStatusTrue
         returns (bool)
     {
-        require(totalVoters > 1, "Not enough voters");
+        // require(totalVoters > 1, "Not enough voters");
+        if (totalVoters <= 1) {
+            revert Voting__notEnoughVoters();
+        }
         uint256 half_voters = SafeMath.div(SafeMath.mul(totalVoters, 5), 10);
 
         if (votedUsers[_votingId] > half_voters) {
