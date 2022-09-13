@@ -129,7 +129,7 @@ contract Whitelist {
     }
 
     function addBeneficiary(address user, uint256 amount) external onlyTalax {
-        require(amount <= privateSaleAmount, "Insufficient Total Balance");
+        require(amount < privateSaleAmount + 1, "Insufficient Total Balance");
 
         if (_beneficiary[user].amount > 0) {
             _beneficiary[user].lockedAmount = amount;

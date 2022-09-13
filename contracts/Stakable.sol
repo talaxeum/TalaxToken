@@ -125,18 +125,6 @@ contract Stakable {
         _talax = talax;
     }
 
-    function getVoters(address user) external view returns (bool, bool) {
-        return (voters[user].votingRight, voters[user].voted[_votingId]);
-    }
-
-    function startAirdropSince() external onlyTalax {
-        airdropSince = block.timestamp;
-    }
-
-    function _calculateWeek(uint256 input) internal view returns (uint256) {
-        return (block.timestamp - input).div(7 days);
-    }
-
     /**
      * @notice
      * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
@@ -178,12 +166,6 @@ contract Stakable {
         require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
         stakingPenaltyRate = amount;
         emit PenaltyChanged(amount);
-    }
-
-    function changeAirdropPercentage(uint256 amount) external onlyOwner {
-        require(amount <= 200, "Airdrop Percentage cannot exceed 20 percent.");
-        airdropRate = amount;
-        emit AirdropChanged(amount);
     }
 
     function _calculateStakingDuration(uint256 since)
@@ -298,6 +280,21 @@ contract Stakable {
     }
 
     /* -------------------------------------- Airdrop functions ------------------------------------- */
+
+    function startAirdropSince() external onlyTalax {
+        airdropSince = block.timestamp;
+    }
+
+    function _calculateWeek(uint256 input) internal view returns (uint256) {
+        return (block.timestamp - input).div(7 days);
+    }
+
+    function changeAirdropPercentage(uint256 amount) external onlyOwner {
+        require(amount <= 200, "Airdrop Percentage cannot exceed 20 percent.");
+        airdropRate = amount;
+        emit AirdropChanged(amount);
+    }
+
     function _calculateAirdrop(uint256 stakeAmount)
         internal
         view
@@ -339,6 +336,10 @@ contract Stakable {
     }
 
     /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
+
+    function getVoters(address user) external view returns (bool, bool) {
+        return (voters[user].votingRight, voters[user].voted[_votingId]);
+    }
 
     //can be simplified since not connected directly
     function startVoting() external onlyTalax {
