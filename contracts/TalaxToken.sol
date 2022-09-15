@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "./governance/ERC20Votes.sol";
+
 import "./Data.sol";
 import "./Interfaces.sol";
 import "./VestingWallet.sol";
@@ -21,7 +24,7 @@ error Staking__optionNotExist();
 error Tax__maxFivePercent();
 error Ownable__notWalletOwner();
 
-contract TalaxToken is ERC20, ERC20Burnable, Ownable {
+contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     using SafeMath for uint256;
 
     mapping(address => uint256) private _balances;
@@ -105,7 +108,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         uint256 amount
     );
 
-    constructor() ERC20("TALAXEUM", "TALAX") {
+    constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
         _totalSupply = 21 * 1e9 * 1e18;
 
         // later divided by 100 to make percentage
@@ -387,7 +390,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         emit Transfer(from, to, taxedAmount);
     }
 
-    function _mint(address account, uint256 amount) internal override {
+    function _mint(address account, uint256 amount)
+        internal
+        override(ERC20, ERC20Votes)
+    {
         require(account != address(0), "ERC20: mint to the zero address");
 
         _beforeTokenTransfer(address(0), account, amount);
@@ -410,7 +416,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
      * - `account` cannot be the zero address.
      * - `account` must have at least `amount` tokens.
      */
-    function _burn(address account, uint256 amount) internal override {
+    function _burn(address account, uint256 amount)
+        internal
+        override(ERC20, ERC20Votes)
+    {
         require(account != address(0), "ERC20: burn from the zero address");
 
         _beforeTokenTransfer(account, address(0), amount);
@@ -477,6 +486,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
+    }
+
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
+        super._afterTokenTransfer(from, to, amount);
     }
 
     /* ---------------------------------------------------------------------------------------------- */
