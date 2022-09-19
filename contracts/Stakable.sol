@@ -47,6 +47,7 @@ contract Stakable {
     uint256 public stakingPenaltyRate;
     uint256 public airdropRate;
     uint256 public airdropSince;
+    mapping(uint256 => uint256) public airdropClaimed;
 
     bool internal _votingStatus;
     uint256 internal _votingId;
@@ -373,10 +374,12 @@ contract Stakable {
                     revert Airdrop__claimableOnceAWeek();
                 }
 
+                airdropClaimed[airdropWeek()] = 1;
+                uint256 airdrop_amount = _calculateAirdrop(staker.amount);
                 staker.claimableAirdrop = 0;
                 staker.latestClaimDrop = block.timestamp;
 
-                return _calculateAirdrop(staker.amount);
+                return airdrop_amount;
             } else {
                 return 0;
             }
