@@ -507,18 +507,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     /* --------------------------------- Added functions (external) --------------------------------- */
 
     function startTransferDAOVoting() external onlyOwner {
-        //moveable
+        // TODO: moveable
         S_contract.startVoting();
     }
 
     function transferToDAOPool(uint256 amount_) external {
-        // removeable if address exist
+        // TODO: removeable if address exist
         _balances[msg.sender] = _balances[msg.sender].sub(amount_);
         daoProjectPool += amount_;
     }
 
     function transferDAOPool(address to_, uint256 amount_) external onlyOwner {
-        // removeable if address exist
+        // TODO: removeable if address exist
         bool result = S_contract.getVotingResult();
 
         if (result == true) {
@@ -531,26 +531,26 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
     }
 
     function mintStakingReward(uint256 amount_) public onlyOwner {
-        // removeable if address exist
+        // TODO: removeable if address exist
         _mintStakingReward(amount_);
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
-        // removeable if address exist
+        // TODO: removeable if address exist
         _balances[address(this)] = _balances[address(this)].add(amount_);
         _totalSupply = _totalSupply.add(amount_);
         emit Transfer(address(0), address(this), amount_);
     }
 
     function burnStakingReward(uint256 amount_) external onlyOwner {
-        // removeable if address exist
+        // TODO: removeable if address exist
         stakingReward = stakingReward.sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
         emit TransferStakingReward(address(this), address(0), amount_);
     }
 
     function burnLiquidityReserve(uint256 amount_) external onlyOwner {
-        // removeable if address exist
+        // TODO: removeable if address exist
         _balances[address(this)] = _balances[address(this)].sub(amount_);
         _totalSupply = _totalSupply.sub(amount_);
         emit Transfer(address(this), address(0), amount_);
