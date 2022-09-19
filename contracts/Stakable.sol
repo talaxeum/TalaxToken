@@ -2,6 +2,7 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @notice Error handling message for Modifier
@@ -32,7 +33,7 @@ error Voting__alreadyVoted();
 error Voting__notYetVoted();
 error Voting__notEnoughVoters();
 
-contract Stakable {
+contract Stakable is ReentrancyGuard {
     using SafeMath for uint256;
     /**
      * @notice Constructor since this contract is not meant to be used without inheritance
@@ -176,7 +177,7 @@ contract Stakable {
         uint256 amount,
         uint256 stakePeriod,
         uint256 rewardRate
-    ) external onlyTalax {
+    ) external nonReentrant onlyTalax {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
         if (amount <= 0) {
@@ -276,6 +277,7 @@ contract Stakable {
      */
     function withdrawStake(address user)
         external
+        nonReentrant
         onlyTalax
         returns (uint256, uint256)
     {
@@ -400,7 +402,7 @@ contract Stakable {
     }
 
     //can be simplified since not connected directly
-    function startVoting() external onlyTalax {
+    function startVoting() external nonReentrant onlyTalax {
         // require(_votingStatus == false, "Voting is already running");
         if (_votingStatus == true) {
             revert Voting__votingIsRunning();
@@ -410,7 +412,7 @@ contract Stakable {
         _votingId += 1;
     }
 
-    function vote() public votingStatusTrue isVoter {
+    function vote() public nonReentrant votingStatusTrue isVoter {
         // require(
         //     voters[msg.sender].voted[_votingId] == false,
         //     "You have voted before"
@@ -423,7 +425,7 @@ contract Stakable {
         votedUsers[_votingId] += 1;
     }
 
-    function retractVote() public votingStatusTrue isVoter {
+    function retractVote() public nonReentrant votingStatusTrue isVoter {
         // require(
         //     voters[msg.sender].voted[_votingId] == true,
         //     "You have not voted yet"
