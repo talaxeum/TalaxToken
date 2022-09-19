@@ -340,16 +340,17 @@ contract Stakable is ReentrancyGuard {
         airdropSince = block.timestamp;
     }
 
-    function _calculateWeek(uint256 input) internal view returns (uint256) {
-        return (block.timestamp - input).div(7 days);
-    }
-
     function changeAirdropPercentage(uint256 amount) external onlyOwner {
         if (amount > 200) {
             revert Staking__airdropExceed20Percent();
         }
         airdropRate = amount;
         emit AirdropChanged(amount);
+    }
+
+    function _calculateWeek(uint256 input) internal view returns (uint256) {
+        // return (block.timestamp - input).div(7 days);
+        return (block.timestamp - input).div(1 minutes);
     }
 
     function _calculateAirdrop(uint256 stakeAmount)

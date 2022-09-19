@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 address constant public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
 
 /* ------------------------------------ Interfaces Addresses ------------------------------------ */
+// address constant stake_address = 0xd9145CCE52D386f254917e481eB44e9943F39138;
 address constant stake_address = 0xd9145CCE52D386f254917e481eB44e9943F39138;
 
 // address constant strategic_partner_address_1 = 0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8;

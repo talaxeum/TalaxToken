@@ -657,41 +657,41 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         }
 
         initializationStatus = true;
-        M_contract_1 = new VestingWallet(
-            marketing_address_1,
-            uint64(vesting_start),
-            35 * 30 days
-        );
-        M_contract_2 = new VestingWallet(
-            marketing_address_2,
-            uint64(vesting_start),
-            35 * 30 days
-        );
-        M_contract_3 = new VestingWallet(
-            marketing_address_3,
-            uint64(vesting_start),
-            35 * 30 days
-        );
+        // M_contract_1 = new VestingWallet(
+        //     marketing_address_1,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
+        // M_contract_2 = new VestingWallet(
+        //     marketing_address_2,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
+        // M_contract_3 = new VestingWallet(
+        //     marketing_address_3,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
 
-        TPC_contract_1 = new VestingWallet(
-            team_and_project_coordinator_address_1,
-            uint64(vesting_start) + (11 * 30 days),
-            36 * 30 days
-        );
-        TPC_contract_2 = new VestingWallet(
-            team_and_project_coordinator_address_2,
-            uint64(vesting_start) + (11 * 30 days),
-            36 * 30 days
-        );
-        TPC_contract_3 = new VestingWallet(
-            team_and_project_coordinator_address_3,
-            uint64(vesting_start) + (11 * 30 days),
-            36 * 30 days
-        );
+        // TPC_contract_1 = new VestingWallet(
+        //     team_and_project_coordinator_address_1,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
+        // TPC_contract_2 = new VestingWallet(
+        //     team_and_project_coordinator_address_2,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
+        // TPC_contract_3 = new VestingWallet(
+        //     team_and_project_coordinator_address_3,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
         emit InitiateVesting(_msgSender());
 
         // PP_contract.initiateWhitelist();
-        PS_contract.initiateWhitelist();
+        // PS_contract.initiateWhitelist();
         // SP_contract.initiateWhitelist();
         emit InitiateWhitelist(_msgSender());
 
