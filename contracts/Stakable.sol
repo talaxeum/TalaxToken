@@ -320,12 +320,12 @@ contract Stakable {
                 SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000);
         }
 
-        if (airdropWeek() == 0) {
-            if (airdropWeek() < 52) {
+        if (airdropWeek() < 52) {
+            if (airdropClaimed[airdropWeek()] != 0) {
+                summary.stake.claimableAirdrop = 0;
+            } else {
                 uint256 airdrop = _calculateAirdrop(user_stake.amount);
                 summary.stake.claimableAirdrop = airdrop;
-            } else {
-                summary.stake.claimableAirdrop = 0;
             }
         } else {
             summary.stake.claimableAirdrop = 0;
@@ -370,16 +370,15 @@ contract Stakable {
 
         if (staker.amount > 0) {
             if (airdropWeek() < 52) {
-                if (airdropWeek() != 0) {
+                if (airdropClaimed[airdropWeek()] != 0) {
                     revert Airdrop__claimableOnceAWeek();
                 }
 
                 airdropClaimed[airdropWeek()] = 1;
-                uint256 airdrop_amount = _calculateAirdrop(staker.amount);
                 staker.claimableAirdrop = 0;
                 staker.latestClaimDrop = block.timestamp;
 
-                return airdrop_amount;
+                return _calculateAirdrop(staker.amount);
             } else {
                 return 0;
             }
