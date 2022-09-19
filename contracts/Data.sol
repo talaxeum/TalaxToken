@@ -4,10 +4,6 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 address constant public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
-address constant cex_listing_address = address(0);
-address constant staking_reward = address(0);
-address constant liquidity_reserve = address(0);
-address constant dao_pool = address(0);
 
 /* ------------------------------------ Interfaces Addresses ------------------------------------ */
 address constant stake_address = 0xd9145CCE52D386f254917e481eB44e9943F39138;
@@ -22,3 +18,8 @@ address constant team_and_project_coordinator_address_3 = 0x97620dEAdC98bC817330
 address constant marketing_address_1 = 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
 address constant marketing_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
 address constant marketing_address_3 = 0x126974fa373267d86fAB6d6871Afe62ccB68e810;
+
+address constant cex_listing_address = address(0);
+address constant staking_reward = address(0);
+address constant liquidity_reserve = address(0);
+address constant dao_pool = address(0);
