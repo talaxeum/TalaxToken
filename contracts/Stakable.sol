@@ -319,9 +319,13 @@ contract Stakable {
                 SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000);
         }
 
-        if (_calculateWeek(user_stake.latestClaimDrop) > 0) {
-            uint256 airdrop = _calculateAirdrop(user_stake.amount);
-            summary.stake.claimableAirdrop = airdrop;
+        if (airdropWeek() == 0) {
+            if (airdropWeek() < 52) {
+                uint256 airdrop = _calculateAirdrop(user_stake.amount);
+                summary.stake.claimableAirdrop = airdrop;
+            } else {
+                summary.stake.claimableAirdrop = 0;
+            }
         } else {
             summary.stake.claimableAirdrop = 0;
         }
@@ -336,10 +340,6 @@ contract Stakable {
 
     function startAirdropSince() external onlyTalax {
         airdropSince = block.timestamp;
-    }
-
-    function _calculateWeek(uint256 input) internal view returns (uint256) {
-        return (block.timestamp - input).div(7 days);
     }
 
     function changeAirdropPercentage(uint256 amount) external onlyOwner {
@@ -368,18 +368,18 @@ contract Stakable {
         Stake memory staker = stakeholders[user];
 
         if (staker.amount > 0) {
-            // require(
-            //     _calculateWeek(staker.latestClaimDrop) > 0,
-            //     "Claimable once a week"
-            // );
-            if (_calculateWeek(staker.latestClaimDrop) <= 0) {
-                revert Airdrop__claimableOnceAWeek();
+            if (airdropWeek() < 52) {
+                if (airdropWeek() != 0) {
+                    revert Airdrop__claimableOnceAWeek();
+                }
+
+                staker.claimableAirdrop = 0;
+                staker.latestClaimDrop = block.timestamp;
+
+                return _calculateAirdrop(staker.amount);
+            } else {
+                return 0;
             }
-
-            staker.claimableAirdrop = 0;
-            staker.latestClaimDrop = block.timestamp;
-
-            return _calculateAirdrop(staker.amount);
         } else {
             return 0;
         }

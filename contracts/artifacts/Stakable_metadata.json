@@ -11,6 +11,71 @@
 				"type": "constructor"
 			},
 			{
+				"inputs": [],
+				"name": "Airdrop__claimableOnceAWeek",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Function__notAVoter",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Function__notAuthorized",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Function__votingNotAvailable",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Staking__airdropExceed20Percent",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Staking__cannotStakeNothing",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Staking__noStakingFound",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Staking__penaltyExceed3Percent",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Staking__userIsStaker",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Voting__alreadyVoted",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Voting__notEnoughVoters",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Voting__notYetVoted",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Voting__votingIsRunning",
+				"type": "error"
+			},
+			{
 				"anonymous": false,
 				"inputs": [
 					{
@@ -66,6 +131,32 @@
 				],
 				"name": "Staked",
 				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "_owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "_talax",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
 			},
 			{
 				"inputs": [],
@@ -165,19 +256,6 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "getOwner",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -233,11 +311,6 @@
 							{
 								"components": [
 									{
-										"internalType": "address",
-										"name": "user",
-										"type": "address"
-									},
-									{
 										"internalType": "uint256",
 										"name": "amount",
 										"type": "uint256"
@@ -249,22 +322,27 @@
 									},
 									{
 										"internalType": "uint256",
-										"name": "claimable",
-										"type": "uint256"
-									},
-									{
-										"internalType": "uint256",
-										"name": "claimable_airdrop",
-										"type": "uint256"
-									},
-									{
-										"internalType": "uint256",
 										"name": "rewardAPY",
 										"type": "uint256"
 									},
 									{
 										"internalType": "uint256",
 										"name": "releaseTime",
+										"type": "uint256"
+									},
+									{
+										"internalType": "uint256",
+										"name": "claimable",
+										"type": "uint256"
+									},
+									{
+										"internalType": "uint256",
+										"name": "claimableAirdrop",
+										"type": "uint256"
+									},
+									{
+										"internalType": "uint256",
+										"name": "latestClaimDrop",
 										"type": "uint256"
 									}
 								],
@@ -276,25 +354,6 @@
 						"internalType": "struct Stakable.StakingSummary",
 						"name": "",
 						"type": "tuple"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "user",
-						"type": "address"
-					}
-				],
-				"name": "isVoter",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
 					}
 				],
 				"stateMutability": "view",
@@ -458,6 +517,28 @@
 			"version": 1
 		},
 		"userdoc": {
+			"errors": {
+				"Airdrop__claimableOnceAWeek()": [
+					{
+						"notice": "Error handling message for Airdrop functions"
+					}
+				],
+				"Function__notAuthorized()": [
+					{
+						"notice": "Error handling message for Modifier"
+					}
+				],
+				"Staking__cannotStakeNothing()": [
+					{
+						"notice": "Error handling message for Staking functions"
+					}
+				],
+				"Voting__votingIsRunning()": [
+					{
+						"notice": "Error handling message for Voting functions"
+					}
+				]
+			},
 			"events": {
 				"Staked(address,uint256,uint256,uint256)": {
 					"notice": "Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable"
@@ -469,7 +550,7 @@
 					"notice": "_Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container StakeID"
 				},
 				"withdrawStake(address)": {
-					"notice": "withdrawStake takes in an amount and a index of the stake and will remove tokens from that stake Notice index of the stake is the users stake counter, starting at 0 for the first stake Will return the amount to MINT onto the acount Will also _calculateStakeReward and reset timer"
+					"notice": "withdrawStake takes in an amount and a index of the stake and will remove tokens from that stake Notice index of the stake is the users stake counter, starting at 0 for the first stake Will return the amount to MINT onto the account Will also _calculateStakeReward and reset timer"
 				}
 			},
 			"version": 1
@@ -500,11 +581,11 @@
 			]
 		},
 		"contracts/Stakable.sol": {
-			"keccak256": "0xc3b8b1570e26cce84ba6bfc6c96e55ff7981b9e4eabd0b381599d38c57729efd",
+			"keccak256": "0xffda35ecad967c584eb63181385f68173dc3544326a3de376d342e671667d2c0",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://6cdaac8c6154bc580eb07372ac48cb9262cc9f8e2e68a3b137d1e2ade44568d2",
-				"dweb:/ipfs/QmVKN1ScbChYJAEkgScFeS44SAbMvBqrMberUnf27C3TgN"
+				"bzz-raw://5d6b8120ccff5cccd5689fd323fb4ef90524a774a4c3b7ed8051d44097640b74",
+				"dweb:/ipfs/QmeQoJSvbbDbzswyeM7EQrZ9YQrAbVKpw31R2zyx6mmWUZ"
 			]
 		}
 	},

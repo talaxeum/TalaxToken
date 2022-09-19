@@ -11,6 +11,31 @@
 				"type": "constructor"
 			},
 			{
+				"inputs": [],
+				"name": "Airdrop__notStarted",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Init__notInitialized",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Init__nothingToInitialize",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Staking__optionNotExist",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Tax__maxFivePercent",
+				"type": "error"
+			},
+			{
 				"anonymous": false,
 				"inputs": [
 					{
@@ -72,25 +97,6 @@
 					{
 						"indexed": true,
 						"internalType": "address",
-						"name": "from",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
-				"name": "ChangeAirdropPercentage",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
 						"name": "who",
 						"type": "address"
 					},
@@ -102,25 +108,6 @@
 					}
 				],
 				"name": "ChangeAirdropStatus",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "from",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
-				"name": "ChangePenaltyFee",
 				"type": "event"
 			},
 			{
@@ -615,32 +602,6 @@
 					}
 				],
 				"name": "burnStakingReward",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "airdrop_",
-						"type": "uint256"
-					}
-				],
-				"name": "changeAirdropPercentage",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "penaltyFee_",
-						"type": "uint256"
-					}
-				],
-				"name": "changePenaltyFee",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -1189,8 +1150,19 @@
 			"version": 1
 		},
 		"userdoc": {
+			"errors": {
+				"Airdrop__notStarted()": [
+					{
+						"notice": "Custom error"
+					}
+				]
+			},
 			"kind": "user",
-			"methods": {},
+			"methods": {
+				"add_PP_Beneficiaries((address,uint256)[])": {
+					"notice": "? Token needs to be transferred to the vesting wallet ? When user want to claim the vesting, vesting wallet will transfer the token to the beneficiary address"
+				}
+			},
 			"version": 1
 		}
 	},
@@ -1283,11 +1255,11 @@
 			]
 		},
 		"contracts/Data.sol": {
-			"keccak256": "0xaca6bfa6560f9ffc63674411505e2c4ee778c11f4aeefacb906e31d25b5a325a",
+			"keccak256": "0xc7adcae65e377566bf5ad9457beac536efcacdfe4a1e2e8497d31ac06f4c39d9",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://65212caa03d5e7017e13db2bb8268b201f0162a2d75e9c40e14c68c542453a44",
-				"dweb:/ipfs/QmZAEEWATsg1bPNsKyAXHKrVoAfCSvCKMEmWfXtRkyhWLR"
+				"bzz-raw://f602b86ca0bc5ee499a4a00c350a35a06903fc9f5d14c7b5c93177635d0fa7fc",
+				"dweb:/ipfs/QmcRDkwL67kfBQLkh6SDM73xK7jAhFMFnxjEFYuaL4TugZ"
 			]
 		},
 		"contracts/Interfaces.sol": {
@@ -1299,11 +1271,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x39d08b4c237c93544b98844c0f77ce0be31a94638540498f8fc5d57cc6fb35c9",
+			"keccak256": "0x70a2824ec1f57fb380c642a41d38ef9b4d0a8a857ce02cafbf60d20a10466234",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://f26b7f33efee09c417b85ae7ae983638a30b548af17839c0cd9e749ac09ea9bc",
-				"dweb:/ipfs/QmNXZSUeDPEirVH14kMWvUE6TnPHAtHCMNWinkNfwsd4yz"
+				"bzz-raw://afe7dc8719655ca3e575971e350c35d5572ec5d029eac25023a6c4b851cf4680",
+				"dweb:/ipfs/QmQN5Mpwd3b12jCzVfF9MkNqQ5JWidsUms4TDCnNMRkkM8"
 			]
 		},
 		"contracts/VestingWallet.sol": {
