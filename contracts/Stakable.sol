@@ -2,6 +2,7 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @notice Error handling message for Modifier
@@ -32,7 +33,7 @@ error Voting__alreadyVoted();
 error Voting__notYetVoted();
 error Voting__notEnoughVoters();
 
-contract Stakable {
+contract Stakable is ReentrancyGuard {
     using SafeMath for uint256;
     /**
      * @notice Constructor since this contract is not meant to be used without inheritance
@@ -47,7 +48,6 @@ contract Stakable {
     uint256 public stakingPenaltyRate;
     uint256 public airdropRate;
     uint256 public airdropSince;
-    mapping(uint256 => uint256) public airdropClaimed;
 
     bool internal _votingStatus;
     uint256 internal _votingId;
@@ -177,7 +177,7 @@ contract Stakable {
         uint256 amount,
         uint256 stakePeriod,
         uint256 rewardRate
-    ) external onlyTalax {
+    ) external nonReentrant onlyTalax {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
         if (amount <= 0) {
@@ -277,6 +277,7 @@ contract Stakable {
      */
     function withdrawStake(address user)
         external
+        nonReentrant
         onlyTalax
         returns (uint256, uint256)
     {
@@ -320,13 +321,9 @@ contract Stakable {
                 SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000);
         }
 
-        if (airdropWeek() < 52) {
-            if (airdropClaimed[airdropWeek()] != 0) {
-                summary.stake.claimableAirdrop = 0;
-            } else {
-                uint256 airdrop = _calculateAirdrop(user_stake.amount);
-                summary.stake.claimableAirdrop = airdrop;
-            }
+        if (_calculateWeek(user_stake.latestClaimDrop) > 0) {
+            uint256 airdrop = _calculateAirdrop(user_stake.amount);
+            summary.stake.claimableAirdrop = airdrop;
         } else {
             summary.stake.claimableAirdrop = 0;
         }
@@ -351,6 +348,10 @@ contract Stakable {
         emit AirdropChanged(amount);
     }
 
+    function _calculateWeek(uint256 input) internal view returns (uint256) {
+        return (block.timestamp - input).div(7 days);
+    }
+
     function _calculateAirdrop(uint256 stakeAmount)
         internal
         view
@@ -369,19 +370,18 @@ contract Stakable {
         Stake memory staker = stakeholders[user];
 
         if (staker.amount > 0) {
-            if (airdropWeek() < 52) {
-                if (airdropClaimed[airdropWeek()] != 0) {
-                    revert Airdrop__claimableOnceAWeek();
-                }
-
-                airdropClaimed[airdropWeek()] = 1;
-                staker.claimableAirdrop = 0;
-                staker.latestClaimDrop = block.timestamp;
-
-                return _calculateAirdrop(staker.amount);
-            } else {
-                return 0;
+            // require(
+            //     _calculateWeek(staker.latestClaimDrop) > 0,
+            //     "Claimable once a week"
+            // );
+            if (_calculateWeek(staker.latestClaimDrop) <= 0) {
+                revert Airdrop__claimableOnceAWeek();
             }
+
+            staker.claimableAirdrop = 0;
+            staker.latestClaimDrop = block.timestamp;
+
+            return _calculateAirdrop(staker.amount);
         } else {
             return 0;
         }
@@ -402,7 +402,7 @@ contract Stakable {
     }
 
     //can be simplified since not connected directly
-    function startVoting() external onlyTalax {
+    function startVoting() external nonReentrant onlyTalax {
         // require(_votingStatus == false, "Voting is already running");
         if (_votingStatus == true) {
             revert Voting__votingIsRunning();
@@ -412,7 +412,7 @@ contract Stakable {
         _votingId += 1;
     }
 
-    function vote() public votingStatusTrue isVoter {
+    function vote() public nonReentrant votingStatusTrue isVoter {
         // require(
         //     voters[msg.sender].voted[_votingId] == false,
         //     "You have voted before"
@@ -425,7 +425,7 @@ contract Stakable {
         votedUsers[_votingId] += 1;
     }
 
-    function retractVote() public votingStatusTrue isVoter {
+    function retractVote() public nonReentrant votingStatusTrue isVoter {
         // require(
         //     voters[msg.sender].voted[_votingId] == true,
         //     "You have not voted yet"
