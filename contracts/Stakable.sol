@@ -366,8 +366,8 @@ contract Stakable is ReentrancyGuard {
         onlyTalax
         returns (uint256)
     {
-        //can be simplified if using address
-        Stake memory staker = stakeholders[user];
+        // TODO: can be simplified if using address
+        Stake storage staker = stakeholders[user];
 
         if (staker.amount > 0) {
             // require(

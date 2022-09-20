@@ -130,16 +130,17 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
          */
 
         /* --------------------------------------------- TGE -------------------------------------------- */
-        _balances[public_sale_address] = 193200 * 1e3 * 1e18;
-        _balances[marketing_address_1] = 14000 * 1e3 * 1e18;
-        _balances[marketing_address_2] = 14000 * 1e3 * 1e18;
-        _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
-        _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
-        _balances[staking_reward] = 56538462 * 1e18;
-        _balances[msg.sender] = 88846154 * 1e18; // for testing and staging
+        // _balances[public_sale_address] = 193200 * 1e3 * 1e18;
+        // _balances[marketing_address_1] = 14000 * 1e3 * 1e18;
+        // _balances[marketing_address_2] = 14000 * 1e3 * 1e18;
+        // _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
+        // _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
+        // _balances[staking_reward] = 56538462 * 1e18;
+        _balances[msg.sender] = 10000 * 1e18; // for testing and staging
+        // _balances[address(this)] = 10000 * 1e18; // for testing and staging
         // _balances[address(this)] = 88846154 * 1e18;
         // _balances[timeLockController] = 88846154 * 1e18;
-        _balances[dao_pool] = 100961538 * 1e18;
+        // _balances[dao_pool] = 100961538 * 1e18;
 
         /* ------------------------------------- Interfaces Contract ------------------------------------ */
         S_contract = IStakable(stake_address);
@@ -610,8 +611,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
             revert Airdrop__notStarted();
         }
         uint256 airdrop = S_contract.claimAirdrop(_msgSender());
-        _balances[address(this)] = _balances[address(this)].sub(airdrop);
-        _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
+        _balances[address(this)] = _balances[address(this)] - airdrop;
+        _balances[_msgSender()] = _balances[_msgSender()] + airdrop;
     }
 
     /* ---------------------------------------------------------------------------------------------- */
@@ -623,41 +624,41 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         }
 
         initializationStatus = true;
-        M_contract_1 = new VestingWallet(
-            marketing_address_1,
-            uint64(vesting_start),
-            35 * 30 days
-        );
-        M_contract_2 = new VestingWallet(
-            marketing_address_2,
-            uint64(vesting_start),
-            35 * 30 days
-        );
-        M_contract_3 = new VestingWallet(
-            marketing_address_3,
-            uint64(vesting_start),
-            35 * 30 days
-        );
+        // M_contract_1 = new VestingWallet(
+        //     marketing_address_1,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
+        // M_contract_2 = new VestingWallet(
+        //     marketing_address_2,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
+        // M_contract_3 = new VestingWallet(
+        //     marketing_address_3,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
 
-        TPC_contract_1 = new VestingWallet(
-            team_and_project_coordinator_address_1,
-            uint64(vesting_start) + (11 * 30 days),
-            36 * 30 days
-        );
-        TPC_contract_2 = new VestingWallet(
-            team_and_project_coordinator_address_2,
-            uint64(vesting_start) + (11 * 30 days),
-            36 * 30 days
-        );
-        TPC_contract_3 = new VestingWallet(
-            team_and_project_coordinator_address_3,
-            uint64(vesting_start) + (11 * 30 days),
-            36 * 30 days
-        );
+        // TPC_contract_1 = new VestingWallet(
+        //     team_and_project_coordinator_address_1,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
+        // TPC_contract_2 = new VestingWallet(
+        //     team_and_project_coordinator_address_2,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
+        // TPC_contract_3 = new VestingWallet(
+        //     team_and_project_coordinator_address_3,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
         emit InitiateVesting(_msgSender());
 
         // PP_contract.initiateWhitelist();
-        PS_contract.initiateWhitelist();
+        // PS_contract.initiateWhitelist();
         // SP_contract.initiateWhitelist();
         emit InitiateWhitelist(_msgSender());
 
