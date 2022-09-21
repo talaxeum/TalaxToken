@@ -45,14 +45,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
     uint256 public vesting_start;
     /* ------------------------------------------ Addresses ----------------------------------------- */
-    // TODO: Changeable address by owner
+    // ! Changeable address by owner
     address public governance_address;
-
-    address public private_placement_address =
-        0xf8e81D47203A594245E36C48e151709F0C19fBe8; //test account 1
-    // address public private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
-
-    address public strategic_partner_address = address(0);
 
     /*
      * Notes
@@ -64,10 +58,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
      * TPC   = Team and Project Coordinator
      */
 
-    IStakable S_contract;
-    IWhitelist PP_contract;
-    IWhitelist PS_contract;
-    IWhitelist SP_contract;
     VestingWallet public M_contract_1;
     VestingWallet public M_contract_2;
     VestingWallet public M_contract_3;
@@ -89,8 +79,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         address indexed to3
     );
 
-    event AddBeneficiary(address indexed from, Beneficiary[] beneficiary);
-    event DeleteBeneficiary(address indexed from, address[] beneficiary);
+    event AddBeneficiaries(
+        address indexed from,
+        address indexed whitelist_contract,
+        Beneficiary[] beneficiary
+    );
+    event DeleteBeneficiaries(
+        address indexed from,
+        address indexed whitelist_contract,
+        address[] beneficiary
+    );
 
     event InitiateWhitelist(address indexed from);
     event InitiateVesting(address indexed from);
@@ -119,16 +117,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         _stakingPackage[365 days] = 8;
 
         /*
-         * 1.     Public Sale                   -
-         * 2.     Private Placement             -
+         * 1.     Public Sale                   - // Vesting
+         * 2.     Private Placement             - // Whitelist (no pattern percentage)
          * 3.     Private Sale                  - // Whitelist
          * 4.     Strategic Partner & Advisory  - // Whitelist
-         * 5.     Team                          -
-         * 6.     Marketing                     -
-         * 7.     CEX Listing                   -
-         * 8.     Staking Reward                -
-         * 9.     Liquidity Reserve             -
-         * 10.    DAO Project Launcher Pool     -
+         * 5.     Team                          - // Vesting
+         * 6.     Marketing                     - // Vesting
+         * 7.     CEX Listing                   - // Vesting
+         * 8.     Staking Reward                - // Vesting
+         * 9.     Liquidity Reserve             - // Vesting
+         * 10.    DAO Project Launcher Pool     - // Vesting
          */
 
         /* --------------------------------------------- TGE -------------------------------------------- */
@@ -143,24 +141,18 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         // _balances[address(this)] = 88846154 * 1e18;
         // _balances[timeLockController] = 88846154 * 1e18;
         // _balances[dao_pool] = 100961538 * 1e18;
-
-        /* ------------------------------------- Interfaces Contract ------------------------------------ */
-        S_contract = IStakable(stake_address);
-        PP_contract = IWhitelist(private_placement_address);
-        PS_contract = IWhitelist(private_sale_address);
-        SP_contract = IWhitelist(strategic_partner_address);
         /* ---------------------------------------------- - --------------------------------------------- */
 
         // Public Sale, CEX Listing - EOA Type Balance
         // Private Sale - Multilock.sol
         // Private Placement, Strategic Partner & Advisory, Team and Project Contributor, Marketing - Locked Wallet Type Balance
         // Staking Reward, Liquidity Reserve, DAO Project Pool - Smart Contract Balance
-        _totalSupply = _totalSupply.sub(
-            14114100 * 1e3 * 1e18,
-            "Insufficient Total Supply"
-        );
+        // _totalSupply = _totalSupply.sub(
+        //     14114100 * 1e3 * 1e18,
+        //     "Insufficient Total Supply"
+        // );
 
-        //Transfer Ownership to TimelockController address
+        // TODO: Transfer Ownership to Governance Contract address
     }
 
     /**
@@ -543,9 +535,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         emit TransferStakingReward(address(0), address(this), amount_);
     }
 
-    function startTransferDAOVoting() external onlyOwner {
+    function startTransferDAOVoting(address stake_contract) external onlyOwner {
         // TODO: moveable
-        S_contract.startVoting();
+        IStakable(stake_contract).startVoting();
     }
 
     function transferToDAOPool(uint256 amount_) external {
@@ -554,15 +546,19 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         daoProjectPool += amount_;
     }
 
-    function transferDAOPool(address to_, uint256 amount_) external onlyOwner {
+    function transferDAOPool(
+        address to_,
+        uint256 amount_,
+        address stake_contract
+    ) external onlyOwner {
         // TODO: removeable if address exist
-        bool result = S_contract.getVotingResult();
+        bool result = IStakable(stake_contract).getVotingResult();
 
         if (result == true) {
             daoProjectPool = daoProjectPool.sub(amount_);
             _balances[to_] = _balances[to_].add(amount_);
         }
-        S_contract.stopVoting();
+        IStakable(stake_contract).stopVoting();
 
         emit TransferDAOPool(address(this), to_, amount_);
     }
@@ -602,7 +598,11 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     /* ------------------------ Stake function with burn function ------------------------ */
-    function stake(uint256 _amount, uint256 _stakePeriod) external {
+    function stake(
+        uint256 _amount,
+        uint256 _stakePeriod,
+        address stake_contract
+    ) external {
         if (
             !(_stakePeriod == 90 days ||
                 _stakePeriod == 180 days ||
@@ -614,7 +614,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         // Burn the amount of tokens on the sender
         _burn(_msgSender(), _amount);
 
-        S_contract.stake(
+        IStakable(stake_contract).stake(
             msg.sender,
             _amount,
             _stakePeriod,
@@ -626,10 +626,9 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
-    function withdrawStake() external {
-        (uint256 amount_, uint256 reward_) = S_contract.withdrawStake(
-            msg.sender
-        );
+    function withdrawStake(address stake_contract) external {
+        (uint256 amount_, uint256 reward_) = IStakable(stake_contract)
+            .withdrawStake(msg.sender);
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
@@ -642,22 +641,30 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         );
     }
 
-    function claimAirdrop() external isInitialized {
+    function claimAirdrop(address stake_contract) external isInitialized {
         if (airdropStatus != true) {
             revert Airdrop__notStarted();
         }
-        uint256 airdrop = S_contract.claimAirdrop(_msgSender());
+        uint256 airdrop = IStakable(stake_contract).claimAirdrop(_msgSender());
         _balances[address(this)] = _balances[address(this)] - airdrop;
         _balances[_msgSender()] = _balances[_msgSender()] + airdrop;
     }
 
     /* ------------------------------------------- VESTING ------------------------------------------ */
-    function initiateVesting_Whitelist_Airdrop() external onlyOwner {
+    function initiateVesting_Whitelist_Airdrop(
+        address PP,
+        address PS,
+        address SP,
+        address stake
+    ) external onlyOwner {
         if (initializationStatus != false) {
             revert Init__nothingToInitialize();
         }
 
         initializationStatus = true;
+
+        // TODO: can be deployed at the same time using scripts
+
         // M_contract_1 = new VestingWallet(
         //     marketing_address_1,
         //     uint64(vesting_start),
@@ -691,13 +698,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         // );
         emit InitiateVesting(_msgSender());
 
-        // PP_contract.initiateWhitelist();
-        // PS_contract.initiateWhitelist();
-        // SP_contract.initiateWhitelist();
+        IWhitelist(PP).initiateWhitelist();
+        IWhitelist(PS).initiateWhitelist();
+        IWhitelist(SP).initiateWhitelist();
         emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;
-        S_contract.startAirdropSince();
+        IStakable(stake).startAirdropSince();
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
@@ -717,102 +724,37 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
      * ? Token needs to be transferred to the vesting wallet
      * ? When user want to claim the vesting, vesting wallet will transfer the token to the beneficiary address
      */
-    // TODO: Moveable
-    function add_PP_Beneficiaries(Beneficiary[] calldata benefs)
-        external
-        onlyOwner
-        isInitialized
-    {
+    // TODO: edit with address only
+    function addBeneficiaries(
+        address whitelist_contract,
+        Beneficiary[] calldata benefs
+    ) external onlyOwner isInitialized {
         _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            PP_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
+            IWhitelist(whitelist_contract).addBeneficiary(
+                benefs[i].user,
+                benefs[i].amount
+            );
         }
-        emit AddBeneficiary(msg.sender, benefs);
+        emit AddBeneficiaries(msg.sender, whitelist_contract, benefs);
     }
 
     // TODO: Moveable
-    function add_PS_Beneficiaries(Beneficiary[] calldata benefs)
-        external
-        onlyOwner
-        isInitialized
-    {
+    function deleteBeneficiaries(
+        address whitelist_contract,
+        address[] calldata benefs
+    ) external onlyOwner isInitialized {
         _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            PS_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
+            IWhitelist(whitelist_contract).deleteBeneficiary(benefs[i]);
         }
-        emit AddBeneficiary(msg.sender, benefs);
+        emit DeleteBeneficiaries(msg.sender, whitelist_contract, benefs);
     }
 
     // TODO: Moveable
-    function add_SP_Beneficiaries(Beneficiary[] calldata benefs)
-        external
-        onlyOwner
-        isInitialized
-    {
-        _checkBeneficiary(benefs.length);
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            SP_contract.addBeneficiary(benefs[i].user, benefs[i].amount);
-        }
-        emit AddBeneficiary(msg.sender, benefs);
-    }
-
-    // TODO: Moveable
-    function delete_PP_Beneficiaries(address[] calldata benefs)
-        external
-        onlyOwner
-        isInitialized
-    {
-        _checkBeneficiary(benefs.length);
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            PP_contract.deleteBeneficiary(benefs[i]);
-        }
-        emit DeleteBeneficiary(msg.sender, benefs);
-    }
-
-    // TODO: Moveable
-    function delete_PS_Beneficiaries(address[] calldata benefs)
-        external
-        onlyOwner
-        isInitialized
-    {
-        _checkBeneficiary(benefs.length);
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            PS_contract.deleteBeneficiary(benefs[i]);
-        }
-        emit DeleteBeneficiary(msg.sender, benefs);
-    }
-
-    // TODO: Moveable
-    function delete_SP_Beneficiaries(address[] calldata benefs)
-        external
-        onlyOwner
-        isInitialized
-    {
-        _checkBeneficiary(benefs.length);
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            SP_contract.deleteBeneficiary(benefs[i]);
-        }
-        emit DeleteBeneficiary(msg.sender, benefs);
-    }
-
-    // TODO: Moveable
-    function claim_PP() external isInitialized {
+    function claimWhitelist(address whitelist_contract) external isInitialized {
         _balances[_msgSender()] = _balances[_msgSender()].add(
-            PP_contract.releaseClaimable(_msgSender())
-        );
-    }
-
-    // TODO: Moveable
-    function claim_PS() external isInitialized {
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            PP_contract.releaseClaimable(_msgSender())
-        );
-    }
-
-    // TODO: Moveable
-    function claim_SP() external isInitialized {
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            SP_contract.releaseClaimable(_msgSender())
+            IWhitelist(whitelist_contract).releaseClaimable(_msgSender())
         );
     }
 }
