@@ -1,0 +1,163 @@
+{
+	"compiler": {
+		"version": "0.8.11+commit.d7f03943"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount_",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "beneficiary_",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [],
+				"name": "beneficiary",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "talax",
+						"type": "address"
+					}
+				],
+				"name": "changeTalaxAddress",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getOwner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "initiateLockedWallet",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[51]",
+						"name": "amount",
+						"type": "uint256[51]"
+					}
+				],
+				"name": "releaseClaimable",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "startLockedWallet",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"initiateLockedWallet()": {
+					"notice": "Initiate Locked Wallet"
+				},
+				"releaseClaimable(uint256[51])": {
+					"notice": "Transfers tokens held by timelock to beneficiary."
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/Lockedwallet.sol": "LockedWallet"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": true,
+			"runs": 1000
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/utils/math/SafeMath.sol": {
+			"keccak256": "0xa2f576be637946f767aa56601c26d717f48a0aff44f82e46f13807eea1009a21",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://973868f808e88e21a1a0a01d4839314515ee337ad096286c88e41b74dcc11fc2",
+				"dweb:/ipfs/QmfYuZxRfx2J2xdk4EXN7jKg4bUYEMTaYk9BAw9Bqn4o2Y"
+			]
+		},
+		"contracts/Interfaces.sol": {
+			"keccak256": "0x3e6787e58214b5af4af523a2a603f03dbdf4e397be411edd1ce47d792872ad03",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://3ceac46a908c7381881ed80661864bf9214de9b777f353a86b3d79f6d0dcf537",
+				"dweb:/ipfs/QmewThGMZUjU2i4LkFmqMD8zFt8QtMJpV7nCn59opjZ48B"
+			]
+		},
+		"contracts/Lockedwallet.sol": {
+			"keccak256": "0x48b42e24077d9726bc4b8d4295d54e4d2c816501a21e14d0a4a970b2ce581b57",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://cd28cca75ec0da67e75c778bd3e864d340895ed91698df121839c51b020ce3ab",
+				"dweb:/ipfs/QmXg6AiUUwWZkXeqFaQchCvHq43XEeVJH1GFwH1KYYi9i5"
+			]
+		}
+	},
+	"version": 1
+}

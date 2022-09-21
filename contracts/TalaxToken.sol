@@ -3,27 +3,34 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "./governance/ERC20Votes.sol";
 
 import "./Data.sol";
-import "./Stakable.sol";
-import "./Lockable.sol";
-import "./Multilockable.sol";
+import "./Interfaces.sol";
+import "./VestingWallet.sol";
 
-contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
-    using SafeMath for uint256;
+/**
+ * @notice Custom error
+ */
+error Airdrop__notStarted();
+error Init__nothingToInitialize();
+error Init__notInitialized();
+error Staking__optionNotExist();
+error Tax__maxFivePercent();
+error Ownable__notWalletOwner();
+error Transfer__failedToSendEther();
 
+contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
 
-    string private _name;
-    string private _symbol;
-
+    /* ------------------------------------- Additional Settings ------------------------------------ */
     mapping(uint256 => uint256) internal _stakingPackage;
     uint256 public stakingReward;
     uint256 public daoProjectPool;
@@ -32,154 +39,52 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     bool public airdropStatus;
     bool public initializationStatus;
 
+    uint256 public vesting_start;
     /* ------------------------------------------ Addresses ----------------------------------------- */
+    // ! Changeable address by owner
+    address public governance_address;
 
-    // Later moved to Data.sol
-    address private cex_listing_address;
+    /*
+     * Notes
+     * S     = Staking
+     * PP    = Private Placement
+     * PS    = Private Sale
+     * M     = Marketing
+     * SP    = Strategic Partner
+     * TPC   = Team and Project Coordinator
+     */
 
-    // Changeable address by owner
-    address public timelockController;
-    address public private_placement_address;
-    address public strategic_partner_address_1;
-    address public strategic_partner_address_2;
-    address public strategic_partner_address_3;
+    VestingWallet public M_contract_1;
+    VestingWallet public M_contract_2;
+    VestingWallet public M_contract_3;
+    VestingWallet public TPC_contract_1;
+    VestingWallet public TPC_contract_2;
+    VestingWallet public TPC_contract_3;
 
-    /* ------------------------------------------ Lockable ------------------------------------------ */
-
-    Lockable internal privatePlacementLockedWallet;
-    Lockable internal marketingLockedWallet_1;
-    Lockable internal marketingLockedWallet_2;
-    Lockable internal marketingLockedWallet_3;
-    Lockable internal strategicPartnerLockedWallet_1;
-    Lockable internal strategicPartnerLockedWallet_2;
-    Lockable internal strategicPartnerLockedWallet_3;
-    Lockable internal teamAndProjectCoordinatorLockedWallet_1;
-    Lockable internal teamAndProjectCoordinatorLockedWallet_2;
-    Lockable internal teamAndProjectCoordinatorLockedWallet_3;
-
-    struct Beneficiary {
-        address user;
-        uint256 amount;
-    }
-
-    constructor() ERC20("TALAXEUM", "TALAX") {
-        _totalSupply = 21 * 1e9 * 1e18;
-        _name = "TALAXEUM";
-        _symbol = "TALAX";
-
-        // later divided by 100 to make percentage
-        taxFee = 1;
-
-        // Staking APY in percentage
-        _stakingPackage[90 days] = 6;
-        _stakingPackage[180 days] = 7;
-        _stakingPackage[360 days] = 8;
-
-        private_placement_address = 0x07A20dc6722563783e44BA8EDCA08c774621125E;
-        strategic_partner_address_1 = 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
-        strategic_partner_address_2 = 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
-        strategic_partner_address_3 = 0xAeB26fB84d0E2b3B353Cd50f0A29FD40C916d2Ab;
-
-        // Public Sale
-        _balances[public_sale_address] = 396900 * 1e3 * 1e18;
-        // CEX Listing
-        _balances[cex_listing_address] = 1050000 * 1e3 * 1e18;
-
-        // Private Sale (MultiLockable.sol)
-        // Staking Reward (stored inside this contract)
-        stakingReward = 2685900 * 1e3 * 1e18;
-        // DAO Project Pool
-        daoProjectPool = 4200000 * 1e3 * 1e18;
-        // Liquitidity Reserve (This Contract)
-        _balances[address(this)] = 4200000 * 1e3 * 1e18;
-
-        /* ---------------------------------------- Locked Wallet --------------------------------------- */
-        privatePlacementLockedWallet = new Lockable(
-            699300 * 1e3 * 1e18,
-            private_placement_address
-        );
-
-        marketingLockedWallet_1 = new Lockable(
-            700000 * 1e3 * 1e18,
-            marketing_address_1
-        );
-        marketingLockedWallet_2 = new Lockable(
-            700000 * 1e3 * 1e18,
-            marketing_address_2
-        );
-        marketingLockedWallet_3 = new Lockable(
-            700000 * 1e3 * 1e18,
-            marketing_address_3
-        );
-
-        strategicPartnerLockedWallet_1 = new Lockable(
-            700000 * 1e3 * 1e18,
-            strategic_partner_address_1
-        );
-        strategicPartnerLockedWallet_2 = new Lockable(
-            700000 * 1e3 * 1e18,
-            strategic_partner_address_2
-        );
-        strategicPartnerLockedWallet_3 = new Lockable(
-            700000 * 1e3 * 1e18,
-            strategic_partner_address_3
-        );
-
-        teamAndProjectCoordinatorLockedWallet_1 = new Lockable(
-            700000 * 1e3 * 1e18,
-            team_and_project_coordinator_address_1
-        );
-        teamAndProjectCoordinatorLockedWallet_2 = new Lockable(
-            700000 * 1e3 * 1e18,
-            team_and_project_coordinator_address_2
-        );
-        teamAndProjectCoordinatorLockedWallet_3 = new Lockable(
-            700000 * 1e3 * 1e18,
-            team_and_project_coordinator_address_3
-        );
-
-        // Public Sale, CEX Listing - EOA Type Balance
-        // Private Sale - Multilock.sol
-        // Private Placement, Strategic Partner & Advisory, Team and Project Contributor, Marketing - Locked Wallet Type Balance
-        // Staking Reward, Liquidity Reserve, DAO Project Pool - Smart Contract Balance
-        _totalSupply = _totalSupply.sub(
-            14114100 * 1e3 * 1e18,
-            "Insufficient Total Supply"
-        );
-    }
-
-    fallback() external payable {
-        // Add any ethers send to this address to team and project coordinators addresses
-        _addThirdOfValue(msg.value);
-    }
-
-    receive() external payable {
-        _addThirdOfValue(msg.value);
-    }
-
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                             EVENTS                                             */
-    /* ---------------------------------------------------------------------------------------------- */
-
+    /* ------------------------------------------- EVENTS ------------------------------------------- */
     event ChangeTax(address indexed who, uint256 amount);
     event ChangeAirdropStatus(address indexed who, bool status);
-    event ChangePenaltyFee(address indexed from, uint256 amount);
-    event ChangeAirdropPercentage(address indexed from, uint256 amount);
-
-    event ChangePrivatePlacementAddress(address indexed to);
 
     event ChangeStrategicPartnerAddress(
-        address indexed from,
+        address from,
         address indexed to1,
         address indexed to2,
         address indexed to3
     );
 
-    event AddPrivateSale(address indexed from, Beneficiary[] beneficiary);
-    event DeletePrivateSale(address indexed from, address[] beneficiary);
+    event AddBeneficiaries(
+        address indexed from,
+        address indexed whitelist_contract,
+        Beneficiary[] beneficiary
+    );
+    event DeleteBeneficiaries(
+        address indexed from,
+        address indexed whitelist_contract,
+        address[] beneficiary
+    );
 
-    event InitiatePrivateSale(address indexed from);
-    event InitiateLockedWallet(address indexed from);
+    event InitiateWhitelist(address indexed from);
+    event InitiateVesting(address indexed from);
 
     event TransferStakingReward(
         address indexed from,
@@ -193,94 +98,54 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         uint256 amount
     );
 
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                            MODIFIERS                                           */
-    /* ---------------------------------------------------------------------------------------------- */
-    function _isInitializationStarted() internal view {
-        require(initializationStatus == true, "Not yet started");
-    }
+    constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
+        _totalSupply = 21 * 1e9 * 1e18;
 
-    modifier isInitialize() {
-        _isInitializationStarted();
-        _;
-    }
+        // later divided by 100 to make percentage
+        taxFee = 1;
 
-    function _onlyWalletOwner(address walletOwner) internal view {
-        require(_msgSender() == walletOwner, "Wallet owner only");
-    }
+        // Staking APY in percentage
+        _stakingPackage[90 days] = 6;
+        _stakingPackage[180 days] = 7;
+        _stakingPackage[365 days] = 8;
 
-    modifier onlyWalletOwner(address walletOwner) {
-        _onlyWalletOwner(walletOwner);
-        _;
-    }
+        /*
+         * 1.     Public Sale                   - // Vesting
+         * 2.     Private Placement             - // Whitelist (no pattern percentage)
+         * 3.     Private Sale                  - // Whitelist
+         * 4.     Strategic Partner & Advisory  - // Whitelist
+         * 5.     Team                          - // Vesting
+         * 6.     Marketing                     - // Vesting
+         * 7.     CEX Listing                   - // Vesting
+         * 8.     Staking Reward                - // Vesting
+         * 9.     Liquidity Reserve             - // Vesting
+         * 10.    DAO Project Launcher Pool     - // Vesting
+         */
 
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                       INTERNAL FUNCTIONS                                       */
-    /* ---------------------------------------------------------------------------------------------- */
+        /* --------------------------------------------- TGE -------------------------------------------- */
+        // _balances[public_sale_address] = 193200 * 1e3 * 1e18;
+        // _balances[marketing_address_1] = 14000 * 1e3 * 1e18;
+        // _balances[marketing_address_2] = 14000 * 1e3 * 1e18;
+        // _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
+        // _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
+        // _balances[staking_reward] = 56538462 * 1e18;
+        _balances[msg.sender] = 10000 * 1e18; // for testing and staging
+        // _balances[address(this)] = 10000 * 1e18; // for testing and staging
+        // _balances[address(this)] = 88846154 * 1e18;
+        // _balances[timeLockController] = 88846154 * 1e18;
+        // _balances[dao_pool] = 100961538 * 1e18;
+        /* ---------------------------------------------- - --------------------------------------------- */
 
-    /**
-     * @dev Moves tokens `amount` from `sender` to `recipient`.
-     *
-     * This is internal function is equivalent to {transfer}, and can be used to
-     * e.g. implement automatic token fees, slashing mechanisms, etc.
-     *
-     * Emits a {Transfer} event.
-     *
-     * Requirements:
-     *
-     * - `sender` cannot be the zero address.
-     * - `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     */
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override {
-        require(from != address(0), "Transfer from zero address");
-        require(to != address(0), "Transfer to zero address");
+        // Public Sale, CEX Listing - EOA Type Balance
+        // Private Sale - Multilock.sol
+        // Private Placement, Strategic Partner & Advisory, Team and Project Contributor, Marketing - Locked Wallet Type Balance
+        // Staking Reward, Liquidity Reserve, DAO Project Pool - Smart Contract Balance
+        // _totalSupply = _totalSupply.sub(
+        //     14114100 * 1e3 * 1e18,
+        //     "Insufficient Total Supply"
+        // );
 
-        _beforeTokenTransfer(from, to, amount);
-
-        uint256 fromBalance = _balances[from];
-        require(
-            fromBalance >= amount,
-            "ERC20: transfer amount exceeds balance"
-        );
-        unchecked {
-            _balances[from] = fromBalance - amount;
-        }
-
-        uint256 tax = SafeMath.div(SafeMath.mul(amount, taxFee), 100);
-        uint256 taxedAmount = SafeMath.sub(amount, tax);
-
-        uint256 teamFee = SafeMath.div(SafeMath.mul(taxedAmount, 2), 10);
-        uint256 liquidityFee = SafeMath.div(SafeMath.mul(taxedAmount, 8), 10);
-
-        _addThirdOfValue(teamFee);
-        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
-
-        _balances[to] = _balances[to].add(taxedAmount);
-        emit Transfer(from, to, taxedAmount);
-    }
-
-    /**
-     * @notice ERC20 FUNCTIONS
-     */
-
-    /**
-     * @dev Returns the name of the token.
-     */
-    function name() public view override returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() public view override returns (string memory) {
-        return _symbol;
+        // TODO: Transfer Ownership to Governance Contract address
     }
 
     /**
@@ -428,8 +293,65 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         return true;
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
+    /**
+     * @dev Moves tokens `amount` from `sender` to `recipient`.
+     *
+     * This is internal function is equivalent to {transfer}, and can be used to
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+     *
+     * Emits a {Transfer} event.
+     *
+     * Requirements:
+     *
+     * - `sender` cannot be the zero address.
+     * - `recipient` cannot be the zero address.
+     * - `sender` must have a balance of at least `amount`.
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        require(from != address(0), "Transfer from zero address");
+        require(to != address(0), "Transfer to zero address");
+
+        _beforeTokenTransfer(from, to, amount);
+
+        uint256 fromBalance = _balances[from];
+        require(
+            fromBalance >= amount,
+            "ERC20: transfer amount exceeds balance"
+        );
+        unchecked {
+            _balances[from] = fromBalance - amount;
+        }
+
+        uint256 tax = (amount * taxFee) / 100;
+        uint256 taxedAmount = amount - tax;
+
+        uint256 teamFee = (taxedAmount * 2) / 10;
+        uint256 liquidityFee = (taxedAmount * 8) / 10;
+
+        _addThirdOfValue(teamFee);
+        _balances[address(this)] = _balances[address(this)] + liquidityFee;
+
+        _balances[to] = _balances[to] + taxedAmount;
+        emit Transfer(from, to, taxedAmount);
+    }
+
+    function _mint(address account, uint256 amount)
+        internal
+        override(ERC20, ERC20Votes)
+    {
+        require(account != address(0), "ERC20: mint to the zero address");
+
+        _beforeTokenTransfer(address(0), account, amount);
+
+        _totalSupply += amount;
+        _balances[account] += amount;
+        emit Transfer(address(0), account, amount);
+
+        _afterTokenTransfer(address(0), account, amount);
     }
 
     /**
@@ -443,7 +365,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
      * - `account` cannot be the zero address.
      * - `account` must have at least `amount` tokens.
      */
-    function _burn(address account, uint256 amount) internal override {
+    function _burn(address account, uint256 amount)
+        internal
+        override(ERC20, ERC20Votes)
+    {
         require(account != address(0), "ERC20: burn from the zero address");
 
         _beforeTokenTransfer(account, address(0), amount);
@@ -508,125 +433,181 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         }
     }
 
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
+        super._afterTokenTransfer(from, to, amount);
+    }
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+
+    /* ---------------------------------------------------------------------------------------------- */
+    /*                                     END OF TOKEN FUNCTIONS                                     */
+    /* ---------------------------------------------------------------------------------------------- */
+
+    fallback() external payable {}
+
+    receive() external payable {}
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function withdrawFunds() external onlyOwner {
+        uint256 thirdOfValue = address(this).balance / 3;
+
+        (bool sent, bytes memory data) = team_and_project_coordinator_address_1
+            .call{value: thirdOfValue}("");
+
+        (
+            bool sent1,
+            bytes memory data1
+        ) = team_and_project_coordinator_address_2.call{value: thirdOfValue}(
+                ""
+            );
+
+        (
+            bool sent2,
+            bytes memory data2
+        ) = team_and_project_coordinator_address_3.call{value: thirdOfValue}(
+                ""
+            );
+
+        if (sent && sent1 && sent2 == true) {
+            revert Transfer__failedToSendEther();
+        }
+    }
+
+    /* ------------------------------------------ MODIFIERS ----------------------------------------- */
+    function _isInitializationStarted() internal view {
+        if (initializationStatus != true) {
+            revert Init__notInitialized();
+        }
+    }
+
+    modifier isInitialized() {
+        _isInitializationStarted();
+        _;
+    }
+
+    function _onlyWalletOwner(address walletOwner) internal view {
+        if (_msgSender() != walletOwner) {
+            revert Ownable__notWalletOwner();
+        }
+    }
+
+    modifier onlyWalletOwner(address walletOwner) {
+        _onlyWalletOwner(walletOwner);
+        _;
+    }
+
+    /* --------------------------------------- ADDED FUNCTIONS -------------------------------------- */
+
     function _addThirdOfValue(uint256 amount_) internal {
-        uint256 thirdOfValue = SafeMath.div(amount_, 3);
-        _balances[team_and_project_coordinator_address_1] = _balances[
-            team_and_project_coordinator_address_1
-        ].add(thirdOfValue);
+        uint256 thirdOfValue = amount_ / 3;
+        _balances[team_and_project_coordinator_address_1] =
+            _balances[team_and_project_coordinator_address_1] +
+            thirdOfValue;
 
-        _balances[team_and_project_coordinator_address_2] = _balances[
-            team_and_project_coordinator_address_2
-        ].add(thirdOfValue);
+        _balances[team_and_project_coordinator_address_2] =
+            _balances[team_and_project_coordinator_address_2] +
+            thirdOfValue;
 
-        _balances[team_and_project_coordinator_address_3] = _balances[
-            team_and_project_coordinator_address_3
-        ].add(thirdOfValue);
+        _balances[team_and_project_coordinator_address_3] =
+            _balances[team_and_project_coordinator_address_3] +
+            thirdOfValue;
     }
 
     function _mintStakingReward(uint256 amount_) internal {
-        stakingReward = stakingReward.add(amount_);
-        _totalSupply = _totalSupply.add(amount_);
+        stakingReward = stakingReward + amount_;
+        _totalSupply = _totalSupply + amount_;
         emit TransferStakingReward(address(0), address(this), amount_);
     }
 
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                       External Functions                                       */
-    /* ---------------------------------------------------------------------------------------------- */
-
-    function startTransferDAOVoting() external onlyOwner {
-        _startVoting();
+    function startTransferDAOVoting(address stake_contract) external onlyOwner {
+        // TODO: moveable
+        IStakable(stake_contract).startVoting();
     }
 
     function transferToDAOPool(uint256 amount_) external {
-        _balances[msg.sender] = _balances[msg.sender].sub(amount_);
+        // TODO: removable if address exist
+        _balances[msg.sender] = _balances[msg.sender] - amount_;
         daoProjectPool += amount_;
     }
 
-    function transferDAOPool(address to_, uint256 amount_) external onlyOwner {
-        bool result = _getVotingResult();
+    function transferDAOPool(
+        address to_,
+        uint256 amount_,
+        address stake_contract
+    ) external onlyOwner {
+        // TODO: removable if address exist
+        bool result = IStakable(stake_contract).getVotingResult();
 
         if (result == true) {
-            daoProjectPool = daoProjectPool.sub(amount_);
-            _balances[to_] = _balances[to_].add(amount_);
+            daoProjectPool = daoProjectPool - amount_;
+            _balances[to_] = _balances[to_] + amount_;
         }
-        _stopVoting();
+        IStakable(stake_contract).stopVoting();
 
         emit TransferDAOPool(address(this), to_, amount_);
     }
 
-    function changePrivatePlacementAddress(address _input) external onlyOwner {
-        private_placement_address = _input;
-        emit ChangePrivatePlacementAddress(_input);
-    }
-
-    function changeStrategicPartnerAddress(
-        address address1,
-        address address2,
-        address address3
-    ) external onlyOwner {
-        strategic_partner_address_1 = address1;
-        strategic_partner_address_2 = address2;
-        strategic_partner_address_3 = address3;
-        emit ChangeStrategicPartnerAddress(
-            msg.sender,
-            address1,
-            address2,
-            address3
-        );
-    }
-
     function mintStakingReward(uint256 amount_) public onlyOwner {
+        // TODO: removable if address exist
         _mintStakingReward(amount_);
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
-        _balances[address(this)] = _balances[address(this)].add(amount_);
-        _totalSupply = _totalSupply.add(amount_);
+        // TODO: removable if address exist
+        _balances[address(this)] = _balances[address(this)] + amount_;
+        _totalSupply = _totalSupply + amount_;
         emit Transfer(address(0), address(this), amount_);
     }
 
     function burnStakingReward(uint256 amount_) external onlyOwner {
-        stakingReward = stakingReward.sub(amount_);
-        _totalSupply = _totalSupply.sub(amount_);
+        // TODO: removable if address exist
+        stakingReward = stakingReward - amount_;
+        _totalSupply = _totalSupply - amount_;
         emit TransferStakingReward(address(this), address(0), amount_);
     }
 
     function burnLiquidityReserve(uint256 amount_) external onlyOwner {
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
-        _totalSupply = _totalSupply.sub(amount_);
+        // TODO: removable if address exist
+        _balances[address(this)] = _balances[address(this)] - amount_;
+        _totalSupply = _totalSupply - amount_;
         emit Transfer(address(this), address(0), amount_);
     }
 
     function changeTaxFee(uint8 taxFee_) external onlyOwner {
-        require(taxFee_ < 5, "Tax Fee maximum is 5%");
+        if (taxFee_ > 5) {
+            revert Tax__maxFivePercent();
+        }
         taxFee = taxFee_;
         emit ChangeTax(_msgSender(), taxFee_);
     }
 
-    function changePenaltyFee(uint256 penaltyFee_) external onlyOwner {
-        _changePenaltyFee(penaltyFee_);
-        emit ChangePenaltyFee(_msgSender(), penaltyFee_);
-    }
-
-    function changeAirdropPercentage(uint256 airdrop_) external onlyOwner {
-        _changeAirdropPercentage(airdrop_);
-        emit ChangeAirdropPercentage(_msgSender(), airdrop_);
-    }
-
     /* ------------------------ Stake function with burn function ------------------------ */
-    function stake(uint256 _amount, uint256 _stakePeriod) external {
-        // Make sure staker actually is good for it
-        require(
-            _stakePeriod == 90 days ||
+    function stake(
+        uint256 _amount,
+        uint256 _stakePeriod,
+        address stake_contract
+    ) external {
+        if (
+            !(_stakePeriod == 90 days ||
                 _stakePeriod == 180 days ||
-                _stakePeriod == 365 days,
-            "Staking option doesnt exist"
-        );
+                _stakePeriod == 365 days)
+        ) {
+            revert Staking__optionNotExist();
+        }
 
         // Burn the amount of tokens on the sender
         _burn(_msgSender(), _amount);
 
-        _stake(
+        IStakable(stake_contract).stake(
             msg.sender,
             _amount,
             _stakePeriod,
@@ -634,194 +615,91 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
 
         // Stake amount goes to liquidity reserve
-        _balances[address(this)] = _balances[address(this)].add(_amount);
+        _balances[address(this)] = _balances[address(this)] + _amount;
     }
 
     /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
-    function withdrawStake() external {
-        (uint256 amount_, uint256 reward_) = _withdrawStake(msg.sender);
+    function withdrawStake(address stake_contract) external {
+        (uint256 amount_, uint256 reward_) = IStakable(stake_contract)
+            .withdrawStake(msg.sender);
         // Return staked tokens to user
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintStakingReward(reward_);
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
-        stakingReward = stakingReward.sub(reward_);
-        _totalSupply = _totalSupply.add(amount_);
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            amount_ + reward_
-        );
+        _mintStakingReward(reward_);
+        _balances[address(this)] = _balances[address(this)] - amount_;
+        stakingReward = stakingReward - reward_;
+        _totalSupply = _totalSupply + amount_;
+        _balances[_msgSender()] = _balances[_msgSender()] + amount_ + reward_;
     }
 
-    function claimAirdrop() external isInitialize {
-        require(airdropStatus == true, "Airdrop not yet started");
-        uint256 airdrop = _claimAirdrop(_msgSender());
-        _balances[address(this)] = _balances[address(this)].sub(airdrop);
-        _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
+    function claimAirdrop(address stake_contract) external isInitialized {
+        if (airdropStatus != true) {
+            revert Airdrop__notStarted();
+        }
+        uint256 airdrop = IStakable(stake_contract).claimAirdrop(_msgSender());
+        _balances[address(this)] = _balances[address(this)] - airdrop;
+        _balances[_msgSender()] = _balances[_msgSender()] + airdrop;
     }
 
-    /* -------------------------------------------------------------------------- */
-    /*                                Locked Wallet                               */
-    /* -------------------------------------------------------------------------- */
-    function initiateLockedWallet_PrivateSale_Airdrop() external onlyOwner {
-        require(initializationStatus == false, "Nothing to initialize");
+    /* ------------------------------------------- VESTING ------------------------------------------ */
+    function initiateVesting_Whitelist_Airdrop(
+        address PP,
+        address PS,
+        address SP,
+        address stake_contract
+    ) external onlyOwner {
+        if (initializationStatus != false) {
+            revert Init__nothingToInitialize();
+        }
 
         initializationStatus = true;
-        privatePlacementLockedWallet.initiateLockedWallet();
-        marketingLockedWallet_1.initiateLockedWallet();
-        marketingLockedWallet_2.initiateLockedWallet();
-        marketingLockedWallet_3.initiateLockedWallet();
-        strategicPartnerLockedWallet_1.initiateLockedWallet();
-        strategicPartnerLockedWallet_2.initiateLockedWallet();
-        strategicPartnerLockedWallet_3.initiateLockedWallet();
-        teamAndProjectCoordinatorLockedWallet_1.initiateLockedWallet();
-        teamAndProjectCoordinatorLockedWallet_2.initiateLockedWallet();
-        teamAndProjectCoordinatorLockedWallet_3.initiateLockedWallet();
-        emit InitiateLockedWallet(_msgSender());
 
-        _initiatePrivateSale();
-        emit InitiatePrivateSale(_msgSender());
+        // TODO: can be deployed at the same time using scripts
+
+        // M_contract_1 = new VestingWallet(
+        //     marketing_address_1,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
+        // M_contract_2 = new VestingWallet(
+        //     marketing_address_2,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
+        // M_contract_3 = new VestingWallet(
+        //     marketing_address_3,
+        //     uint64(vesting_start),
+        //     35 * 30 days
+        // );
+
+        // TPC_contract_1 = new VestingWallet(
+        //     team_and_project_coordinator_address_1,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
+        // TPC_contract_2 = new VestingWallet(
+        //     team_and_project_coordinator_address_2,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
+        // TPC_contract_3 = new VestingWallet(
+        //     team_and_project_coordinator_address_3,
+        //     uint64(vesting_start) + (11 * 30 days),
+        //     36 * 30 days
+        // );
+        emit InitiateVesting(_msgSender());
+
+        IWhitelist(PP).initiateWhitelist();
+        IWhitelist(PS).initiateWhitelist();
+        IWhitelist(SP).initiateWhitelist();
+        emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;
-        _startAirdropSince();
+        IStakable(stake_contract).startAirdropSince();
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
-    /* -------------------------------------- Private Placement ------------------------------------- */
-    function unlockPrivatePlacementWallet()
-        external
-        isInitialize
-        onlyWalletOwner(privatePlacementLockedWallet.beneficiary())
-    {
-        uint256 timeLockedAmount = privatePlacementLockedWallet
-            .releaseClaimable(privatePlacementReleaseAmount());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /* ------------------------------------------ Marketing ----------------------------------------- */
-    function unlockMarketingWallet_1()
-        external
-        isInitialize
-        onlyWalletOwner(marketingLockedWallet_1.beneficiary())
-    {
-        uint256 timeLockedAmount = marketingLockedWallet_1.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockMarketingWallet_2()
-        external
-        isInitialize
-        onlyWalletOwner(marketingLockedWallet_2.beneficiary())
-    {
-        uint256 timeLockedAmount = marketingLockedWallet_2.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockMarketingWallet_3()
-        external
-        isInitialize
-        onlyWalletOwner(marketingLockedWallet_3.beneficiary())
-    {
-        uint256 timeLockedAmount = marketingLockedWallet_3.releaseClaimable(
-            marketingReleaseAmount()
-        );
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /* -------------------------------------- Strategic Partner ------------------------------------- */
-    function unlockStrategicPartnerWallet_1()
-        external
-        isInitialize
-        onlyWalletOwner(strategicPartnerLockedWallet_1.beneficiary())
-    {
-        uint256 timeLockedAmount = strategicPartnerLockedWallet_1
-            .releaseClaimable(strategicPartnerReleaseAmount());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockStrategicPartnerWallet_2()
-        external
-        isInitialize
-        onlyWalletOwner(strategicPartnerLockedWallet_2.beneficiary())
-    {
-        uint256 timeLockedAmount = strategicPartnerLockedWallet_2
-            .releaseClaimable(strategicPartnerReleaseAmount());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockStrategicPartnerWallet_3()
-        external
-        isInitialize
-        onlyWalletOwner(strategicPartnerLockedWallet_3.beneficiary())
-    {
-        uint256 timeLockedAmount = strategicPartnerLockedWallet_3
-            .releaseClaimable(strategicPartnerReleaseAmount());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /* -------------------------------- Team and Project Coordinator -------------------------------- */
-    function unlockTeamAndProjectCoordinatorWallet_1()
-        external
-        isInitialize
-        onlyWalletOwner(teamAndProjectCoordinatorLockedWallet_1.beneficiary())
-    {
-        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_1
-            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockTeamAndProjectCoordinatorWallet_2()
-        external
-        isInitialize
-        onlyWalletOwner(teamAndProjectCoordinatorLockedWallet_2.beneficiary())
-    {
-        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_2
-            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    function unlockTeamAndProjectCoordinatorWallet_3()
-        external
-        isInitialize
-        onlyWalletOwner(teamAndProjectCoordinatorLockedWallet_3.beneficiary())
-    {
-        uint256 timeLockedAmount = teamAndProjectCoordinatorLockedWallet_3
-            .releaseClaimable(teamAndProjectCoordinatorReleaseAmount());
-
-        _balances[_msgSender()] = _balances[_msgSender()].add(timeLockedAmount);
-    }
-
-    /* -------------------------------------------------------------------------- */
-    /*                                Private Sale                                */
-    /* -------------------------------------------------------------------------- */
-
-    // function addBeneficiary(address user, uint256 amount) external onlyOwner {
-    //     require(privateSaleStatus == true, "Private Sale not yet started");
-    //     require(amount > 0, "Cannot add beneficiary with 0 amount");
-    //     privateSale -= amount;
-    //     _addBeneficiary(user, amount);
-    //     emit AddPrivateSale(msg.sender, user, amount);
-    // }
-
-    function _checkBeneficiaryAmount(uint256 amount)
-        internal
-        view
-        isInitialize
-    {
-        require(amount != 0, "Amount cannot be zero");
-    }
+    /* ------------------------------------------ WHITELIST ----------------------------------------- */
 
     function unsafeInc(uint256 x) internal pure returns (uint256) {
         unchecked {
@@ -829,41 +707,45 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         }
     }
 
-    function addMultipleBeneficiary(Beneficiary[] calldata benefs)
-        external
-        onlyOwner
-        isInitialize
-    {
-        require(benefs.length > 0, "Nothing to add");
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            _checkBeneficiaryAmount(benefs[i].amount);
-            _addBeneficiary(benefs[i].user, benefs[i].amount);
-        }
-        emit AddPrivateSale(msg.sender, benefs);
+    function _checkBeneficiary(uint256 len) internal pure {
+        require(len > 0, "Input can't empty");
     }
 
-    // function deleteBeneficiary(address user) external onlyOwner {
-    //     require(privateSaleStatus == true, "Private Sale not yet started");
-    //     uint256 amount = _deleteBeneficiary(user);
-    //     privateSale += amount;
-    //     emit DeletePrivateSale(msg.sender, user);
-    // }
-
-    function deleteMultipleBeneficiary(address[] calldata benefs)
-        external
-        onlyOwner
-        isInitialize
-    {
-        require(benefs.length > 0, "Nothing to delete");
+    /**
+     * ? Token needs to be transferred to the vesting wallet
+     * ? When user want to claim the vesting, vesting wallet will transfer the token to the beneficiary address
+     */
+    // TODO: edit with address only
+    function addBeneficiaries(
+        address whitelist_contract,
+        Beneficiary[] calldata benefs
+    ) external onlyOwner isInitialized {
+        _checkBeneficiary(benefs.length);
         for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            _deleteBeneficiary(benefs[i]);
+            IWhitelist(whitelist_contract).addBeneficiary(
+                benefs[i].user,
+                benefs[i].amount
+            );
         }
-        emit DeletePrivateSale(msg.sender, benefs);
+        emit AddBeneficiaries(msg.sender, whitelist_contract, benefs);
     }
 
-    function claimPrivateSale() external isInitialize {
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            _releaseClaimable(_msgSender())
-        );
+    // TODO: Moveable
+    function deleteBeneficiaries(
+        address whitelist_contract,
+        address[] calldata benefs
+    ) external onlyOwner isInitialized {
+        _checkBeneficiary(benefs.length);
+        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
+            IWhitelist(whitelist_contract).deleteBeneficiary(benefs[i]);
+        }
+        emit DeleteBeneficiaries(msg.sender, whitelist_contract, benefs);
+    }
+
+    // TODO: Moveable
+    function claimWhitelist(address whitelist_contract) external isInitialized {
+        _balances[_msgSender()] =
+            _balances[_msgSender()] +
+            IWhitelist(whitelist_contract).releaseClaimable(_msgSender());
     }
 }

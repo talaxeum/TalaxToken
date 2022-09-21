@@ -21,8 +21,6 @@
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 require("dotenv").config();
 
-const mnemonic = process.env.MNEMONIC;
-
 module.exports = {
     /**
      * Networks define how you connect to your ethereum client and let you set the
@@ -43,17 +41,20 @@ module.exports = {
         //
         development: {
             host: "127.0.0.1", // Localhost (default: none)
-            port: 7545, // Standard BSC port (default: none)
+            port: 8545, // Standard BSC port (default: none)
             network_id: "*", // Any network (default: none)
         },
         rinkeby: {
             provider: function () {
-                return new HDWalletProvider(process.env.MNEMONIC, process.env.INFURA_ENDPOINT);
+                return new HDWalletProvider(
+                    process.env.MNEMONIC,
+                    process.env.INFURA_ENDPOINT
+                );
             },
             network_id: 4,
             gas: 4500000,
             gasPrice: 10000000000,
-        }
+        },
         // testnet: {
         // 	provider: () =>
         // 		new HDWalletProvider(
@@ -106,6 +107,14 @@ module.exports = {
     // Set default mocha options here, use special reporters etc.
     mocha: {
         // timeout: 100000
+        reporter: "eth-gas-reporter",
+        reporterOptions: {
+            currency: "IDR",
+            // token: "BNB",
+            // gasPriceApi:
+            //     "https://api.bscscan.com/api?module=proxy&action=eth_gasPrice",
+            forceConsoleOutput: true,
+        },
     },
 
     // Configure your compilers
@@ -127,8 +136,8 @@ module.exports = {
 
     plugins: ["truffle-contract-size", "truffle-plugin-verify"],
     api_keys: {
-        etherscan: process.env.RINKEBY_API
-    }
+        etherscan: process.env.RINKEBY_API,
+    },
 
     // Truffle DB is currently disabled by default; to enable it, change enabled:
     // false to enabled: true. The default storage location can also be
