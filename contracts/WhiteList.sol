@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./Interfaces.sol";
 
 /**
@@ -15,7 +14,6 @@ error Function__notAuthorized();
 error MainFunction__insufficientBalance();
 
 contract Whitelist {
-    using SafeMath for uint256;
     uint256 public privateSaleUsers;
 
     uint256 public privateSaleAmount;
@@ -101,39 +99,32 @@ contract Whitelist {
         //Phase 1 of locked wallet release - monthly
         if (lockDuration < 16 * 30) {
             if (_beneficiary[user].isPhase1Claimed == false) {
-                claimable = claimable.add(
-                    SafeMath.div(
-                        SafeMath.mul(_phase1, _beneficiary[user].lockedAmount),
-                        privateSaleAmount
-                    )
-                );
                 _beneficiary[user].isPhase1Claimed = true;
                 _beneficiary[user].latestClaimDay = 15 * 30;
+                claimable =
+                    claimable +
+                    ((_phase1 * _beneficiary[user].lockedAmount) /
+                        privateSaleAmount);
             }
         }
         //Phase 2 of locked wallet release - daily
         else if (lockDuration >= 16 * 30 && lockDuration < 28 * 30) {
             if (_beneficiary[user].isPhase1Claimed == false) {
-                claimable = claimable.add(
-                    SafeMath.div(
-                        SafeMath.mul(_phase1, _beneficiary[user].lockedAmount),
-                        privateSaleAmount
-                    )
-                );
                 _beneficiary[user].isPhase1Claimed = true;
+                claimable =
+                    claimable +
+                    ((_phase1 * _beneficiary[user].lockedAmount) /
+                        privateSaleAmount);
             }
 
             uint256 sinceLatestClaim = lockDuration -
                 _beneficiary[user].latestClaimDay;
+            _beneficiary[user].latestClaimDay = lockDuration;
             claimable =
                 sinceLatestClaim *
-                claimable.add(
-                    SafeMath.div(
-                        SafeMath.mul(_phase2, _beneficiary[user].lockedAmount),
-                        privateSaleAmount
-                    )
-                );
-            _beneficiary[user].latestClaimDay = lockDuration;
+                (claimable +
+                    ((_phase2 * _beneficiary[user].lockedAmount) /
+                        privateSaleAmount));
         } else {
             return 0;
         }
@@ -187,10 +178,9 @@ contract Whitelist {
             uint256 claimableLockedAmount = _calculateClaimableAmount(user);
 
             if (claimableLockedAmount > 0) {
-                _beneficiary[user].amount = SafeMath.sub(
-                    _beneficiary[user].amount,
-                    claimableLockedAmount
-                );
+                _beneficiary[user].amount =
+                    _beneficiary[user].amount -
+                    claimableLockedAmount;
 
                 return claimableLockedAmount;
             } else {

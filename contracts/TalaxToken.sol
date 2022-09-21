@@ -3,9 +3,7 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "./governance/ERC20Votes.sol";
@@ -26,8 +24,6 @@ error Ownable__notWalletOwner();
 error Transfer__failedToSendEther();
 
 contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
-    using SafeMath for uint256;
-
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -65,10 +61,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     VestingWallet public TPC_contract_2;
     VestingWallet public TPC_contract_3;
 
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                             EVENTS                                             */
-    /* ---------------------------------------------------------------------------------------------- */
-
+    /* ------------------------------------------- EVENTS ------------------------------------------- */
     event ChangeTax(address indexed who, uint256 amount);
     event ChangeAirdropStatus(address indexed who, bool status);
 
@@ -333,16 +326,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
             _balances[from] = fromBalance - amount;
         }
 
-        uint256 tax = SafeMath.div(SafeMath.mul(amount, taxFee), 100);
-        uint256 taxedAmount = SafeMath.sub(amount, tax);
+        uint256 tax = (amount * taxFee) / 100;
+        uint256 taxedAmount = amount - tax;
 
-        uint256 teamFee = SafeMath.div(SafeMath.mul(taxedAmount, 2), 10);
-        uint256 liquidityFee = SafeMath.div(SafeMath.mul(taxedAmount, 8), 10);
+        uint256 teamFee = (taxedAmount * 2) / 10;
+        uint256 liquidityFee = (taxedAmount * 8) / 10;
 
         _addThirdOfValue(teamFee);
-        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
+        _balances[address(this)] = _balances[address(this)] + liquidityFee;
 
-        _balances[to] = _balances[to].add(taxedAmount);
+        _balances[to] = _balances[to] + taxedAmount;
         emit Transfer(from, to, taxedAmount);
     }
 
@@ -465,7 +458,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     function withdrawFunds() external onlyOwner {
-        uint256 thirdOfValue = SafeMath.div(address(this).balance, 3);
+        uint256 thirdOfValue = address(this).balance / 3;
 
         (bool sent, bytes memory data) = team_and_project_coordinator_address_1
             .call{value: thirdOfValue}("");
@@ -515,23 +508,23 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     /* --------------------------------------- ADDED FUNCTIONS -------------------------------------- */
 
     function _addThirdOfValue(uint256 amount_) internal {
-        uint256 thirdOfValue = SafeMath.div(amount_, 3);
-        _balances[team_and_project_coordinator_address_1] = _balances[
-            team_and_project_coordinator_address_1
-        ].add(thirdOfValue);
+        uint256 thirdOfValue = amount_ / 3;
+        _balances[team_and_project_coordinator_address_1] =
+            _balances[team_and_project_coordinator_address_1] +
+            thirdOfValue;
 
-        _balances[team_and_project_coordinator_address_2] = _balances[
-            team_and_project_coordinator_address_2
-        ].add(thirdOfValue);
+        _balances[team_and_project_coordinator_address_2] =
+            _balances[team_and_project_coordinator_address_2] +
+            thirdOfValue;
 
-        _balances[team_and_project_coordinator_address_3] = _balances[
-            team_and_project_coordinator_address_3
-        ].add(thirdOfValue);
+        _balances[team_and_project_coordinator_address_3] =
+            _balances[team_and_project_coordinator_address_3] +
+            thirdOfValue;
     }
 
     function _mintStakingReward(uint256 amount_) internal {
-        stakingReward = stakingReward.add(amount_);
-        _totalSupply = _totalSupply.add(amount_);
+        stakingReward = stakingReward + amount_;
+        _totalSupply = _totalSupply + amount_;
         emit TransferStakingReward(address(0), address(this), amount_);
     }
 
@@ -541,8 +534,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     function transferToDAOPool(uint256 amount_) external {
-        // TODO: removeable if address exist
-        _balances[msg.sender] = _balances[msg.sender].sub(amount_);
+        // TODO: removable if address exist
+        _balances[msg.sender] = _balances[msg.sender] - amount_;
         daoProjectPool += amount_;
     }
 
@@ -551,12 +544,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         uint256 amount_,
         address stake_contract
     ) external onlyOwner {
-        // TODO: removeable if address exist
+        // TODO: removable if address exist
         bool result = IStakable(stake_contract).getVotingResult();
 
         if (result == true) {
-            daoProjectPool = daoProjectPool.sub(amount_);
-            _balances[to_] = _balances[to_].add(amount_);
+            daoProjectPool = daoProjectPool - amount_;
+            _balances[to_] = _balances[to_] + amount_;
         }
         IStakable(stake_contract).stopVoting();
 
@@ -564,28 +557,28 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     function mintStakingReward(uint256 amount_) public onlyOwner {
-        // TODO: removeable if address exist
+        // TODO: removable if address exist
         _mintStakingReward(amount_);
     }
 
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
-        // TODO: removeable if address exist
-        _balances[address(this)] = _balances[address(this)].add(amount_);
-        _totalSupply = _totalSupply.add(amount_);
+        // TODO: removable if address exist
+        _balances[address(this)] = _balances[address(this)] + amount_;
+        _totalSupply = _totalSupply + amount_;
         emit Transfer(address(0), address(this), amount_);
     }
 
     function burnStakingReward(uint256 amount_) external onlyOwner {
-        // TODO: removeable if address exist
-        stakingReward = stakingReward.sub(amount_);
-        _totalSupply = _totalSupply.sub(amount_);
+        // TODO: removable if address exist
+        stakingReward = stakingReward - amount_;
+        _totalSupply = _totalSupply - amount_;
         emit TransferStakingReward(address(this), address(0), amount_);
     }
 
     function burnLiquidityReserve(uint256 amount_) external onlyOwner {
-        // TODO: removeable if address exist
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
-        _totalSupply = _totalSupply.sub(amount_);
+        // TODO: removable if address exist
+        _balances[address(this)] = _balances[address(this)] - amount_;
+        _totalSupply = _totalSupply - amount_;
         emit Transfer(address(this), address(0), amount_);
     }
 
@@ -622,7 +615,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         );
 
         // Stake amount goes to liquidity reserve
-        _balances[address(this)] = _balances[address(this)].add(_amount);
+        _balances[address(this)] = _balances[address(this)] + _amount;
     }
 
     /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
@@ -633,12 +626,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         // Amount staked on liquidity reserved goes to the user
         // Staking reward, calculated from Stakable.sol, is minted and substracted
         _mintStakingReward(reward_);
-        _balances[address(this)] -= amount_;
-        stakingReward = stakingReward.sub(reward_);
-        _totalSupply = _totalSupply.add(amount_);
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            amount_ + reward_
-        );
+        _balances[address(this)] = _balances[address(this)] - amount_;
+        stakingReward = stakingReward - reward_;
+        _totalSupply = _totalSupply + amount_;
+        _balances[_msgSender()] = _balances[_msgSender()] + amount_ + reward_;
     }
 
     function claimAirdrop(address stake_contract) external isInitialized {
@@ -655,7 +646,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         address PP,
         address PS,
         address SP,
-        address stake
+        address stake_contract
     ) external onlyOwner {
         if (initializationStatus != false) {
             revert Init__nothingToInitialize();
@@ -704,7 +695,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;
-        IStakable(stake).startAirdropSince();
+        IStakable(stake_contract).startAirdropSince();
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
@@ -753,8 +744,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
     // TODO: Moveable
     function claimWhitelist(address whitelist_contract) external isInitialized {
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            IWhitelist(whitelist_contract).releaseClaimable(_msgSender())
-        );
+        _balances[_msgSender()] =
+            _balances[_msgSender()] +
+            IWhitelist(whitelist_contract).releaseClaimable(_msgSender());
     }
 }

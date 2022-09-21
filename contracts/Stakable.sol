@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
@@ -34,7 +33,6 @@ error Voting__notYetVoted();
 error Voting__notEnoughVoters();
 
 contract Stakable is ReentrancyGuard {
-    using SafeMath for uint256;
     /**
      * @notice Constructor since this contract is not meant to be used without inheritance
      * push once to stakeholders for it to work properly
@@ -225,12 +223,7 @@ contract Stakable is ReentrancyGuard {
         returns (uint256)
     {
         // times by 1e24 so theres no missing value
-        return
-            SafeMath.div(
-                (block.timestamp - since) * 1e24,
-                365 days,
-                "Error cannot divide timestamp"
-            );
+        return ((block.timestamp - since) * 1e24) / 365 days;
     }
 
     function _calculateStakeReward(Stake memory user_stake)
@@ -257,14 +250,8 @@ contract Stakable is ReentrancyGuard {
             return (0, 0);
         }
         return (
-            SafeMath.sub(
-                amount,
-                SafeMath.div(SafeMath.mul(amount, stakingPenaltyRate), 1000)
-            ),
-            SafeMath.sub(
-                reward,
-                SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000)
-            )
+            amount - ((amount * stakingPenaltyRate) / 1000),
+            reward - ((reward * stakingPenaltyRate) / 1000)
         );
     }
 
@@ -312,11 +299,8 @@ contract Stakable is ReentrancyGuard {
 
         if (summary.stake.releaseTime > block.timestamp) {
             summary.penalty =
-                SafeMath.div(
-                    SafeMath.mul(user_stake.amount, stakingPenaltyRate),
-                    1000
-                ) +
-                SafeMath.div(SafeMath.mul(reward, stakingPenaltyRate), 1000);
+                ((user_stake.amount * stakingPenaltyRate) / 1000) +
+                ((reward * stakingPenaltyRate) / 1000);
         }
 
         if (_calculateWeek(user_stake.latestClaimDrop) > 0) {
@@ -440,7 +424,7 @@ contract Stakable is ReentrancyGuard {
         if (totalVoters <= 1) {
             revert Voting__notEnoughVoters();
         }
-        uint256 half_voters = SafeMath.div(SafeMath.mul(totalVoters, 5), 10);
+        uint256 half_voters = (totalVoters * 5) / 10;
 
         if (votedUsers[_votingId] > half_voters) {
             return true;
