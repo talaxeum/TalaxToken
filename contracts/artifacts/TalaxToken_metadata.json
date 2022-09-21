@@ -1255,19 +1255,19 @@
 			]
 		},
 		"contracts/Data.sol": {
-			"keccak256": "0xd9bc329f433ed3ad5b67083b5b77179cbdd90ffcf7436f304e9f53d5b93c2318",
+			"keccak256": "0x7367a48f0d25e1d2db0a3476e10801e1b7e319000ddaf5c45b9a94f72f546390",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://7f788b034e4c62ee12e584183afb6d2548126922c480bc78b880c6fd9f990802",
-				"dweb:/ipfs/QmNyAzsNzaXsjDmEqmBPY2m6dsopFSSrLUtLEFgpbYpSfd"
+				"bzz-raw://60ea587cc6df94667ecb1000c3f77e4b39a7e4ed064fe51a9d3e8ca559d44256",
+				"dweb:/ipfs/QmWfUhgCfUUL5jJHP7oYpc3tNXeQFSM5efLmKoTrWphXCp"
 			]
 		},
 		"contracts/Interfaces.sol": {
-			"keccak256": "0x940ad15c38896e64ab8ba9afa6b360c0f2761ae676cdcb8bb732d8a655d77187",
+			"keccak256": "0x8dab3af3b559dc2eacae23da41621573107e938dd56658532bce9d9573ce31b3",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://6333d0ee57a538509afd6313ef6748d6e19e9ee45e4ef96b9dafa508c4eb7038",
-				"dweb:/ipfs/QmPFPogeVAacf72D6U5DJLztm5yYU5jCYQ9qn7Wquj13m8"
+				"bzz-raw://ad2f4fb2235107f3b5afbdc3d076554606e8b4b111904044395740e375cc23f1",
+				"dweb:/ipfs/QmaCD8DAU55bEE1nara483EdbJ6RFYuPppi6a12EVTRZUb"
 			]
 		},
 		"contracts/TalaxToken.sol": {

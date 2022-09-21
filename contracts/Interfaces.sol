@@ -43,7 +43,7 @@ interface IStakable {
 
     function withdrawStake(address user) external returns (uint256, uint256);
 
-    function claimAirdrop(address user) external view returns (uint256);
+    function claimAirdrop(address user) external returns (uint256);
 
     function startVoting() external;
 
