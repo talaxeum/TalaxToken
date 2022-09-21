@@ -36,11 +36,14 @@
 				"type": "error"
 			},
 			{
+<<<<<<< HEAD
 				"inputs": [],
 				"name": "Transfer__failedToSendEther",
 				"type": "error"
 			},
 			{
+=======
+>>>>>>> dev_split
 				"anonymous": false,
 				"inputs": [
 					{
@@ -1684,27 +1687,43 @@
 			]
 		},
 		"contracts/Data.sol": {
+<<<<<<< HEAD
 			"keccak256": "0x90c754b61cf062daf669eed991902a36360b827e9c5dbb0a5572e40b642b3316",
 			"license": "UNLICENSED",
 			"urls": [
 				"bzz-raw://6590c0e19b54d1358ae92db3a0c2fac668cdc44cf8444a6cee001387c1c2873c",
 				"dweb:/ipfs/QmVyfJeiP9RjXb2YvdM2PhZkajfzpz6ejq5SgxvDqta3pc"
+=======
+			"keccak256": "0x7367a48f0d25e1d2db0a3476e10801e1b7e319000ddaf5c45b9a94f72f546390",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://60ea587cc6df94667ecb1000c3f77e4b39a7e4ed064fe51a9d3e8ca559d44256",
+				"dweb:/ipfs/QmWfUhgCfUUL5jJHP7oYpc3tNXeQFSM5efLmKoTrWphXCp"
+>>>>>>> dev_split
 			]
 		},
 		"contracts/Interfaces.sol": {
-			"keccak256": "0x940ad15c38896e64ab8ba9afa6b360c0f2761ae676cdcb8bb732d8a655d77187",
+			"keccak256": "0x8dab3af3b559dc2eacae23da41621573107e938dd56658532bce9d9573ce31b3",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://6333d0ee57a538509afd6313ef6748d6e19e9ee45e4ef96b9dafa508c4eb7038",
-				"dweb:/ipfs/QmPFPogeVAacf72D6U5DJLztm5yYU5jCYQ9qn7Wquj13m8"
+				"bzz-raw://ad2f4fb2235107f3b5afbdc3d076554606e8b4b111904044395740e375cc23f1",
+				"dweb:/ipfs/QmaCD8DAU55bEE1nara483EdbJ6RFYuPppi6a12EVTRZUb"
 			]
 		},
 		"contracts/TalaxToken.sol": {
+<<<<<<< HEAD
 			"keccak256": "0x1dc9bee209bf9e2028f7f9b4bd2a914f645664309044ad29a430becaf496beea",
 			"license": "UNLICENSED",
 			"urls": [
 				"bzz-raw://ee9fb69d172ab75579611194591558e8ac0df14d196bead2ff6c649fb7f9eddd",
 				"dweb:/ipfs/QmR4CDRbNx7AGPz476nyk14fBsewvqLhXT1HNgpbJ4Bpy8"
+=======
+			"keccak256": "0xd2ae4d0629df3a24bf58442e63a0d5f600caa1e3449392b34ec688fb4a173127",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://25b128bc81874305a1ef225d6e84ab4a6f1be3387bedbb22a595fff4482ab87e",
+				"dweb:/ipfs/QmVproMdFV4sNc75WFXiFqCNjwmBN7FypZ6dzaEA2evsfN"
+>>>>>>> dev_split
 			]
 		},
 		"contracts/VestingWallet.sol": {

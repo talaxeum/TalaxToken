@@ -252,7 +252,11 @@
 						"type": "uint256"
 					}
 				],
+<<<<<<< HEAD
 				"stateMutability": "view",
+=======
+				"stateMutability": "nonpayable",
+>>>>>>> dev_split
 				"type": "function"
 			},
 			{
@@ -589,11 +593,19 @@
 			]
 		},
 		"contracts/Stakable.sol": {
+<<<<<<< HEAD
 			"keccak256": "0xae10214718332959a763f396013886e64b089a84b877381a6b359bbadfe4b5f3",
 			"license": "UNLICENSED",
 			"urls": [
 				"bzz-raw://39cf45a8091e34a8917accd373512429a4bb1cbd0ea54086b094d9ed5c5b66ef",
 				"dweb:/ipfs/QmXNGawpXpsWhf1d9rWx5u6m5bXyt3WUP6UYLvZeQ79iZA"
+=======
+			"keccak256": "0x8aba197b0851511ceec2560ddb884ee14cbc7b07e25ee17771662f9f5d38d15a",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://52cff6dc1e16f2f039cf5810e8c8e71110bb2f319eae5c92c8745995ad75264d",
+				"dweb:/ipfs/QmdsJaZttYJMmB2HVKGWGnbCMJwoQZ8GiLPHLgV2KFVNSp"
+>>>>>>> dev_split
 			]
 		}
 	},

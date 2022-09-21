@@ -281,15 +281,15 @@ contract Stakable is ReentrancyGuard {
         onlyTalax
         returns (uint256, uint256)
     {
-        //can be simplified
+        // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
         Stake memory user_stake = stakeholders[user];
 
         delete stakeholders[user];
+        totalVoters -= 1;
+        delete voters[user].voted[_votingId];
 
         if (user_stake.releaseTime > block.timestamp) {
-            totalVoters -= 1;
-            delete voters[user].voted[_votingId];
             return
                 _calculateStakingWithPenalty(
                     user_stake.amount,
@@ -297,8 +297,6 @@ contract Stakable is ReentrancyGuard {
                 );
         }
 
-        totalVoters -= 1;
-        delete voters[user].voted[_votingId];
         return (user_stake.amount, _calculateStakeReward(user_stake));
     }
 
@@ -349,8 +347,12 @@ contract Stakable is ReentrancyGuard {
     }
 
     function _calculateWeek(uint256 input) internal view returns (uint256) {
+<<<<<<< HEAD
         // return (block.timestamp - input).div(7 days);
         return (block.timestamp - input).div(1 minutes);
+=======
+        return (block.timestamp - input) / 7 days;
+>>>>>>> dev_split
     }
 
     function _calculateAirdrop(uint256 stakeAmount)
@@ -361,28 +363,21 @@ contract Stakable is ReentrancyGuard {
         return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
     }
 
-    function claimAirdrop(address user)
-        external
-        view
-        onlyTalax
-        returns (uint256)
-    {
-        //can be simplified if using address
-        Stake memory staker = stakeholders[user];
+    function claimAirdrop(address user) external returns (uint256) {
+        // TODO: can be simplified if using address
+        Stake storage staker = stakeholders[user];
 
         if (staker.amount > 0) {
-            // require(
-            //     _calculateWeek(staker.latestClaimDrop) > 0,
-            //     "Claimable once a week"
-            // );
-            if (_calculateWeek(staker.latestClaimDrop) <= 0) {
+            if (_calculateWeek(staker.latestClaimDrop) == 0) {
                 revert Airdrop__claimableOnceAWeek();
             }
+
+            uint256 airdrop = _calculateAirdrop(staker.amount);
 
             staker.claimableAirdrop = 0;
             staker.latestClaimDrop = block.timestamp;
 
-            return _calculateAirdrop(staker.amount);
+            return airdrop;
         } else {
             return 0;
         }
