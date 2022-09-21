@@ -347,12 +347,7 @@ contract Stakable is ReentrancyGuard {
     }
 
     function _calculateWeek(uint256 input) internal view returns (uint256) {
-<<<<<<< HEAD
-        // return (block.timestamp - input).div(7 days);
-        return (block.timestamp - input).div(1 minutes);
-=======
         return (block.timestamp - input) / 7 days;
->>>>>>> dev_split
     }
 
     function _calculateAirdrop(uint256 stakeAmount)
