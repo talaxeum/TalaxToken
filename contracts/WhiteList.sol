@@ -138,7 +138,7 @@ contract Whitelist {
             revert MainFunction__insufficientBalance();
         }
 
-        if (_beneficiary[user].amount > 0) {
+        if (amount > 0) {
             _beneficiary[user].lockedAmount = amount;
             _beneficiary[user].amount = amount;
             _beneficiary[user].isPhase1Claimed = false;
