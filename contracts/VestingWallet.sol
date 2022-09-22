@@ -25,6 +25,7 @@ contract VestingWallet is Context {
     address private immutable _beneficiary;
     uint64 private immutable _start;
     uint64 private immutable _duration;
+    uint256 public lastMonth = 0;
 
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
@@ -83,10 +84,14 @@ contract VestingWallet is Context {
         return _erc20Released[token];
     }
 
+    function getCurrentMonth() public view returns (uint256) {
+        return (uint64(block.timestamp) - start()) / uint64(1 minutes);
+    }
+
     /**
      * @dev Getter for the amount of releasable eth.
      */
-    function releasable() public view virtual returns (uint256) {
+    function releasable() public virtual returns (uint256) {
         return vestedAmount(uint64(block.timestamp)) - released();
     }
 
@@ -94,8 +99,12 @@ contract VestingWallet is Context {
      * @dev Getter for the amount of releasable `token` tokens. `token` should be the address of an
      * IERC20 contract.
      */
-    function releasable(address token) public view virtual returns (uint256) {
-        return vestedAmount(token, uint64(block.timestamp)) - released(token);
+    function releasable(address token) public virtual returns (uint256) {
+        if (getCurrentMonth() > lastMonth) {
+            lastMonth = getCurrentMonth();
+            return vestedAmount(token, uint64(block.timestamp)) - released(token);
+        }
+        return 0;
     }
 
     /**
@@ -115,7 +124,7 @@ contract VestingWallet is Context {
      *
      * Emits a {ERC20Released} event.
      */
-    function release(address token) public virtual {
+    function release(address token) public  virtual {
         uint256 amount = releasable(token);
         _erc20Released[token] += amount;
         emit ERC20Released(token, amount);
@@ -127,7 +136,7 @@ contract VestingWallet is Context {
      */
     function vestedAmount(uint64 timestamp)
         public
-        view
+        view 
         virtual
         returns (uint256)
     {
@@ -165,11 +174,7 @@ contract VestingWallet is Context {
         } else if (timestamp > start() + duration()) {
             return totalAllocation;
         } else {
-            // Claimable once a month
-            if ((timestamp - start()) % 30 days == 0) {
-                return (totalAllocation * (timestamp - start())) / duration();
-            }
-            return 0;
+            return (totalAllocation * (timestamp - start())) / duration();
         }
     }
 }
