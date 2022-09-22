@@ -26,6 +26,8 @@ contract VestingWallet is Context {
     uint64 private immutable _start;
     uint64 private immutable _duration;
 
+    uint256 private lastMonth;
+
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
      */
@@ -111,16 +113,35 @@ contract VestingWallet is Context {
     }
 
     /**
+     * @dev Getter for the current running month of the vesting process
+     */
+
+    function _currentMonth() internal view returns (uint256) {
+        return (uint64(block.timestamp) - start()) / 30 days;
+    }
+
+    /**
      * @dev Release the tokens that have already vested.
      *
      * Emits a {ERC20Released} event.
      */
     function release(address token) public virtual {
         uint256 amount = releasable(token);
-        _erc20Released[token] += amount;
-        emit ERC20Released(token, amount);
-        SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
+        if (_currentMonth() > lastMonth) {
+            lastMonth = _currentMonth();
+            _erc20Released[token] += amount;
+            emit ERC20Released(token, amount);
+            SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
+        }
     }
+
+    // ? Default function
+    // function release(address token) public virtual {
+    //     uint256 amount = releasable(token);
+    //     _erc20Released[token] += amount;
+    //     emit ERC20Released(token, amount);
+    //     SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
+    // }
 
     /**
      * @dev Calculates the amount of ether that has already vested. Default implementation is a linear vesting curve.
@@ -165,11 +186,7 @@ contract VestingWallet is Context {
         } else if (timestamp > start() + duration()) {
             return totalAllocation;
         } else {
-            // Claimable once a month
-            if ((timestamp - start()) % 30 days == 0) {
-                return (totalAllocation * (timestamp - start())) / duration();
-            }
-            return 0;
+            return (totalAllocation * (timestamp - start())) / duration();
         }
     }
 }
