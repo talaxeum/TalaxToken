@@ -59,7 +59,7 @@
 			"getVotingResult()": "671d2b75",
 			"stake(address,uint256,uint256,uint256)": "f93d4f8a",
 			"stakingPenaltyRate()": "cb79c2e1",
-			"startAirdropSince()": "71e3db87",
+			"startAirdrop()": "d2a569c3",
 			"startVoting()": "1ec6b60a",
 			"stopVoting()": "fab2f86b",
 			"totalVoters()": "5f5300ff",
@@ -232,7 +232,7 @@
 		},
 		{
 			"inputs": [],
-			"name": "startAirdropSince",
+			"name": "startAirdrop",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"

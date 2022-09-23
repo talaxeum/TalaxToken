@@ -271,20 +271,17 @@ contract Stakable is ReentrancyGuard {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
         Stake memory user_stake = stakeholders[user];
+        uint256 reward = _calculateStakeReward(user_stake);
 
         delete stakeholders[user];
         totalVoters -= 1;
         delete voters[user].voted[_votingId];
 
         if (user_stake.releaseTime > block.timestamp) {
-            return
-                _calculateStakingWithPenalty(
-                    user_stake.amount,
-                    _calculateStakeReward(user_stake)
-                );
+            return _calculateStakingWithPenalty(user_stake.amount, reward);
         }
 
-        return (user_stake.amount, _calculateStakeReward(user_stake));
+        return (user_stake.amount, reward);
     }
 
     function hasStake() external view returns (StakingSummary memory) {
@@ -303,7 +300,7 @@ contract Stakable is ReentrancyGuard {
                 ((reward * stakingPenaltyRate) / 1000);
         }
 
-        if (_calculateWeek(user_stake.latestClaimDrop) > 0) {
+        if (calculateWeek(user_stake.latestClaimDrop) > 0) {
             uint256 airdrop = _calculateAirdrop(user_stake.amount);
             summary.stake.claimableAirdrop = airdrop;
         } else {
@@ -318,7 +315,7 @@ contract Stakable is ReentrancyGuard {
 
     /* -------------------------------------- Airdrop functions ------------------------------------- */
 
-    function startAirdropSince() external onlyTalax {
+    function startAirdrop() external onlyTalax {
         airdropSince = block.timestamp;
     }
 
@@ -330,8 +327,12 @@ contract Stakable is ReentrancyGuard {
         emit AirdropChanged(amount);
     }
 
-    function _calculateWeek(uint256 input) internal view returns (uint256) {
-        return (block.timestamp - input) / 7 days;
+    function _blockTimestamp() public view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function calculateWeek(uint256 timestamp) public view returns (uint256) {
+        return (block.timestamp - timestamp) / 7 days;
     }
 
     function _calculateAirdrop(uint256 stakeAmount)
@@ -347,38 +348,28 @@ contract Stakable is ReentrancyGuard {
         Stake storage staker = stakeholders[user];
 
         if (staker.amount > 0) {
-            if (_calculateWeek(staker.latestClaimDrop) == 0) {
+            if (calculateWeek(staker.latestClaimDrop) == 0) {
                 revert Airdrop__claimableOnceAWeek();
             }
-
-            uint256 airdrop = _calculateAirdrop(staker.amount);
 
             staker.claimableAirdrop = 0;
             staker.latestClaimDrop = block.timestamp;
 
-            return airdrop;
-        } else {
-            return 0;
-        }
-    }
-
-    function airdropWeek() public view returns (uint256) {
-        if (airdropSince != 0) {
-            return (block.timestamp - airdropSince) / 7 days;
+            return _calculateAirdrop(staker.amount);
         } else {
             return 0;
         }
     }
 
     /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
+    // ! Replaceable with Governance token
 
     function getVoters(address user) external view returns (bool, bool) {
         return (voters[user].votingRight, voters[user].voted[_votingId]);
     }
 
-    //can be simplified since not connected directly
+    // TODO: can be simplified since not connected directly
     function startVoting() external nonReentrant onlyTalax {
-        // require(_votingStatus == false, "Voting is already running");
         if (_votingStatus == true) {
             revert Voting__votingIsRunning();
         }
@@ -388,10 +379,6 @@ contract Stakable is ReentrancyGuard {
     }
 
     function vote() public nonReentrant votingStatusTrue isVoter {
-        // require(
-        //     voters[msg.sender].voted[_votingId] == false,
-        //     "You have voted before"
-        // );
         if (voters[msg.sender].voted[_votingId] == true) {
             revert Voting__alreadyVoted();
         }
@@ -401,10 +388,6 @@ contract Stakable is ReentrancyGuard {
     }
 
     function retractVote() public nonReentrant votingStatusTrue isVoter {
-        // require(
-        //     voters[msg.sender].voted[_votingId] == true,
-        //     "You have not voted yet"
-        // );
         if (voters[msg.sender].voted[_votingId] == false) {
             revert Voting__notYetVoted();
         }
@@ -420,7 +403,6 @@ contract Stakable is ReentrancyGuard {
         votingStatusTrue
         returns (bool)
     {
-        // require(totalVoters > 1, "Not enough voters");
         if (totalVoters <= 1) {
             revert Voting__notEnoughVoters();
         }
