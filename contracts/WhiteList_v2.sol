@@ -186,7 +186,6 @@ contract Whitelist is ReentrancyGuard, Ownable  {
      */
     function releaseClaimable()
         external
-        returns (uint256)
     {
         if (_beneficiary[msg.sender].amount > 0) {
             uint256 claimableLockedAmount = _calculateClaimableAmount(msg.sender);
@@ -203,13 +202,7 @@ contract Whitelist is ReentrancyGuard, Ownable  {
                     msg.sender,
                     claimableLockedAmount
                 );
-
-                return claimableLockedAmount;
-            } else {
-                return 0;
-            }
-        } else {
-            return 0;
+            } 
         }
     }
 }
