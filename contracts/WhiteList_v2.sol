@@ -33,7 +33,6 @@ struct Beneficiary {
 
 contract Whitelist is ReentrancyGuard, Ownable  {
     uint256 public privateSaleUsers;
-    uint256 public totalLockedAmount;
 
     uint256 public privateSaleAmount;
     uint256 internal constant _phase1 = 73395000 * 1e18;
@@ -145,25 +144,22 @@ contract Whitelist is ReentrancyGuard, Ownable  {
         return claimable;
     }
 
-    function getTotalLockedAmount() public view returns (uint256) {
-        return totalLockedAmount;
-    }
-
     function addBeneficiary(address user, uint256 amount) external onlyOwner {
         if (_beneficiary[user].lockedAmount != 0) {
             revert MainFunction__beneficiaryExist();
         } else {
+            if (amount > privateSaleAmount) {
+                revert MainFunction__insufficientBalance();
+            }
+
             if (amount > 0) {
                 _beneficiary[user].lockedAmount = amount;
                 _beneficiary[user].amount = amount;
                 _beneficiary[user].isPhase1Claimed = false;
                 _beneficiary[user].latestClaimDay = 1;
 
-                totalLockedAmount += amount;
-                if (totalLockedAmount > privateSaleAmount) {
-                    revert MainFunction__amountOverBalance();
-                }
                 privateSaleUsers += 1;
+                privateSaleAmount -= amount;
             }
         }
     }
@@ -188,23 +184,23 @@ contract Whitelist is ReentrancyGuard, Ownable  {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function releaseClaimable(address user)
+    function releaseClaimable()
         external
         returns (uint256)
     {
-        if (_beneficiary[user].amount > 0) {
-            uint256 claimableLockedAmount = _calculateClaimableAmount(user);
+        if (_beneficiary[msg.sender].amount > 0) {
+            uint256 claimableLockedAmount = _calculateClaimableAmount(msg.sender);
 
             if (claimableLockedAmount > 0) {
-                _beneficiary[user].amount =
-                    _beneficiary[user].amount -
+                _beneficiary[msg.sender].amount =
+                    _beneficiary[msg.sender].amount -
                     claimableLockedAmount;
 
-                _beneficiary[user].userAddress = user;
+                // _beneficiary[user].userAddress = user;
 
                 SafeERC20.safeTransfer(
                     IERC20(_token),
-                    _beneficiary[user].userAddress,
+                    msg.sender,
                     claimableLockedAmount
                 );
 
