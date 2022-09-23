@@ -10,6 +10,7 @@ import "./governance/ERC20Votes.sol";
 
 import "./Data.sol";
 import "./Interfaces.sol";
+import "./WhiteListV2.sol";
 import "./VestingWallet.sol";
 
 /**
@@ -129,7 +130,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         // _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
         // _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
         // _balances[staking_reward] = 56538462 * 1e18;
-        _balances[msg.sender] = 10000 * 1e18; // for testing and staging
+        _balances[msg.sender] = 5000000 * 1e18; // for testing and staging
         // _balances[address(this)] = 10000 * 1e18; // for testing and staging
         // _balances[address(this)] = 88846154 * 1e18;
         // _balances[timeLockController] = 88846154 * 1e18;
@@ -643,10 +644,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
     /* ------------------------------------------- VESTING ------------------------------------------ */
     function initiateVesting_Whitelist_Airdrop(
-        address PP,
-        address PS,
-        address SP,
-        address stake_contract
+        address PP
+        // address PS,
+        // address SP,
+        // address stake_contract
     ) external onlyOwner {
         if (initializationStatus != false) {
             revert Init__nothingToInitialize();
@@ -690,12 +691,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         emit InitiateVesting(_msgSender());
 
         IWhitelist(PP).initiateWhitelist();
-        IWhitelist(PS).initiateWhitelist();
-        IWhitelist(SP).initiateWhitelist();
+        // IWhitelist(PS).initiateWhitelist();
+        // IWhitelist(SP).initiateWhitelist();
         emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;
-        IStakable(stake_contract).startAirdropSince();
+        // IStakable(stake_contract).startAirdropSince();
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
