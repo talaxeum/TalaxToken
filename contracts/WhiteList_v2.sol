@@ -2,6 +2,8 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @notice Error handling message for Modifier
@@ -17,6 +19,7 @@ error MainFunction__beneficiaryExist();
 
 
 struct WhitelistStruct {
+    address userAddress;
     uint256 lockedAmount;
     uint256 amount;
     bool isPhase1Claimed;
@@ -28,7 +31,7 @@ struct Beneficiary {
     uint256 amount;
 }
 
-contract Whitelist {
+contract Whitelist is ReentrancyGuard, Ownable  {
     uint256 public privateSaleUsers;
     uint256 public totalLockedAmount;
 
@@ -41,38 +44,18 @@ contract Whitelist {
     // beneficiary of tokens after they are released
     mapping(address => WhitelistStruct) private _beneficiary;
 
-    address public _talax;
-    address public _owner;
+    address public _token;
 
-    constructor() {
+    constructor(address token) {
         privateSaleAmount = 1467900000 * 1e18;
-        _talax = msg.sender;
-        _owner = msg.sender;
-    }
-
-    /* ------------------------------------------ modifier ------------------------------------------ */
-    function _onlyTalax() internal view {
-        // require(msg.sender == _talax, "Not authorized");
-        if (msg.sender != _talax) {
-            revert Function__notAuthorized();
-        }
-    }
-
-    modifier onlyTalax() {
-        _onlyTalax();
-        _;
-    }
-
-    /* ---------------------------------------------- - --------------------------------------------- */
-
-    function changeTalaxAddress(address talax) external onlyTalax {
-        _talax = talax;
+        _token = token;
     }
 
     function beneficiary(address user)
         external
         view
         returns (
+            address,
             uint256,
             uint256,
             bool,
@@ -81,6 +64,7 @@ contract Whitelist {
     {
         WhitelistStruct memory beneficiary_ = _beneficiary[user];
         return (
+            beneficiary_.userAddress = user,
             beneficiary_.lockedAmount,
             beneficiary_.amount,
             beneficiary_.isPhase1Claimed,
@@ -88,16 +72,29 @@ contract Whitelist {
         );
     }
 
-    function initiateWhitelist() external onlyTalax {
+    function initiateWhitelist() external onlyOwner {
         startPrivateSale = block.timestamp;
     }
 
     function hasWhitelist(address user)
         external
         view
-        returns (WhitelistStruct memory)
+        returns (
+            address,
+            uint256,
+            uint256,
+            bool,
+            uint256
+        )
     {
-        return _beneficiary[user];
+        WhitelistStruct memory beneficiary_ = _beneficiary[user];
+        return (
+            beneficiary_.userAddress = user,
+            beneficiary_.lockedAmount,
+            beneficiary_.amount,
+            beneficiary_.isPhase1Claimed,
+            beneficiary_.latestClaimDay
+        );
     }
 
     /**
@@ -152,7 +149,7 @@ contract Whitelist {
         return totalLockedAmount;
     }
 
-    function addBeneficiary(address user, uint256 amount) external onlyTalax {
+    function addBeneficiary(address user, uint256 amount) external onlyOwner {
         if (_beneficiary[user].lockedAmount != 0) {
             revert MainFunction__beneficiaryExist();
         } else {
@@ -173,7 +170,7 @@ contract Whitelist {
 
     function deleteBeneficiary(address user)
         external
-        onlyTalax
+        onlyOwner
         returns (uint256)
     {
         if (_beneficiary[user].amount > 0) {
@@ -193,7 +190,6 @@ contract Whitelist {
      */
     function releaseClaimable(address user)
         external
-        onlyTalax
         returns (uint256)
     {
         if (_beneficiary[user].amount > 0) {
@@ -203,6 +199,14 @@ contract Whitelist {
                 _beneficiary[user].amount =
                     _beneficiary[user].amount -
                     claimableLockedAmount;
+
+                _beneficiary[user].userAddress = user;
+
+                SafeERC20.safeTransfer(
+                    IERC20(_token),
+                    _beneficiary[user].userAddress,
+                    claimableLockedAmount
+                );
 
                 return claimableLockedAmount;
             } else {
