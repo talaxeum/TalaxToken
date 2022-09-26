@@ -646,12 +646,13 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     /* ------------------------------------------- VESTING ------------------------------------------ */
-    function initiateVesting_Whitelist_Airdrop(
-        address PP
+    function initiateVesting_Whitelist_Airdrop(address PP)
+        external
         // address PS,
         // address SP,
         // address stake_contract
-    ) external onlyOwner {
+        onlyOwner
+    {
         if (initializationStatus != false) {
             revert Init__nothingToInitialize();
         }
@@ -705,51 +706,51 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
     /* ------------------------------------------ WHITELIST ----------------------------------------- */
 
-    function unsafeInc(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            return x + 1;
-        }
-    }
+    // function unsafeInc(uint256 x) internal pure returns (uint256) {
+    //     unchecked {
+    //         return x + 1;
+    //     }
+    // }
 
-    function _checkBeneficiary(uint256 len) internal pure {
-        require(len > 0, "Input can't empty");
-    }
+    // function _checkBeneficiary(uint256 len) internal pure {
+    //     require(len > 0, "Input can't empty");
+    // }
 
-    /**
-     * ? Token needs to be transferred to the vesting wallet
-     * ? When user want to claim the vesting, vesting wallet will transfer the token to the beneficiary address
-     */
-    // TODO: edit with address only
-    function addBeneficiaries(
-        address whitelist_contract,
-        Beneficiary[] calldata benefs
-    ) external onlyOwner isInitialized {
-        _checkBeneficiary(benefs.length);
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            IWhitelist(whitelist_contract).addBeneficiary(
-                benefs[i].user,
-                benefs[i].amount
-            );
-        }
-        emit AddBeneficiaries(msg.sender, whitelist_contract, benefs);
-    }
+    // /**
+    //  * ? Token needs to be transferred to the vesting wallet
+    //  * ? When user want to claim the vesting, vesting wallet will transfer the token to the beneficiary address
+    //  */
+    // // TODO: edit with address only
+    // function addBeneficiaries(
+    //     address whitelist_contract,
+    //     Beneficiary[] calldata benefs
+    // ) external onlyOwner isInitialized {
+    //     _checkBeneficiary(benefs.length);
+    //     for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
+    //         IWhitelist(whitelist_contract).addBeneficiary(
+    //             benefs[i].user,
+    //             benefs[i].amount
+    //         );
+    //     }
+    //     emit AddBeneficiaries(msg.sender, whitelist_contract, benefs);
+    // }
 
-    // TODO: Moveable
-    function deleteBeneficiaries(
-        address whitelist_contract,
-        address[] calldata benefs
-    ) external onlyOwner isInitialized {
-        _checkBeneficiary(benefs.length);
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            IWhitelist(whitelist_contract).deleteBeneficiary(benefs[i]);
-        }
-        emit DeleteBeneficiaries(msg.sender, whitelist_contract, benefs);
-    }
+    // // TODO: Moveable
+    // function deleteBeneficiaries(
+    //     address whitelist_contract,
+    //     address[] calldata benefs
+    // ) external onlyOwner isInitialized {
+    //     _checkBeneficiary(benefs.length);
+    //     for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
+    //         IWhitelist(whitelist_contract).deleteBeneficiary(benefs[i]);
+    //     }
+    //     emit DeleteBeneficiaries(msg.sender, whitelist_contract, benefs);
+    // }
 
-    // TODO: Moveable
-    function claimWhitelist(address whitelist_contract) external isInitialized {
-        _balances[_msgSender()] =
-            _balances[_msgSender()] +
-            IWhitelist(whitelist_contract).releaseClaimable(_msgSender());
-    }
+    // // TODO: Moveable
+    // function claimWhitelist(address whitelist_contract) external isInitialized {
+    //     _balances[_msgSender()] =
+    //         _balances[_msgSender()] +
+    //         IWhitelist(whitelist_contract).releaseClaimable(_msgSender());
+    // }
 }
