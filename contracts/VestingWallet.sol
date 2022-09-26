@@ -5,7 +5,6 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title VestingWallet
@@ -17,7 +16,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  * Consequently, if the vesting has already started, any amount of tokens sent to this contract will (at least partly)
  * be immediately releasable.
  */
-contract VestingWallet is Context, ReentrancyGuard {
+contract VestingWallet is Context {
     event EtherReleased(uint256 amount);
     event ERC20Released(address indexed token, uint256 amount);
 
@@ -26,7 +25,8 @@ contract VestingWallet is Context, ReentrancyGuard {
     address private immutable _beneficiary;
     uint64 private immutable _start;
     uint64 private immutable _duration;
-    uint256 public lastMonth;
+
+    uint256 private lastMonth;
 
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
@@ -88,7 +88,7 @@ contract VestingWallet is Context, ReentrancyGuard {
     /**
      * @dev Getter for the amount of releasable eth.
      */
-    function releasable() public virtual returns (uint256) {
+    function releasable() public view virtual returns (uint256) {
         return vestedAmount(uint64(block.timestamp)) - released();
     }
 
@@ -96,12 +96,8 @@ contract VestingWallet is Context, ReentrancyGuard {
      * @dev Getter for the amount of releasable `token` tokens. `token` should be the address of an
      * IERC20 contract.
      */
-    function releasable(address token) public virtual returns (uint256) {
-        if (currentMonth() > lastMonth) {
-            lastMonth = currentMonth();
-            return vestedAmount(token, uint64(block.timestamp)) - released(token);
-        }
-        return 0;
+    function releasable(address token) public view virtual returns (uint256) {
+        return vestedAmount(token, uint64(block.timestamp)) - released(token);
     }
 
     /**
@@ -117,24 +113,43 @@ contract VestingWallet is Context, ReentrancyGuard {
     }
 
     /**
+     * @dev Getter for the current running month of the vesting process
+     */
+
+    function _currentMonth() internal view returns (uint256) {
+        return (uint64(block.timestamp) - start()) / 30 days;
+    }
+
+    /**
      * @dev Release the tokens that have already vested.
      *
      * Emits a {ERC20Released} event.
      */
-    function release(address token) public nonReentrant virtual {
+    function release(address token) public virtual {
         uint256 amount = releasable(token);
-        _erc20Released[token] += amount;
-        emit ERC20Released(token, amount);
-        SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
+        if (_currentMonth() > lastMonth) {
+            lastMonth = _currentMonth();
+            _erc20Released[token] += amount;
+            emit ERC20Released(token, amount);
+            SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
+        }
     }
+
+    // ? Default function
+    // function release(address token) public virtual {
+    //     uint256 amount = releasable(token);
+    //     _erc20Released[token] += amount;
+    //     emit ERC20Released(token, amount);
+    //     SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
+    // }
 
     /**
      * @dev Calculates the amount of ether that has already vested. Default implementation is a linear vesting curve.
      */
     function vestedAmount(uint64 timestamp)
         public
-        virtual
         view
+        virtual
         returns (uint256)
     {
         return _vestingSchedule(address(this).balance + released(), timestamp);
@@ -145,8 +160,8 @@ contract VestingWallet is Context, ReentrancyGuard {
      */
     function vestedAmount(address token, uint64 timestamp)
         public
-        virtual
         view
+        virtual
         returns (uint256)
     {
         return
@@ -156,18 +171,14 @@ contract VestingWallet is Context, ReentrancyGuard {
             );
     }
 
-    function currentMonth() public view returns (uint256){
-        return (uint64(block.timestamp) - start()) / uint64(1 minutes);
-    }
-
     /**
      * @dev Virtual implementation of the vesting formula. This returns the amount vested, as a function of time, for
      * an asset given its total historical allocation.
      */
     function _vestingSchedule(uint256 totalAllocation, uint64 timestamp)
         internal
-        virtual
         view
+        virtual
         returns (uint256)
     {
         if (timestamp < start()) {
@@ -175,7 +186,6 @@ contract VestingWallet is Context, ReentrancyGuard {
         } else if (timestamp > start() + duration()) {
             return totalAllocation;
         } else {
-            // Claimable once a month
             return (totalAllocation * (timestamp - start())) / duration();
         }
     }

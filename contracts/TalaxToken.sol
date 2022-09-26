@@ -523,29 +523,30 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
             thirdOfValue;
     }
 
+    // TODO: removable
     function _mintStakingReward(uint256 amount_) internal {
         stakingReward = stakingReward + amount_;
         _totalSupply = _totalSupply + amount_;
         emit TransferStakingReward(address(0), address(this), amount_);
     }
 
+    // TODO: moveable
     function startTransferDAOVoting(address stake_contract) external onlyOwner {
-        // TODO: moveable
         IStakable(stake_contract).startVoting();
     }
 
+    // TODO: removable if address exist
     function transferToDAOPool(uint256 amount_) external {
-        // TODO: removable if address exist
         _balances[msg.sender] = _balances[msg.sender] - amount_;
         daoProjectPool += amount_;
     }
 
+    // TODO: removable if address exist
     function transferDAOPool(
         address to_,
         uint256 amount_,
         address stake_contract
     ) external onlyOwner {
-        // TODO: removable if address exist
         bool result = IStakable(stake_contract).getVotingResult();
 
         if (result == true) {
@@ -557,27 +558,27 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         emit TransferDAOPool(address(this), to_, amount_);
     }
 
+    // TODO: removable if address exist
     function mintStakingReward(uint256 amount_) public onlyOwner {
-        // TODO: removable if address exist
         _mintStakingReward(amount_);
     }
 
+    // TODO: removable if address exist
     function mintLiquidityReserve(uint256 amount_) public onlyOwner {
-        // TODO: removable if address exist
         _balances[address(this)] = _balances[address(this)] + amount_;
         _totalSupply = _totalSupply + amount_;
         emit Transfer(address(0), address(this), amount_);
     }
 
+    // TODO: removable if address exist
     function burnStakingReward(uint256 amount_) external onlyOwner {
-        // TODO: removable if address exist
         stakingReward = stakingReward - amount_;
         _totalSupply = _totalSupply - amount_;
         emit TransferStakingReward(address(this), address(0), amount_);
     }
 
+    // TODO: removable if address exist
     function burnLiquidityReserve(uint256 amount_) external onlyOwner {
-        // TODO: removable if address exist
         _balances[address(this)] = _balances[address(this)] - amount_;
         _totalSupply = _totalSupply - amount_;
         emit Transfer(address(this), address(0), amount_);
@@ -619,6 +620,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         _balances[address(this)] = _balances[address(this)] + _amount;
     }
 
+    // TODO: removable if the staking process replaced with transfer
     /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
     function withdrawStake(address stake_contract) external {
         (uint256 amount_, uint256 reward_) = IStakable(stake_contract)
@@ -633,6 +635,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         _balances[_msgSender()] = _balances[_msgSender()] + amount_ + reward_;
     }
 
+    // TODO: removable if the airdrop process is supplied with the token by transferring
     function claimAirdrop(address stake_contract) external isInitialized {
         if (airdropStatus != true) {
             revert Airdrop__notStarted();
@@ -696,7 +699,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         emit InitiateWhitelist(_msgSender());
 
         airdropStatus = true;
-        // IStakable(stake_contract).startAirdropSince();
+        // IStakable(stake_contract).startAirdrop();
         emit ChangeAirdropStatus(_msgSender(), airdropStatus);
     }
 
