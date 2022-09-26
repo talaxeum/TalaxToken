@@ -58,7 +58,7 @@ contract Staking is ReentrancyGuard, Ownable {
     mapping(address => Voter) public voters;
     mapping(uint256 => uint256) public votedUsers;
 
-    address private token_address;
+    address public token_address;
 
     constructor(address token) {
         //Staking penalty and Airdrop in 0.1 times percentage
@@ -254,7 +254,6 @@ contract Staking is ReentrancyGuard, Ownable {
      * Will also _calculateStakeReward and reset timer
      */
 
-    // ! TODO: ganti function _calculateStakingWithPenalty dan _calculateStakingReward menjadi single return
     function withdrawStake() external nonReentrant {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
