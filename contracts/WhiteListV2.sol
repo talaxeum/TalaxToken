@@ -45,7 +45,7 @@ contract Whitelist is ReentrancyGuard, Ownable  {
     address public _token;
 
     constructor(address token) {
-        privateSaleAmount = 5000000 * 1e18;
+        privateSaleAmount = 1467900000 * 1e18;
         _token = token;
     }
 
