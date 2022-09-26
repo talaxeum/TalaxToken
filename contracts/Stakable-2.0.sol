@@ -26,6 +26,7 @@ error Staking_noStakingPackageFound();
  * @notice Error handling message for Airdrop functions
  */
 error Airdrop__claimableOnceAWeek();
+error Airdrop__notYetStarted();
 
 /**
  * @notice Error handling message for Voting functions
@@ -58,7 +59,7 @@ contract Staking is ReentrancyGuard, Ownable {
     mapping(address => Voter) public voters;
     mapping(uint256 => uint256) public votedUsers;
 
-    address private token_address;
+    address public token_address;
 
     constructor(address token) {
         //Staking penalty and Airdrop in 0.1 times percentage
@@ -151,18 +152,17 @@ contract Staking is ReentrancyGuard, Ownable {
      * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
      * StakeID
      */
-    function stake(
-        address user,
-        uint256 amount,
-        uint256 stakePeriod
-    ) external nonReentrant onlyOwner {
+    function stake(uint256 amount, uint256 stakePeriod)
+        external
+        nonReentrant
+    {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
         if (amount <= 0) {
             revert Staking__cannotStakeNothing();
         }
         // require(stakeholders[user].amount == 0, "User is a staker");
-        if (stakeholders[user].amount != 0) {
+        if (stakeholders[msg.sender].amount != 0) {
             revert Staking__userIsStaker();
         }
 
@@ -171,7 +171,7 @@ contract Staking is ReentrancyGuard, Ownable {
         }
 
         totalVoters += 1;
-        voters[user].votingRight = true;
+        voters[msg.sender].votingRight = true;
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -179,7 +179,7 @@ contract Staking is ReentrancyGuard, Ownable {
         // Use the index to push a new Stake
         // push a newly created Stake with the current block timestamp.
 
-        stakeholders[user] = Stake(
+        stakeholders[msg.sender] = Stake(
             amount,
             timestamp,
             stakingPackage[stakePeriod],
@@ -196,7 +196,7 @@ contract Staking is ReentrancyGuard, Ownable {
             amount
         );
         // Emit an event that the stake has occured
-        emit Staked(user, amount, timestamp, (stakePeriod + timestamp));
+        emit Staked(msg.sender, amount, timestamp, (stakePeriod + timestamp));
     }
 
     function changePenaltyFee(uint256 amount) external onlyOwner {
@@ -345,6 +345,10 @@ contract Staking is ReentrancyGuard, Ownable {
     }
 
     function claimAirdrop(address user) external {
+        if (airdropSince == 0) {
+            revert Airdrop__notYetStarted();
+        }
+
         // TODO: can be simplified if using address
         Stake storage staker = stakeholders[user];
 
