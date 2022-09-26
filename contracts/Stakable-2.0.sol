@@ -151,18 +151,18 @@ contract Staking is ReentrancyGuard, Ownable {
      * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
      * StakeID
      */
-    function stake(
-        address user,
-        uint256 amount,
-        uint256 stakePeriod
-    ) external nonReentrant onlyOwner {
+    function stake(uint256 amount, uint256 stakePeriod)
+        external
+        nonReentrant
+        onlyOwner
+    {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
         if (amount <= 0) {
             revert Staking__cannotStakeNothing();
         }
         // require(stakeholders[user].amount == 0, "User is a staker");
-        if (stakeholders[user].amount != 0) {
+        if (stakeholders[msg.sender].amount != 0) {
             revert Staking__userIsStaker();
         }
 
@@ -171,7 +171,7 @@ contract Staking is ReentrancyGuard, Ownable {
         }
 
         totalVoters += 1;
-        voters[user].votingRight = true;
+        voters[msg.sender].votingRight = true;
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -179,7 +179,7 @@ contract Staking is ReentrancyGuard, Ownable {
         // Use the index to push a new Stake
         // push a newly created Stake with the current block timestamp.
 
-        stakeholders[user] = Stake(
+        stakeholders[msg.sender] = Stake(
             amount,
             timestamp,
             stakingPackage[stakePeriod],
@@ -196,7 +196,7 @@ contract Staking is ReentrancyGuard, Ownable {
             amount
         );
         // Emit an event that the stake has occured
-        emit Staked(user, amount, timestamp, (stakePeriod + timestamp));
+        emit Staked(msg.sender, amount, timestamp, (stakePeriod + timestamp));
     }
 
     function changePenaltyFee(uint256 amount) external onlyOwner {
@@ -254,6 +254,7 @@ contract Staking is ReentrancyGuard, Ownable {
      * Will also _calculateStakeReward and reset timer
      */
 
+    // ! TODO: ganti function _calculateStakingWithPenalty dan _calculateStakingReward menjadi single return
     function withdrawStake() external nonReentrant {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
