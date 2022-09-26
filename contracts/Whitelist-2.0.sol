@@ -5,6 +5,7 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title VestingWallet
@@ -16,15 +17,21 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * Consequently, if the vesting has already started, any amount of tokens sent to this contract will (at least partly)
  * be immediately releasable.
  */
-contract VestingWallet is Context {
+contract WhitelistVesting is Context, Ownable {
     event ERC20Released(
         address indexed token,
         address indexed user,
         uint256 amount
     );
 
+    struct Beneficiary {
+        address user;
+        uint256 amount;
+    }
+
     // mapping(address => uint256) private _erc20Released;
     // address private immutable _beneficiary;
+    address private _token;
     mapping(address => mapping(address => uint256)) private _erc20Released;
     mapping(address => uint256) _beneficiary;
     uint64 private immutable _start;
@@ -36,7 +43,12 @@ contract VestingWallet is Context {
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
      */
-    constructor(uint64 startTimestamp, uint64 durationSeconds) payable {
+    constructor(
+        address token,
+        uint64 startTimestamp,
+        uint64 durationSeconds
+    ) payable {
+        _token = token;
         _start = startTimestamp;
         _duration = durationSeconds;
     }
@@ -63,16 +75,16 @@ contract VestingWallet is Context {
     /**
      * @dev Amount of token already released
      */
-    function released(address token) public view virtual returns (uint256) {
-        return _erc20Released[token][msg.sender];
+    function released() public view virtual returns (uint256) {
+        return _erc20Released[_token][msg.sender];
     }
 
     /**
      * @dev Getter for the amount of releasable `token` tokens. `token` should be the address of an
      * IERC20 contract.
      */
-    function releasable(address token) public view virtual returns (uint256) {
-        return vestedAmount(token, uint64(block.timestamp)) - released(token);
+    function releasable() public view virtual returns (uint256) {
+        return vestedAmount(uint64(block.timestamp)) - released();
     }
 
     /**
@@ -83,18 +95,41 @@ contract VestingWallet is Context {
         return (uint64(block.timestamp) - start()) / 30 days;
     }
 
+    function _unsafeInc(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            return x + 1;
+        }
+    }
+
     /**
-     * @dev Vest token
+     * @dev Vest token for a user
      *
      */
-    function vest(address token, uint256 amount) public virtual {
-        _beneficiary[msg.sender] += amount;
-        SafeERC20.safeTransferFrom(
-            IERC20(token),
-            msg.sender,
-            address(this),
-            amount
-        );
+    function _vest(address user, uint256 amount) internal {
+        _beneficiary[user] += amount;
+    }
+
+    /**
+     * @dev delete Vest token for a user
+     *
+     */
+    function _delete(address user) internal {
+        delete _beneficiary[user];
+    }
+
+    function addMultiVesting(Beneficiary[] calldata users) external onlyOwner {
+        for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
+            _vest(users[i].user, users[i].amount);
+        }
+    }
+
+    function deleteMultiVesting(Beneficiary[] calldata users)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
+            _delete(users[i].user);
+        }
     }
 
     /**
@@ -102,14 +137,14 @@ contract VestingWallet is Context {
      *
      * Emits a {ERC20Released} event.
      */
-    function release(address token) public virtual {
-        uint256 amount = releasable(token);
+    function release() public virtual {
+        uint256 amount = releasable();
         if (_currentMonth() > _lastMonth[msg.sender]) {
             _lastMonth[msg.sender] = _currentMonth();
             _beneficiary[msg.sender] -= amount;
-            _erc20Released[token][msg.sender] += amount;
-            emit ERC20Released(token, msg.sender, amount);
-            SafeERC20.safeTransfer(IERC20(token), msg.sender, amount);
+            _erc20Released[_token][msg.sender] += amount;
+            emit ERC20Released(_token, msg.sender, amount);
+            SafeERC20.safeTransfer(IERC20(_token), msg.sender, amount);
         }
     }
 
@@ -124,7 +159,7 @@ contract VestingWallet is Context {
     /**
      * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
      */
-    function vestedAmount(address token, uint64 timestamp)
+    function vestedAmount(uint64 timestamp)
         public
         view
         virtual
@@ -136,10 +171,7 @@ contract VestingWallet is Context {
         //         timestamp
         //     );
         return
-            _vestingSchedule(
-                _beneficiary[msg.sender] + released(token),
-                timestamp
-            );
+            _vestingSchedule(_beneficiary[msg.sender] + released(), timestamp);
     }
 
     /**
