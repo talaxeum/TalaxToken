@@ -340,9 +340,9 @@ contract Staking is ReentrancyGuard, Ownable {
         return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
     }
 
-    function claimAirdrop(address user) external {
+    function claimAirdrop() external {
         // TODO: can be simplified if using address
-        Stake storage staker = stakeholders[user];
+        Stake storage staker = stakeholders[msg.sender];
 
         if (staker.amount > 0) {
             if (calculateWeek(staker.latestClaimDrop) == 0) {
@@ -363,58 +363,58 @@ contract Staking is ReentrancyGuard, Ownable {
     /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
     // ! Replaceable with Governance token
 
-    function getVoters(address user) external view returns (bool, bool) {
-        return (voters[user].votingRight, voters[user].voted[_votingId]);
-    }
+    // function getVoters(address user) external view returns (bool, bool) {
+    //     return (voters[user].votingRight, voters[user].voted[_votingId]);
+    // }
 
-    // TODO: can be simplified since not connected directly
-    function startVoting() external nonReentrant onlyOwner {
-        if (_votingStatus == true) {
-            revert Voting__votingIsRunning();
-        }
+    // // TODO: can be simplified since not connected directly
+    // function startVoting() external nonReentrant onlyOwner {
+    //     if (_votingStatus == true) {
+    //         revert Voting__votingIsRunning();
+    //     }
 
-        _votingStatus = true;
-        _votingId += 1;
-    }
+    //     _votingStatus = true;
+    //     _votingId += 1;
+    // }
 
-    function vote() public nonReentrant votingStatusTrue isVoter {
-        if (voters[msg.sender].voted[_votingId] == true) {
-            revert Voting__alreadyVoted();
-        }
+    // function vote() public nonReentrant votingStatusTrue isVoter {
+    //     if (voters[msg.sender].voted[_votingId] == true) {
+    //         revert Voting__alreadyVoted();
+    //     }
 
-        voters[msg.sender].voted[_votingId] = true;
-        votedUsers[_votingId] += 1;
-    }
+    //     voters[msg.sender].voted[_votingId] = true;
+    //     votedUsers[_votingId] += 1;
+    // }
 
-    function retractVote() public nonReentrant votingStatusTrue isVoter {
-        if (voters[msg.sender].voted[_votingId] == false) {
-            revert Voting__notYetVoted();
-        }
+    // function retractVote() public nonReentrant votingStatusTrue isVoter {
+    //     if (voters[msg.sender].voted[_votingId] == false) {
+    //         revert Voting__notYetVoted();
+    //     }
 
-        voters[msg.sender].voted[_votingId] == false;
-        votedUsers[_votingId] -= 1;
-    }
+    //     voters[msg.sender].voted[_votingId] == false;
+    //     votedUsers[_votingId] -= 1;
+    // }
 
-    function getVotingResult()
-        external
-        view
-        onlyOwner
-        votingStatusTrue
-        returns (bool)
-    {
-        if (totalVoters <= 1) {
-            revert Voting__notEnoughVoters();
-        }
-        uint256 half_voters = (totalVoters * 5) / 10;
+    // function getVotingResult()
+    //     external
+    //     view
+    //     onlyOwner
+    //     votingStatusTrue
+    //     returns (bool)
+    // {
+    //     if (totalVoters <= 1) {
+    //         revert Voting__notEnoughVoters();
+    //     }
+    //     uint256 half_voters = (totalVoters * 5) / 10;
 
-        if (votedUsers[_votingId] > half_voters) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    //     if (votedUsers[_votingId] > half_voters) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 
-    function stopVoting() external onlyOwner votingStatusTrue {
-        _votingStatus = false;
-    }
+    // function stopVoting() external onlyOwner votingStatusTrue {
+    //     _votingStatus = false;
+    // }
 }
