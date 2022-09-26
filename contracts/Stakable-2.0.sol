@@ -151,11 +151,7 @@ contract Staking is ReentrancyGuard, Ownable {
      * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
      * StakeID
      */
-    function stake(uint256 amount, uint256 stakePeriod)
-        external
-        nonReentrant
-        onlyOwner
-    {
+    function stake(uint256 amount, uint256 stakePeriod) external nonReentrant {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
         if (amount <= 0) {

@@ -17,7 +17,11 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * be immediately releasable.
  */
 contract VestingWallet is Context {
-    event ERC20Released(address indexed token, uint256 amount);
+    event ERC20Released(
+        address indexed token,
+        address indexed user,
+        uint256 amount
+    );
 
     // mapping(address => uint256) private _erc20Released;
     // address private immutable _beneficiary;
@@ -80,6 +84,20 @@ contract VestingWallet is Context {
     }
 
     /**
+     * @dev Vest token
+     *
+     */
+    function vest(address token, uint256 amount) public virtual {
+        _beneficiary[msg.sender] += amount;
+        SafeERC20.safeTransferFrom(
+            IERC20(token),
+            msg.sender,
+            address(this),
+            amount
+        );
+    }
+
+    /**
      * @dev Release the tokens that have already vested.
      *
      * Emits a {ERC20Released} event.
@@ -88,8 +106,9 @@ contract VestingWallet is Context {
         uint256 amount = releasable(token);
         if (_currentMonth() > _lastMonth[msg.sender]) {
             _lastMonth[msg.sender] = _currentMonth();
+            _beneficiary[msg.sender] -= amount;
             _erc20Released[token][msg.sender] += amount;
-            emit ERC20Released(token, amount);
+            emit ERC20Released(token, msg.sender, amount);
             SafeERC20.safeTransfer(IERC20(token), msg.sender, amount);
         }
     }
