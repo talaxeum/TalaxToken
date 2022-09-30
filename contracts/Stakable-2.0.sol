@@ -154,9 +154,6 @@ contract Staking is ReentrancyGuard, Ownable {
     function stake(uint256 amount, uint256 stakePeriod) external nonReentrant {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
-        if (amount <= 0) {
-            revert Staking__cannotStakeNothing();
-        }
         // require(stakeholders[user].amount == 0, "User is a staker");
         if (stakeholders[msg.sender].amount != 0) {
             revert Staking__userIsStaker();
@@ -250,7 +247,6 @@ contract Staking is ReentrancyGuard, Ownable {
      * Will also _calculateStakeReward and reset timer
      */
 
-    // ! TODO: ganti function _calculateStakingWithPenalty dan _calculateStakingReward menjadi single return
     function withdrawStake() external nonReentrant {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
