@@ -169,7 +169,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "startAirdropSince",
+				"name": "startAirdrop",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -267,17 +267,17 @@
 		},
 		"optimizer": {
 			"enabled": true,
-			"runs": 1000
+			"runs": 200
 		},
 		"remappings": []
 	},
 	"sources": {
 		"contracts/Interfaces.sol": {
-			"keccak256": "0x8dab3af3b559dc2eacae23da41621573107e938dd56658532bce9d9573ce31b3",
+			"keccak256": "0x43e967de7a19c9271e351e91cc2d49831947ab238942a097122799a7b1b21ea2",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://ad2f4fb2235107f3b5afbdc3d076554606e8b4b111904044395740e375cc23f1",
-				"dweb:/ipfs/QmaCD8DAU55bEE1nara483EdbJ6RFYuPppi6a12EVTRZUb"
+				"bzz-raw://555a1f6667d327504a50e1880db254d0c62e239942abf495e0e7ef5ee7af06e4",
+				"dweb:/ipfs/QmbqGVTBbkHcoJukQtcLKRCL8J1YAQMjmiLANG6Sztx9y6"
 			]
 		}
 	},

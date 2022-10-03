@@ -26,7 +26,7 @@ interface IStakable {
 
     function votedUsers(uint256 id) external view returns (uint256);
 
-    function startAirdropSince() external;
+    function startAirdrop() external;
 
     function changeTalaxAddress(address talax) external;
 

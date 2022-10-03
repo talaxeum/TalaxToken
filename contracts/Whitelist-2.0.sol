@@ -192,4 +192,8 @@ contract WhitelistVesting is Context, Ownable {
             return (totalAllocation * (timestamp - start())) / duration();
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d0605172608d881905220f92409976a87c948d7f
