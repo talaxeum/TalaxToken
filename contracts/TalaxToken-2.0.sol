@@ -18,7 +18,7 @@ import "./VestingWallet.sol";
 error Tax__maxFivePercent();
 error Transfer__failedToSendEther();
 
-contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+contract TalaxToken2 is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -285,8 +285,8 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         uint256 tax = (amount * taxFee) / 100;
         uint256 taxedAmount = amount - tax;
 
-        uint256 teamFee = (taxedAmount * 2) / 10;
-        uint256 liquidityFee = (taxedAmount * 8) / 10;
+        uint256 teamFee = (tax * 2) / 10;
+        uint256 liquidityFee = (tax * 8) / 10;
 
         _addThirdOfValue(teamFee);
         _balances[address(this)] = _balances[address(this)] + liquidityFee;
