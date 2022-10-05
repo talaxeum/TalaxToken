@@ -19,7 +19,12 @@
 					},
 					{
 						"internalType": "uint64",
-						"name": "durationSeconds",
+						"name": "durationMonths",
+						"type": "uint64"
+					},
+					{
+						"internalType": "uint64",
+						"name": "cliffs",
 						"type": "uint64"
 					}
 				],
@@ -289,8 +294,8 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": true,
-			"runs": 1000
+			"enabled": false,
+			"runs": 200
 		},
 		"remappings": []
 	},
@@ -328,11 +333,11 @@
 			]
 		},
 		"contracts/VestingWallet.sol": {
-			"keccak256": "0x6dad433afc18d956144663f30fb58a3898d24376af663474583c7b7514f636c6",
+			"keccak256": "0x49dc4c17da1f7c765fac756bab8f025f21d290fcfc442e9015e486722a47c108",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://7408ba71f4b87b2dce505dc2002f0856d475eebf9d45f5ee21b2f887fd3a4ae0",
-				"dweb:/ipfs/QmdnGj6nFM5naiVFQE5VLtFyBuqHwMw4KaaXHpNB3URwDg"
+				"bzz-raw://60b39da55713bbf074c640e88f153f5527fb55bd7660af4a80b08632d9d4591f",
+				"dweb:/ipfs/QmeW7cWz77taZesq5fVmTxnfeSDi7N6GYATYoyh5JpTPLg"
 			]
 		}
 	},

@@ -3,7 +3,8 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-address constant public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+address constant public_sale_address = 0xd9145CCE52D386f254917e481eB44e9943F39138;
+address constant beneficiary_public_sale_address = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
 
 /* ------------------------------------ Main TPC Addresses ------------------------------------ */
 // address payable constant team_and_project_coordinator_address_1 = payable(

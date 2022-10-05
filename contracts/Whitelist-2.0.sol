@@ -92,7 +92,7 @@ contract WhitelistVesting is Context, Ownable {
      */
 
     function _currentMonth() internal view returns (uint256) {
-        return (uint64(block.timestamp) - start()) / 30 days;
+        return (uint64(block.timestamp) - start()) / 1 minutes;
     }
 
     function _unsafeInc(uint256 x) internal pure returns (uint256) {

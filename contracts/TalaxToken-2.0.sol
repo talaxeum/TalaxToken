@@ -91,13 +91,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
          */
 
         /* --------------------------------------------- TGE -------------------------------------------- */
-        // _balances[public_sale_address] = 193200 * 1e3 * 1e18;
+        _balances[public_sale_address] = 482624736 * 1e18;
+        _balances[beneficiary_public_sale_address] = 120656184 * 1e18;
         // _balances[marketing_address_1] = 14000 * 1e3 * 1e18;
         // _balances[marketing_address_2] = 14000 * 1e3 * 1e18;
         // _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
         // _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
         // _balances[staking_reward] = 56538462 * 1e18;
-        _balances[msg.sender] = 10000 * 1e18; // for testing and staging
+        _balances[msg.sender] = 21 * 1e9 * 1e18; // for testing and staging
         // _balances[address(this)] = 10000 * 1e18; // for testing and staging
         // _balances[address(this)] = 88846154 * 1e18;
         // _balances[timeLockController] = 88846154 * 1e18;

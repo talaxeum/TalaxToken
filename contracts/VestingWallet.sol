@@ -24,6 +24,7 @@ contract VestingWallet is Context {
     mapping(address => uint256) private _erc20Released;
     address private immutable _beneficiary;
     uint64 private immutable _start;
+    uint64 private immutable _delay;
     uint64 private immutable _duration;
 
     uint256 private lastMonth;
@@ -34,15 +35,17 @@ contract VestingWallet is Context {
     constructor(
         address beneficiaryAddress,
         uint64 startTimestamp,
-        uint64 durationSeconds
+        uint64 durationMonths,
+        uint64 cliffs
     ) payable {
         require(
             beneficiaryAddress != address(0),
             "VestingWallet: beneficiary is zero address"
         );
         _beneficiary = beneficiaryAddress;
-        _start = startTimestamp;
-        _duration = durationSeconds;
+        _duration = durationMonths * 30 days;
+        _delay = cliffs * 30 days;
+        _start = startTimestamp + _delay;
     }
 
     /**
