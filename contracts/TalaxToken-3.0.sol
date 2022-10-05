@@ -9,7 +9,9 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 import "./Data.sol";
 
-contract TalaxToken3 is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+error Transfer__failedToSendEther();
+
+contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     uint256 private taxPercent = 1;
 
     constructor() ERC20("MyToken", "MTK") ERC20Permit("MyToken") {}

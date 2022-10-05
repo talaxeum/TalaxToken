@@ -17,7 +17,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * Consequently, if the vesting has already started, any amount of tokens sent to this contract will (at least partly)
  * be immediately releasable.
  */
-contract WhitelistVesting is Context, Ownable {
+
+contract TeamWhitelist is Context, Ownable {
     event ERC20Released(
         address indexed token,
         address indexed user,
@@ -34,29 +35,31 @@ contract WhitelistVesting is Context, Ownable {
     address private _token;
     mapping(address => mapping(address => uint256)) private _erc20Released;
     mapping(address => uint256) _beneficiary;
-    uint64 private immutable _start;
-    uint64 private immutable _duration;
+    uint64 private _start;
+    uint64 private _duration;
+    uint64 private _cliff;
 
     // uint256 private lastMonth;
     mapping(address => uint256) private _lastMonth;
 
+    bool private _initStatus;
+
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
      */
-    constructor(
+    function init(
         address token,
         uint64 startTimestamp,
-        uint64 durationSeconds
-    ) payable {
+        uint64 durationSeconds,
+        uint64 cliff
+    ) external {
+        require(_initStatus == false, "Initiated");
+        _initStatus = true;
         _token = token;
-        _start = startTimestamp;
+        _start = startTimestamp + cliff;
         _duration = durationSeconds;
+        _cliff = cliff;
     }
-
-    /**
-     * @dev The contract should be able to receive Eth.
-     */
-    receive() external payable virtual {}
 
     /**
      * @dev Getter for the start timestamp.
@@ -109,26 +112,9 @@ contract WhitelistVesting is Context, Ownable {
         _beneficiary[user] += amount;
     }
 
-    /**
-     * @dev delete Vest token for a user
-     *
-     */
-    function _delete(address user) internal {
-        delete _beneficiary[user];
-    }
-
     function addMultiVesting(Beneficiary[] calldata users) external onlyOwner {
         for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
             _vest(users[i].user, users[i].amount);
-        }
-    }
-
-    function deleteMultiVesting(Beneficiary[] calldata users)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
-            _delete(users[i].user);
         }
     }
 

@@ -35,7 +35,7 @@ error Voting__alreadyVoted();
 error Voting__notYetVoted();
 error Voting__notEnoughVoters();
 
-contract Staking is ReentrancyGuard, Ownable {
+contract Stake is ReentrancyGuard, Ownable {
     /**
      * @notice Constructor since this contract is not meant to be used without inheritance
      * push once to stakeholders for it to work properly

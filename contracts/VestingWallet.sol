@@ -16,39 +16,46 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * Consequently, if the vesting has already started, any amount of tokens sent to this contract will (at least partly)
  * be immediately releasable.
  */
+
 contract VestingWallet is Context {
-    event EtherReleased(uint256 amount);
     event ERC20Released(address indexed token, uint256 amount);
 
     uint256 private _released;
     mapping(address => uint256) private _erc20Released;
-    address private immutable _beneficiary;
-    uint64 private immutable _start;
-    uint64 private immutable _duration;
+    address private _token;
+    address private _beneficiary;
+    uint64 private _start;
+    uint64 private _duration;
+    uint64 private _cliff;
 
     uint256 private lastMonth;
+
+    bool private _initStatus;
 
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
      */
-    constructor(
+
+    function init(
+        address token,
         address beneficiaryAddress,
         uint64 startTimestamp,
-        uint64 durationSeconds
-    ) payable {
+        uint64 durationSeconds,
+        uint64 cliff
+    ) external {
         require(
             beneficiaryAddress != address(0),
             "VestingWallet: beneficiary is zero address"
         );
-        _beneficiary = beneficiaryAddress;
-        _start = startTimestamp;
-        _duration = durationSeconds;
-    }
 
-    /**
-     * @dev The contract should be able to receive Eth.
-     */
-    receive() external payable virtual {}
+        require(_initStatus == false, "Initiated");
+        _initStatus = true;
+        _token = token;
+        _beneficiary = beneficiaryAddress;
+        _start = startTimestamp + cliff;
+        _duration = durationSeconds;
+        _cliff = cliff;
+    }
 
     /**
      * @dev Getter for the beneficiary address.
@@ -72,44 +79,18 @@ contract VestingWallet is Context {
     }
 
     /**
-     * @dev Amount of eth already released
-     */
-    function released() public view virtual returns (uint256) {
-        return _released;
-    }
-
-    /**
      * @dev Amount of token already released
      */
-    function released(address token) public view virtual returns (uint256) {
-        return _erc20Released[token];
-    }
-
-    /**
-     * @dev Getter for the amount of releasable eth.
-     */
-    function releasable() public view virtual returns (uint256) {
-        return vestedAmount(uint64(block.timestamp)) - released();
+    function released() public view virtual returns (uint256) {
+        return _erc20Released[_token];
     }
 
     /**
      * @dev Getter for the amount of releasable `token` tokens. `token` should be the address of an
      * IERC20 contract.
      */
-    function releasable(address token) public view virtual returns (uint256) {
-        return vestedAmount(token, uint64(block.timestamp)) - released(token);
-    }
-
-    /**
-     * @dev Release the native token (ether) that have already vested.
-     *
-     * Emits a {EtherReleased} event.
-     */
-    function release() public virtual {
-        uint256 amount = releasable();
-        _released += amount;
-        emit EtherReleased(amount);
-        Address.sendValue(payable(beneficiary()), amount);
+    function releasable() public view virtual returns (uint256) {
+        return vestedAmount(uint64(block.timestamp)) - released();
     }
 
     /**
@@ -125,13 +106,13 @@ contract VestingWallet is Context {
      *
      * Emits a {ERC20Released} event.
      */
-    function release(address token) public virtual {
-        uint256 amount = releasable(token);
+    function release() public virtual {
+        uint256 amount = releasable();
         if (_currentMonth() > lastMonth) {
             lastMonth = _currentMonth();
-            _erc20Released[token] += amount;
-            emit ERC20Released(token, amount);
-            SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
+            _erc20Released[_token] += amount;
+            emit ERC20Released(_token, amount);
+            SafeERC20.safeTransfer(IERC20(_token), beneficiary(), amount);
         }
     }
 
@@ -144,7 +125,7 @@ contract VestingWallet is Context {
     // }
 
     /**
-     * @dev Calculates the amount of ether that has already vested. Default implementation is a linear vesting curve.
+     * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
      */
     function vestedAmount(uint64 timestamp)
         public
@@ -152,21 +133,9 @@ contract VestingWallet is Context {
         virtual
         returns (uint256)
     {
-        return _vestingSchedule(address(this).balance + released(), timestamp);
-    }
-
-    /**
-     * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
-     */
-    function vestedAmount(address token, uint64 timestamp)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
         return
             _vestingSchedule(
-                IERC20(token).balanceOf(address(this)) + released(token),
+                IERC20(_token).balanceOf(address(this)) + released(),
                 timestamp
             );
     }
