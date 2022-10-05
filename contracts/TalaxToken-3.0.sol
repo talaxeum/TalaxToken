@@ -14,6 +14,39 @@ contract TalaxToken3 is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
 
     constructor() ERC20("MyToken", "MTK") ERC20Permit("MyToken") {}
 
+    fallback() external payable {}
+
+    receive() external payable {}
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function withdrawFunds() external onlyOwner {
+        uint256 thirdOfValue = address(this).balance / 3;
+
+        (bool sent, bytes memory data) = team_and_project_coordinator_address_1
+            .call{value: thirdOfValue}("");
+
+        (
+            bool sent1,
+            bytes memory data1
+        ) = team_and_project_coordinator_address_2.call{value: thirdOfValue}(
+                ""
+            );
+
+        (
+            bool sent2,
+            bytes memory data2
+        ) = team_and_project_coordinator_address_3.call{value: thirdOfValue}(
+                ""
+            );
+
+        if (sent && sent1 && sent2 == true) {
+            revert Transfer__failedToSendEther();
+        }
+    }
+
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
