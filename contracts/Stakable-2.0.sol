@@ -26,10 +26,6 @@ error Staking_noStakingPackageFound();
  * @notice Error handling message for Airdrop functions
  */
 error Airdrop__claimableOnceAWeek();
-<<<<<<< HEAD
-error Airdrop__notYetStarted();
-=======
->>>>>>> d0605172608d881905220f92409976a87c948d7f
 
 /**
  * @notice Error handling message for Voting functions
@@ -155,21 +151,9 @@ contract Staking is ReentrancyGuard, Ownable {
      * _Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container
      * StakeID
      */
-<<<<<<< HEAD
-    function stake(uint256 amount, uint256 stakePeriod)
-        external
-        nonReentrant
-    {
-        // Simple check so that user does not stake 0
-        // require(amount > 0, "Cannot stake nothing");
-        if (amount <= 0) {
-            revert Staking__cannotStakeNothing();
-        }
-=======
     function stake(uint256 amount, uint256 stakePeriod) external nonReentrant {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
->>>>>>> d0605172608d881905220f92409976a87c948d7f
         // require(stakeholders[user].amount == 0, "User is a staker");
         if (stakeholders[msg.sender].amount != 0) {
             revert Staking__userIsStaker();
@@ -263,10 +247,6 @@ contract Staking is ReentrancyGuard, Ownable {
      * Will also _calculateStakeReward and reset timer
      */
 
-<<<<<<< HEAD
-    // ! TODO: ganti function _calculateStakingWithPenalty dan _calculateStakingReward menjadi single return
-=======
->>>>>>> d0605172608d881905220f92409976a87c948d7f
     function withdrawStake() external nonReentrant {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
@@ -356,19 +336,9 @@ contract Staking is ReentrancyGuard, Ownable {
         return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
     }
 
-<<<<<<< HEAD
-    function claimAirdrop(address user) external {
-        if (airdropSince == 0) {
-            revert Airdrop__notYetStarted();
-        }
-
-        // TODO: can be simplified if using address
-        Stake storage staker = stakeholders[user];
-=======
     function claimAirdrop() external {
         // TODO: can be simplified if using address
         Stake storage staker = stakeholders[msg.sender];
->>>>>>> d0605172608d881905220f92409976a87c948d7f
 
         if (staker.amount > 0) {
             if (calculateWeek(staker.latestClaimDrop) == 0) {
@@ -389,63 +359,6 @@ contract Staking is ReentrancyGuard, Ownable {
     /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
     // ! Replaceable with Governance token
 
-<<<<<<< HEAD
-    function getVoters(address user) external view returns (bool, bool) {
-        return (voters[user].votingRight, voters[user].voted[_votingId]);
-    }
-
-    // TODO: can be simplified since not connected directly
-    function startVoting() external nonReentrant onlyOwner {
-        if (_votingStatus == true) {
-            revert Voting__votingIsRunning();
-        }
-
-        _votingStatus = true;
-        _votingId += 1;
-    }
-
-    function vote() public nonReentrant votingStatusTrue isVoter {
-        if (voters[msg.sender].voted[_votingId] == true) {
-            revert Voting__alreadyVoted();
-        }
-
-        voters[msg.sender].voted[_votingId] = true;
-        votedUsers[_votingId] += 1;
-    }
-
-    function retractVote() public nonReentrant votingStatusTrue isVoter {
-        if (voters[msg.sender].voted[_votingId] == false) {
-            revert Voting__notYetVoted();
-        }
-
-        voters[msg.sender].voted[_votingId] == false;
-        votedUsers[_votingId] -= 1;
-    }
-
-    function getVotingResult()
-        external
-        view
-        onlyOwner
-        votingStatusTrue
-        returns (bool)
-    {
-        if (totalVoters <= 1) {
-            revert Voting__notEnoughVoters();
-        }
-        uint256 half_voters = (totalVoters * 5) / 10;
-
-        if (votedUsers[_votingId] > half_voters) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function stopVoting() external onlyOwner votingStatusTrue {
-        _votingStatus = false;
-    }
-}
-=======
     // function getVoters(address user) external view returns (bool, bool) {
     //     return (voters[user].votingRight, voters[user].voted[_votingId]);
     // }
@@ -501,4 +414,3 @@ contract Staking is ReentrancyGuard, Ownable {
     //     _votingStatus = false;
     // }
 }
->>>>>>> d0605172608d881905220f92409976a87c948d7f
