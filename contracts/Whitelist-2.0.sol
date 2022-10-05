@@ -36,6 +36,7 @@ contract WhitelistVesting is Context, Ownable {
     mapping(address => uint256) _beneficiary;
     uint64 private immutable _start;
     uint64 private immutable _duration;
+    uint256 _cliff;
 
     // uint256 private lastMonth;
     mapping(address => uint256) private _lastMonth;
@@ -46,10 +47,12 @@ contract WhitelistVesting is Context, Ownable {
     constructor(
         address token,
         uint64 startTimestamp,
+        uint256 cliff,
         uint64 durationSeconds
     ) payable {
         _token = token;
-        _start = startTimestamp;
+        _cliff = cliff * 30 days;
+        _start = startTimestamp  + _cliff;
         _duration = durationSeconds;
     }
 
@@ -192,8 +195,4 @@ contract WhitelistVesting is Context, Ownable {
             return (totalAllocation * (timestamp - start())) / duration();
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> d0605172608d881905220f92409976a87c948d7f
