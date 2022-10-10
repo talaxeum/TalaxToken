@@ -5,11 +5,11 @@ const vestingFactory = artifacts.require("VestingFactory");
 
 module.exports = async function (deployer, network, accounts) {
     console.log(accounts);
-    let startTimestamp = 0;
-    let [durationPP, cliffPP] = [0, 0];
-    let [durationPS, cliffPS] = [0, 0];
-    let [durationSP, cliffSP] = [0, 0];
-    let [durationTeamAndProjectContributor, cliffTeamAndProjectContributor] = [0, 0];
+    let startTimestamp = 0; //? provide unix date
+    let [durationPS, cliffPS] = [31104000, 5184000]; //? 12 months duration, 2 months cliff
+    let [durationPP, cliffPP] = [36288000, 10368000];
+    let [durationSP, cliffSP] = [93312000, 28512000];
+    let [durationTeamAndProjectContributor, cliffTeamAndProjectContributor] = [93312000, 28512000];
 
     /**
      *! Notes:
@@ -20,20 +20,29 @@ module.exports = async function (deployer, network, accounts) {
      */
     // let [addressTeam1, addressTeam2, addressTeam3, durationTeamAndProjectContributor, cliffTeamAndProjectContributor] =
     //     ["", "", "", 0, 0];
-    let [addressMarketing, durationMarketing, cliffMarketing] = ["0x0000000000000000000000000000000000000001", 0, 0];
+    let [addressPublicSale, durationPublicSale, cliffPublicSale] = [
+        "0x0000000000000000000000000000000000000001",
+        10368000,
+        0,
+    ];
+    let [addressMarketing, durationMarketing, cliffMarketing] = [
+        "0x0000000000000000000000000000000000000001",
+        90720000,
+        0,
+    ];
     let [addressStaking, durationStakingReward, cliffStakingReward] = [
         "0x0000000000000000000000000000000000000001",
-        0,
+        132192000,
         0,
     ];
     let [addressLiquidityReserve, durationLiquidityReserve, cliffLiquidityReserve] = [
         "0x0000000000000000000000000000000000000001",
-        0,
+        132192000,
         0,
     ];
     let [addressProjectLauncherPool, durationProjectLauncherPool, cliffProjectLauncherPool] = [
         "0x0000000000000000000000000000000000000001",
-        0,
+        132192000,
         0,
     ];
 
@@ -77,6 +86,13 @@ module.exports = async function (deployer, network, accounts) {
     );
 
     // //createVestingTeam (can be categorized as whitelist with only 3 beneficiaries)
+    await v_Factory.createVesting(
+        talax.address,
+        addressPublicSale,
+        startTimestamp,
+        durationPublicSale,
+        cliffPublicSale
+    );
     await v_Factory.createVesting(talax.address, addressMarketing, startTimestamp, durationMarketing, cliffMarketing);
     await v_Factory.createVesting(
         talax.address,

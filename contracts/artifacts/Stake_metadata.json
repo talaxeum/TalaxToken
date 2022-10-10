@@ -473,8 +473,8 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": false,
-			"runs": 200
+			"enabled": true,
+			"runs": 1000
 		},
 		"remappings": []
 	},
@@ -528,11 +528,11 @@
 			]
 		},
 		"contracts/Stake-2.0.sol": {
-			"keccak256": "0x4e3f69fede049842ba0d5f9bf7f878f71636add8f4559802a140d2c8de7bdd61",
+			"keccak256": "0xba1ea61744db0748d7cb87c94142c442b0f4cbff0e33f50db5a42b1855b9c894",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://99490caa3e342d4630483757b44aec167577bb0e52d87ec03e9b1b879b616547",
-				"dweb:/ipfs/QmT6po6bjct9y8dSoW26C3yxwTVJDaT4d79dspE8mpTbuh"
+				"bzz-raw://514e845362749a8d7dbf1e2f390b189a45ee54f44ad5f44acbdbf9694a1fe417",
+				"dweb:/ipfs/Qmcg256MBg9Quuc8RgwkXmmvBjrZ6gzKARHXCWoNDa9kGB"
 			]
 		}
 	},

@@ -26,7 +26,6 @@ contract VestingWallet is Context {
     address private _beneficiary;
     uint64 private _start;
     uint64 private _duration;
-    uint64 private _cliff;
 
     uint256 private lastMonth;
 
@@ -54,7 +53,6 @@ contract VestingWallet is Context {
         _beneficiary = beneficiaryAddress;
         _start = startTimestamp + cliff;
         _duration = durationSeconds;
-        _cliff = cliff;
     }
 
     /**
