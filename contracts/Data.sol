@@ -38,10 +38,10 @@ address constant marketing_address_1 = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02d
 address constant marketing_address_2 = 0x1A2118E056D6aF192E233C2c9CFB34e067DED1F8;
 address constant marketing_address_3 = 0x126974fa373267d86fAB6d6871Afe62ccB68e810;
 
-address constant cex_listing_address = address(0);
-address constant staking_reward = address(0);
-address constant liquidity_reserve = address(0);
-address constant dao_pool = address(0);
+address constant cex_listing_address = 0x0000000000000000000000000000000000000001;
+address constant staking_reward = 0x0000000000000000000000000000000000000002;
+address constant liquidity_reserve = 0x0000000000000000000000000000000000000003;
+address constant dao_pool = 0x0000000000000000000000000000000000000004;
 
 /* ------------------------------------ Interfaces Addresses ------------------------------------ */
 // ? IStakable.sol
@@ -52,12 +52,6 @@ address constant dao_pool = address(0);
 address constant stake_address = 0xd9145CCE52D386f254917e481eB44e9943F39138;
 
 // ? IWhitelist.sol
-// Main whitelist addresses
-// address constant private_placement_address = 0xf8e81D47203A594245E36C48e151709F0C19fBe8;
+address constant private_placement_address = 0xf8e81D47203A594245E36C48e151709F0C19fBe8;
 // address constant private_sale_address = address(0);
 // address constant strategic_partner = address(0);
-
-// Testing whitelist addresses
-address constant private_placement_address = 0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8;
-address constant private_sale_address = 0xf8e81D47203A594245E36C48e151709F0C19fBe8;
-address constant strategic_partner = 0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B;
