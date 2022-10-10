@@ -37,7 +37,6 @@ contract Whitelist is Context, Ownable {
     mapping(address => uint256) _beneficiary;
     uint64 private _start;
     uint64 private _duration;
-    uint64 private _cliff;
 
     // uint256 private lastMonth;
     mapping(address => uint256) private _lastMonth;
@@ -58,7 +57,6 @@ contract Whitelist is Context, Ownable {
         _token = token;
         _start = startTimestamp + cliff;
         _duration = durationSeconds;
-        _cliff = cliff;
     }
 
     /**
