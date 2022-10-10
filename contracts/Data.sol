@@ -21,7 +21,7 @@ address constant marketing_address_3 = 0x126974fa373267d86fAB6d6871Afe62ccB68e81
 
 address constant cex_listing_address = address(0);
 address constant staking_reward = address(0);
-address constant liquidity_reserve = address(0);
+address constant liquidity_reserve = 0x0000000000000000000000000000000000000001;
 address constant dao_pool = address(0);
 
 /* ------------------------------------ Interfaces Addresses ------------------------------------ */

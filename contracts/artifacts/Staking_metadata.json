@@ -23,22 +23,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "Function__notAVoter",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Function__votingNotAvailable",
-				"type": "error"
-			},
-			{
-				"inputs": [],
 				"name": "Staking__airdropExceed20Percent",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Staking__cannotStakeNothing",
 				"type": "error"
 			},
 			{
@@ -59,26 +44,6 @@
 			{
 				"inputs": [],
 				"name": "Staking_noStakingPackageFound",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Voting__alreadyVoted",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Voting__notEnoughVoters",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Voting__notYetVoted",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Voting__votingIsRunning",
 				"type": "error"
 			},
 			{
@@ -242,53 +207,10 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "user",
-						"type": "address"
-					}
-				],
+				"inputs": [],
 				"name": "claimAirdrop",
 				"outputs": [],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "user",
-						"type": "address"
-					}
-				],
-				"name": "getVoters",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getVotingResult",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -379,19 +301,7 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "retractVote",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
 				"inputs": [
-					{
-						"internalType": "address",
-						"name": "user",
-						"type": "address"
-					},
 					{
 						"internalType": "uint256",
 						"name": "amount",
@@ -424,20 +334,6 @@
 			{
 				"inputs": [],
 				"name": "startAirdrop",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "startVoting",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "stopVoting",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -477,13 +373,6 @@
 					}
 				],
 				"name": "transferOwnership",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "vote",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -555,16 +444,6 @@
 					{
 						"notice": "Error handling message for Airdrop functions"
 					}
-				],
-				"Staking__cannotStakeNothing()": [
-					{
-						"notice": "Error handling message for Staking functions"
-					}
-				],
-				"Voting__votingIsRunning()": [
-					{
-						"notice": "Error handling message for Voting functions"
-					}
 				]
 			},
 			"events": {
@@ -574,7 +453,7 @@
 			},
 			"kind": "user",
 			"methods": {
-				"stake(address,uint256,uint256)": {
+				"stake(uint256,uint256)": {
 					"notice": "_Stake is used to make a stake for an sender. It will remove the amount staked from the stakers account and place those tokens inside a stake container StakeID"
 				},
 				"withdrawStake()": {
@@ -586,7 +465,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Stakable-2.0.sol": "Staking"
+			"contracts/Stake-2.0.sol": "Staking"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -594,8 +473,8 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": true,
-			"runs": 1000
+			"enabled": false,
+			"runs": 200
 		},
 		"remappings": []
 	},
@@ -648,12 +527,12 @@
 				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
 			]
 		},
-		"contracts/Stakable-2.0.sol": {
-			"keccak256": "0x5109fa58fad29fdc0f670e8ecdd4e721eccff5e80695135da35572e093b0f315",
+		"contracts/Stake-2.0.sol": {
+			"keccak256": "0x551a0b879b267d9ee2c16c7327b0ec768d3a88f0c28887c4cd245cc93de44493",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://7a8d0ec8e1ae16a183f38ce969adf746fb5a847282bbf271809bd9a0c6fec291",
-				"dweb:/ipfs/QmYq41nAogi4ggpisnj3sAVSXbcscBbbL6hmfPyz2wxM1U"
+				"bzz-raw://f39cfb53f204ffd5112ca8c5bb75660065694acbe24d0e63224eb61dc9c90859",
+				"dweb:/ipfs/QmXHBBCodVreC6dPGbefZBMyahJGCyCzWYjk3fKfXRhEQC"
 			]
 		}
 	},

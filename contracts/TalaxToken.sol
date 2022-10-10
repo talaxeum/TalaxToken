@@ -24,7 +24,13 @@ error Tax__maxFivePercent();
 error Ownable__notWalletOwner();
 error Transfer__failedToSendEther();
 
-contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+contract TalaxTokenDeprecated is
+    ERC20,
+    ERC20Burnable,
+    Ownable,
+    ERC20Permit,
+    ERC20Votes
+{
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
