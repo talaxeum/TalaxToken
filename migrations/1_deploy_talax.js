@@ -5,5 +5,5 @@
 
 var MyGovernor = artifacts.require("MyGovernor");
 module.exports = function (deployer, network, accounts) {
-  deployer.deploy(MyGovernor, { from: accounts[0] });
+    deployer.deploy(MyGovernor, { from: accounts[0] });
 };

@@ -17,7 +17,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * Consequently, if the vesting has already started, any amount of tokens sent to this contract will (at least partly)
  * be immediately releasable.
  */
-contract WhitelistVesting is Context, Ownable {
+
+contract Whitelist is Context, Ownable {
     event ERC20Released(
         address indexed token,
         address indexed user,
@@ -34,29 +35,31 @@ contract WhitelistVesting is Context, Ownable {
     address private _token;
     mapping(address => mapping(address => uint256)) private _erc20Released;
     mapping(address => uint256) _beneficiary;
-    uint64 private immutable _start;
-    uint64 private immutable _duration;
+    uint64 private _start;
+    uint64 private _duration;
+    uint64 private _cliff;
 
     // uint256 private lastMonth;
     mapping(address => uint256) private _lastMonth;
 
+    bool private _initStatus;
+
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
      */
-    constructor(
+    function init(
         address token,
         uint64 startTimestamp,
-        uint64 durationSeconds
-    ) payable {
+        uint64 durationSeconds,
+        uint64 cliff
+    ) external {
+        require(_initStatus == false, "Initiated");
+        _initStatus = true;
         _token = token;
-        _start = startTimestamp;
+        _start = startTimestamp + cliff;
         _duration = durationSeconds;
+        _cliff = cliff;
     }
-
-    /**
-     * @dev The contract should be able to receive Eth.
-     */
-    receive() external payable virtual {}
 
     /**
      * @dev Getter for the start timestamp.
@@ -92,7 +95,7 @@ contract WhitelistVesting is Context, Ownable {
      */
 
     function _currentMonth() internal view returns (uint256) {
-        return (uint64(block.timestamp) - start()) / 1 minutes;
+        return (uint64(block.timestamp) - start()) / 30 days;
     }
 
     function _unsafeInc(uint256 x) internal pure returns (uint256) {
