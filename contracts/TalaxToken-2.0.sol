@@ -18,7 +18,7 @@ import "./VestingWallet.sol";
 error Tax__maxFivePercent();
 error Transfer__failedToSendEther();
 
-contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+contract TalaxToken2 is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -72,11 +72,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         // later divided by 100 to make percentage
         taxFee = 1;
 
-        // Staking APY in percentage
-        _stakingPackage[90 days] = 6;
-        _stakingPackage[180 days] = 7;
-        _stakingPackage[365 days] = 8;
-
         /*
          * 1.     Public Sale                   - // Vesting
          * 2.     Private Placement             - // Whitelist (no pattern percentage)
@@ -91,18 +86,14 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
          */
 
         /* --------------------------------------------- TGE -------------------------------------------- */
-        _balances[public_sale_address] = 482624736 * 1e18;
-        _balances[beneficiary_public_sale_address] = 120656184 * 1e18;
+        // _balances[public_sale_address] = 193200 * 1e3 * 1e18;
         // _balances[marketing_address_1] = 14000 * 1e3 * 1e18;
         // _balances[marketing_address_2] = 14000 * 1e3 * 1e18;
         // _balances[marketing_address_3] = 14000 * 1e3 * 1e18;
         // _balances[cex_listing_address] = 525000 * 1e3 * 1e18;
         // _balances[staking_reward] = 56538462 * 1e18;
-        _balances[msg.sender] = 21 * 1e9 * 1e18; // for testing and staging
+        _balances[msg.sender] = 10000 * 1e18; // for testing and staging
         // _balances[address(this)] = 10000 * 1e18; // for testing and staging
-        // _balances[address(this)] = 88846154 * 1e18;
-        // _balances[timeLockController] = 88846154 * 1e18;
-        // _balances[dao_pool] = 100961538 * 1e18;
         /* ---------------------------------------------- - --------------------------------------------- */
 
         // Public Sale, CEX Listing - EOA Type Balance
@@ -298,14 +289,16 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         uint256 tax = (amount * taxFee) / 100;
         uint256 taxedAmount = amount - tax;
 
-        uint256 teamFee = (taxedAmount * 2) / 10;
-        uint256 liquidityFee = (taxedAmount * 8) / 10;
+        uint256 teamFee = (tax * 2) / 10;
+        uint256 liquidityFee = (tax * 8) / 10;
 
         _addThirdOfValue(teamFee);
         _balances[address(this)] = _balances[address(this)] + liquidityFee;
 
         _balances[to] = _balances[to] + taxedAmount;
         emit Transfer(from, to, taxedAmount);
+
+        _afterTokenTransfer(from, to, amount);
     }
 
     function _mint(address account, uint256 amount)
