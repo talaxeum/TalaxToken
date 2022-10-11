@@ -9,8 +9,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @notice Error handling message for Modifier
  */
 error Function__notAuthorized();
-error Function__notAVoter();
-error Function__votingNotAvailable();
 
 /**
  * @notice Error handling message for Staking functions
@@ -28,24 +26,11 @@ error Staking_noStakingPackageFound();
 error Airdrop__notStarted();
 error Airdrop__claimableOnceAWeek();
 
-/**
- * @notice Error handling message for Voting functions
- */
-error Voting__votingIsRunning();
-error Voting__alreadyVoted();
-error Voting__notYetVoted();
-error Voting__notEnoughVoters();
-
 contract Staking is ReentrancyGuard, Ownable {
     /**
      * @notice Constructor since this contract is not meant to be used without inheritance
      * push once to stakeholders for it to work properly
      */
-
-    struct Voter {
-        bool votingRight;
-        mapping(uint256 => bool) voted;
-    }
 
     mapping(uint256 => uint256) internal stakingPackage;
 
@@ -53,12 +38,6 @@ contract Staking is ReentrancyGuard, Ownable {
     uint256 public airdropRate;
     uint256 public airdropSince;
     bool public airdropStatus;
-
-    bool internal _votingStatus;
-    uint256 internal _votingId;
-    uint256 public totalVoters;
-    mapping(address => Voter) public voters;
-    mapping(uint256 => uint256) public votedUsers;
 
     address public token_address;
 
@@ -122,30 +101,6 @@ contract Staking is ReentrancyGuard, Ownable {
 
     /* ------------------------------------------ Modifier ------------------------------------------ */
 
-    function _isVoter() internal view {
-        // require(voters[msg.sender].votingRight == true, "You are not a voter");
-        if (voters[msg.sender].votingRight == false) {
-            revert Function__notAVoter();
-        }
-    }
-
-    modifier isVoter() {
-        _isVoter();
-        _;
-    }
-
-    function _checkVotingStatus() internal view {
-        // require(_votingStatus, "Voting is not available");
-        if (!_votingStatus) {
-            revert Function__votingNotAvailable();
-        }
-    }
-
-    modifier votingStatusTrue() {
-        _checkVotingStatus();
-        _;
-    }
-
     function _checkAirdropStatus() internal view {
         if (!airdropStatus) {
             revert Airdrop__notStarted();
@@ -174,9 +129,6 @@ contract Staking is ReentrancyGuard, Ownable {
         if (stakingPackage[stakePeriod] == 0) {
             revert Staking_noStakingPackageFound();
         }
-
-        totalVoters += 1;
-        voters[msg.sender].votingRight = true;
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -266,8 +218,6 @@ contract Staking is ReentrancyGuard, Ownable {
         uint256 reward = _calculateStakeReward(user_stake);
 
         delete stakeholders[msg.sender];
-        totalVoters -= 1;
-        delete voters[msg.sender].voted[_votingId];
 
         if (user_stake.releaseTime > block.timestamp) {
             (
