@@ -180,9 +180,6 @@ contract Staking is ReentrancyGuard, Ownable {
         view
         returns (uint256)
     {
-        if (user_stake.amount == 0) {
-            return 0;
-        }
         // divided by 1e26 because 1e2 for APY and 1e24 from calculate staking duration
         return
             (user_stake.amount *
@@ -195,9 +192,6 @@ contract Staking is ReentrancyGuard, Ownable {
         view
         returns (uint256, uint256)
     {
-        if (amount == 0) {
-            return (0, 0);
-        }
         return (
             amount - ((amount * stakingPenaltyRate) / 1000),
             reward - ((reward * stakingPenaltyRate) / 1000)
@@ -216,8 +210,11 @@ contract Staking is ReentrancyGuard, Ownable {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
         Stake memory user_stake = stakeholders[msg.sender];
-        uint256 reward = _calculateStakeReward(user_stake);
+        if (user_stake.amount == 0) {
+            revert Staking__noStakingFound();
+        }
 
+        uint256 reward = _calculateStakeReward(user_stake);
         delete stakeholders[msg.sender];
 
         if (user_stake.releaseTime > block.timestamp) {
@@ -243,7 +240,7 @@ contract Staking is ReentrancyGuard, Ownable {
     function hasStake() external view returns (StakingSummary memory) {
         Stake memory user_stake = stakeholders[msg.sender];
         // require(user_stake.amount > 0, "No Stake Found");
-        if (user_stake.amount <= 0) {
+        if (user_stake.amount == 0) {
             revert Staking__noStakingFound();
         }
         StakingSummary memory summary = StakingSummary(0, 0, user_stake);
@@ -303,6 +300,9 @@ contract Staking is ReentrancyGuard, Ownable {
     function claimAirdrop() external airdropStatusTrue {
         // TODO: can be simplified if using address
         Stake storage staker = stakeholders[msg.sender];
+        if (user_stake.amount == 0) {
+            revert Staking__noStakingFound();
+        }
 
         if (staker.amount > 0) {
             if (calculateWeek(staker.latestClaimDrop) == 0) {
