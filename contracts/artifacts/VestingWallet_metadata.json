@@ -236,11 +236,11 @@
 			]
 		},
 		"contracts/VestingWallet.sol": {
-			"keccak256": "0x5898e57d1be683615a86e09130494e9938cd5e530e7220c870d4cfe2389ba17a",
+			"keccak256": "0xa216616edd7f628e77ff2278f2208d138e4806c3a6f76326a3daabd1d0b68ed1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://a858d3b183a8cf4815f9dc4af0f691e44da312362af80cb99d6bcf913c8e2a20",
-				"dweb:/ipfs/QmNkiyV1Kj2LNZCC56YFC1wdAbvUQkzGKqSXtb1wjWRVcD"
+				"bzz-raw://06f64786df4a34f5f6a96776a060e00793f3c6cb2c61d3b0b08899a6be189baf",
+				"dweb:/ipfs/QmSZ8syqKHHfUj3ZcQpdwHMJJdLZ8TG3oN78fzve21WU3y"
 			]
 		}
 	},

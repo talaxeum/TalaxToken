@@ -96,7 +96,7 @@ contract VestingWallet is Context {
      */
 
     function _currentMonth() internal view returns (uint256) {
-        return (uint64(block.timestamp) - start()) / 30 days;
+        return (uint64(block.timestamp) - start()) / 1 minutes;
     }
 
     /**

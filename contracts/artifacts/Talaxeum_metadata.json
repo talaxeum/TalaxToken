@@ -1010,11 +1010,11 @@
 			]
 		},
 		"contracts/TalaxToken.sol": {
-			"keccak256": "0x8c73c38038b9ebcd16261c088a406047e5fc78d147fb7d2fe1dea6a94f2474bc",
+			"keccak256": "0x148bf297820427ab6f4a4636de6ee9de07d3937caadd87991c4dd68365bf9da3",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://bb798e055f0dc721f7f22178d77b714bdd261ccf8baf25bc7b99667b91cfe8fc",
-				"dweb:/ipfs/QmPLpWT8HxYbMhBXauq2VJxxa7Ctk4ehdHc6SpKKoG3ydD"
+				"bzz-raw://426f109127af43731a813bd8d23979f1203bedd79456018003d9bda0df7d5601",
+				"dweb:/ipfs/QmeWfxeEmRU1M84aR3qzeCvXg42UMXTHoCM1GXsCFHX9xo"
 			]
 		}
 	},
