@@ -23,6 +23,11 @@
 			},
 			{
 				"inputs": [],
+				"name": "Airdrop__notStarted",
+				"type": "error"
+			},
+			{
+				"inputs": [],
 				"name": "Staking__airdropExceed20Percent",
 				"type": "error"
 			},
@@ -124,19 +129,6 @@
 			},
 			{
 				"inputs": [],
-				"name": "_blockTimestamp",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "airdropRate",
 				"outputs": [
 					{
@@ -151,6 +143,32 @@
 			{
 				"inputs": [],
 				"name": "airdropSince",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "airdropStatus",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "blockTimestamp",
 				"outputs": [
 					{
 						"internalType": "uint256",
@@ -352,19 +370,6 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "totalVoters",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -375,44 +380,6 @@
 				"name": "transferOwnership",
 				"outputs": [],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "votedUsers",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"name": "voters",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "votingRight",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -440,7 +407,7 @@
 		},
 		"userdoc": {
 			"errors": {
-				"Airdrop__claimableOnceAWeek()": [
+				"Airdrop__notStarted()": [
 					{
 						"notice": "Error handling message for Airdrop functions"
 					}
@@ -465,7 +432,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Stake-2.0.sol": "Staking"
+			"contracts/Staking.sol": "Staking"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -473,8 +440,8 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": true,
-			"runs": 1000
+			"enabled": false,
+			"runs": 200
 		},
 		"remappings": []
 	},
@@ -527,12 +494,12 @@
 				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
 			]
 		},
-		"contracts/Stake-2.0.sol": {
-			"keccak256": "0xdfb784b1c88064f7201966fa4a635c75f7a62f7b6e9ebfd0f2a21498707dd739",
+		"contracts/Staking.sol": {
+			"keccak256": "0x964c630be90215a8df16c59186142fe26e7e85d2ea6afbbfa0d73fab622b7ef6",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://6a10e4cbabefe28a253f228508b835d928a9ce146985b47efff9393ef2d826b0",
-				"dweb:/ipfs/QmRkF5LyGj8otGLCtaRGfoV6NLMVZcCw6AX48Un9Cu82pv"
+				"bzz-raw://12e8ba468b09878c1c1619da4c5f8645a5d4f0d8b473b90740de3cb988ea0385",
+				"dweb:/ipfs/QmZ3ahwLfp1TJEjqPLpbyjB1fVirWaXmDCMRJVw9TTrvcB"
 			]
 		}
 	},
