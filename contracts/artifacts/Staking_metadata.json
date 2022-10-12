@@ -495,11 +495,11 @@
 			]
 		},
 		"contracts/Staking.sol": {
-			"keccak256": "0x964c630be90215a8df16c59186142fe26e7e85d2ea6afbbfa0d73fab622b7ef6",
+			"keccak256": "0x220db513d3628352f6428d95661bc5fadefdb3e00160716f1b18ecde822d0211",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://12e8ba468b09878c1c1619da4c5f8645a5d4f0d8b473b90740de3cb988ea0385",
-				"dweb:/ipfs/QmZ3ahwLfp1TJEjqPLpbyjB1fVirWaXmDCMRJVw9TTrvcB"
+				"bzz-raw://793cea02f2beb47b66b6ad2c694207db50526b2700b54ebdcceaf04e916d4f50",
+				"dweb:/ipfs/QmPTqro4gAHndUr1bqZJUrA5dfJddrabwSeND2WsZAhX3u"
 			]
 		}
 	},

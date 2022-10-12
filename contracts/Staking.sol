@@ -300,7 +300,7 @@ contract Staking is ReentrancyGuard, Ownable {
     function claimAirdrop() external airdropStatusTrue {
         // TODO: can be simplified if using address
         Stake storage staker = stakeholders[msg.sender];
-        if (user_stake.amount == 0) {
+        if (staker.amount == 0) {
             revert Staking__noStakingFound();
         }
 
