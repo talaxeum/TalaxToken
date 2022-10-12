@@ -465,7 +465,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Stake-2.0.sol": "Staking"
+			"contracts/Staking.sol": "Staking"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -527,12 +527,12 @@
 				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
 			]
 		},
-		"contracts/Stake-2.0.sol": {
-			"keccak256": "0xdfb784b1c88064f7201966fa4a635c75f7a62f7b6e9ebfd0f2a21498707dd739",
+		"contracts/Staking.sol": {
+			"keccak256": "0x551a0b879b267d9ee2c16c7327b0ec768d3a88f0c28887c4cd245cc93de44493",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://6a10e4cbabefe28a253f228508b835d928a9ce146985b47efff9393ef2d826b0",
-				"dweb:/ipfs/QmRkF5LyGj8otGLCtaRGfoV6NLMVZcCw6AX48Un9Cu82pv"
+				"bzz-raw://f39cfb53f204ffd5112ca8c5bb75660065694acbe24d0e63224eb61dc9c90859",
+				"dweb:/ipfs/QmXHBBCodVreC6dPGbefZBMyahJGCyCzWYjk3fKfXRhEQC"
 			]
 		}
 	},

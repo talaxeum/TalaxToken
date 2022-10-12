@@ -349,7 +349,7 @@ contract Staking is ReentrancyGuard, Ownable {
             staker.latestClaimDrop = block.timestamp;
 
             SafeERC20.safeTransfer(
-                IERC20(token),
+                IERC20(token_address),
                 msg.sender,
                 _calculateAirdrop(staker.amount)
             );

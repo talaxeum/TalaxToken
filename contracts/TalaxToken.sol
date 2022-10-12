@@ -17,10 +17,10 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     uint256 private taxPercent = 1;
 
     constructor() ERC20("MyToken", "MTK") ERC20Permit("MyToken") {
-        _mint(_msgSender(), 21 * 1e9 * decimals());
+        _mint(_msgSender(), 21 * 1e9 * (10 ** decimals()));
         _mint(
             0x5D0ef486F7bAd84a71fa17D9627887eD82C46FF7,
-            10 * 1e9 * decimals()
+            10 * 1e9 * (10 ** decimals())
         );
     }
 
