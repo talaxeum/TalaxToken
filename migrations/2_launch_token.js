@@ -1,5 +1,5 @@
 const talaxToken = artifacts.require("TalaxToken");
-const stakeContract = artifacts.require("Stake");
+const stakeContract = artifacts.require("Staking");
 const whiteListFactory = artifacts.require("WhitelistFactory");
 const vestingFactory = artifacts.require("VestingFactory");
 

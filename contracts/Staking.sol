@@ -9,8 +9,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @notice Error handling message for Modifier
  */
 error Function__notAuthorized();
-error Function__notAVoter();
-error Function__votingNotAvailable();
 
 /**
  * @notice Error handling message for Staking functions
@@ -25,15 +23,8 @@ error Staking_noStakingPackageFound();
 /**
  * @notice Error handling message for Airdrop functions
  */
+error Airdrop__notStarted();
 error Airdrop__claimableOnceAWeek();
-
-/**
- * @notice Error handling message for Voting functions
- */
-error Voting__votingIsRunning();
-error Voting__alreadyVoted();
-error Voting__notYetVoted();
-error Voting__notEnoughVoters();
 
 contract Staking is ReentrancyGuard, Ownable {
     /**
@@ -41,22 +32,12 @@ contract Staking is ReentrancyGuard, Ownable {
      * push once to stakeholders for it to work properly
      */
 
-    struct Voter {
-        bool votingRight;
-        mapping(uint256 => bool) voted;
-    }
-
     mapping(uint256 => uint256) internal stakingPackage;
 
     uint256 public stakingPenaltyRate;
     uint256 public airdropRate;
     uint256 public airdropSince;
-
-    bool internal _votingStatus;
-    uint256 internal _votingId;
-    uint256 public totalVoters;
-    mapping(address => Voter) public voters;
-    mapping(uint256 => uint256) public votedUsers;
+    bool public airdropStatus;
 
     address public token_address;
 
@@ -120,27 +101,14 @@ contract Staking is ReentrancyGuard, Ownable {
 
     /* ------------------------------------------ Modifier ------------------------------------------ */
 
-    function _isVoter() internal view {
-        // require(voters[msg.sender].votingRight == true, "You are not a voter");
-        if (voters[msg.sender].votingRight == false) {
-            revert Function__notAVoter();
+    function _checkAirdropStatus() internal view {
+        if (!airdropStatus) {
+            revert Airdrop__notStarted();
         }
     }
 
-    modifier isVoter() {
-        _isVoter();
-        _;
-    }
-
-    function _checkVotingStatus() internal view {
-        // require(_votingStatus, "Voting is not available");
-        if (!_votingStatus) {
-            revert Function__votingNotAvailable();
-        }
-    }
-
-    modifier votingStatusTrue() {
-        _checkVotingStatus();
+    modifier airdropStatusTrue() {
+        _checkAirdropStatus();
         _;
     }
 
@@ -162,9 +130,6 @@ contract Staking is ReentrancyGuard, Ownable {
         if (stakingPackage[stakePeriod] == 0) {
             revert Staking_noStakingPackageFound();
         }
-
-        totalVoters += 1;
-        voters[msg.sender].votingRight = true;
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -215,9 +180,6 @@ contract Staking is ReentrancyGuard, Ownable {
         view
         returns (uint256)
     {
-        if (user_stake.amount == 0) {
-            return 0;
-        }
         // divided by 1e26 because 1e2 for APY and 1e24 from calculate staking duration
         return
             (user_stake.amount *
@@ -230,9 +192,6 @@ contract Staking is ReentrancyGuard, Ownable {
         view
         returns (uint256, uint256)
     {
-        if (amount == 0) {
-            return (0, 0);
-        }
         return (
             amount - ((amount * stakingPenaltyRate) / 1000),
             reward - ((reward * stakingPenaltyRate) / 1000)
@@ -251,11 +210,12 @@ contract Staking is ReentrancyGuard, Ownable {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
         Stake memory user_stake = stakeholders[msg.sender];
-        uint256 reward = _calculateStakeReward(user_stake);
+        if (user_stake.amount == 0) {
+            revert Staking__noStakingFound();
+        }
 
+        uint256 reward = _calculateStakeReward(user_stake);
         delete stakeholders[msg.sender];
-        totalVoters -= 1;
-        delete voters[msg.sender].voted[_votingId];
 
         if (user_stake.releaseTime > block.timestamp) {
             (
@@ -280,7 +240,7 @@ contract Staking is ReentrancyGuard, Ownable {
     function hasStake() external view returns (StakingSummary memory) {
         Stake memory user_stake = stakeholders[msg.sender];
         // require(user_stake.amount > 0, "No Stake Found");
-        if (user_stake.amount <= 0) {
+        if (user_stake.amount == 0) {
             revert Staking__noStakingFound();
         }
         StakingSummary memory summary = StakingSummary(0, 0, user_stake);
@@ -310,6 +270,7 @@ contract Staking is ReentrancyGuard, Ownable {
 
     function startAirdrop() external onlyOwner {
         airdropSince = block.timestamp;
+        airdropStatus = true;
     }
 
     function changeAirdropPercentage(uint256 amount) external onlyOwner {
@@ -320,7 +281,7 @@ contract Staking is ReentrancyGuard, Ownable {
         emit AirdropChanged(amount);
     }
 
-    function _blockTimestamp() public view returns (uint256) {
+    function blockTimestamp() public view returns (uint256) {
         return block.timestamp;
     }
 
@@ -336,9 +297,12 @@ contract Staking is ReentrancyGuard, Ownable {
         return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
     }
 
-    function claimAirdrop() external {
+    function claimAirdrop() external airdropStatusTrue {
         // TODO: can be simplified if using address
         Stake storage staker = stakeholders[msg.sender];
+        if (user_stake.amount == 0) {
+            revert Staking__noStakingFound();
+        }
 
         if (staker.amount > 0) {
             if (calculateWeek(staker.latestClaimDrop) == 0) {
@@ -355,62 +319,4 @@ contract Staking is ReentrancyGuard, Ownable {
             );
         }
     }
-
-    /* -------------------------------- Voting Functions for DAO Pool ------------------------------- */
-    // ! Replaceable with Governance token
-
-    // function getVoters(address user) external view returns (bool, bool) {
-    //     return (voters[user].votingRight, voters[user].voted[_votingId]);
-    // }
-
-    // // TODO: can be simplified since not connected directly
-    // function startVoting() external nonReentrant onlyOwner {
-    //     if (_votingStatus == true) {
-    //         revert Voting__votingIsRunning();
-    //     }
-
-    //     _votingStatus = true;
-    //     _votingId += 1;
-    // }
-
-    // function vote() public nonReentrant votingStatusTrue isVoter {
-    //     if (voters[msg.sender].voted[_votingId] == true) {
-    //         revert Voting__alreadyVoted();
-    //     }
-
-    //     voters[msg.sender].voted[_votingId] = true;
-    //     votedUsers[_votingId] += 1;
-    // }
-
-    // function retractVote() public nonReentrant votingStatusTrue isVoter {
-    //     if (voters[msg.sender].voted[_votingId] == false) {
-    //         revert Voting__notYetVoted();
-    //     }
-
-    //     voters[msg.sender].voted[_votingId] == false;
-    //     votedUsers[_votingId] -= 1;
-    // }
-
-    // function getVotingResult()
-    //     external
-    //     view
-    //     onlyOwner
-    //     votingStatusTrue
-    //     returns (bool)
-    // {
-    //     if (totalVoters <= 1) {
-    //         revert Voting__notEnoughVoters();
-    //     }
-    //     uint256 half_voters = (totalVoters * 5) / 10;
-
-    //     if (votedUsers[_votingId] > half_voters) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
-
-    // function stopVoting() external onlyOwner votingStatusTrue {
-    //     _votingStatus = false;
-    // }
 }
