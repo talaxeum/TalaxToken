@@ -11,18 +11,18 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 import "./Data.sol";
 
-error Transfer__failedToSendEther();
-
 contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     uint256 private taxPercent = 1;
 
     constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
-        _mint(_msgSender(), 21 * 1e9 * decimals());
+        _mint(_msgSender(), 21 * 1e9 * 10**decimals());
         _mint(
             0x5D0ef486F7bAd84a71fa17D9627887eD82C46FF7,
             10 * 1e9 * decimals()
         );
     }
+
+    event ChangeTaxPercentage(uint256 tax);
 
     fallback() external payable {}
 
@@ -52,9 +52,7 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
                 ""
             );
 
-        if (sent && sent1 && sent2 == true) {
-            revert Transfer__failedToSendEther();
-        }
+        require(sent && sent1 && sent2 == true, "Failed to send Ether");
     }
 
     function withdrawFunds(address token) external {
@@ -74,6 +72,11 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
             team_and_project_coordinator_address_3,
             thirdOfValue
         );
+    }
+
+    function changeTax(uint256 tax) external onlyOwner {
+        taxPercent = tax;
+        emit ChangeTaxPercentage(tax);
     }
 
     function mint(address to, uint256 amount) public onlyOwner {

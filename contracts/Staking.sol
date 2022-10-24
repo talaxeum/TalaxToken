@@ -5,27 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/**
- * @notice Error handling message for Modifier
- */
-error Function__notAuthorized();
-
-/**
- * @notice Error handling message for Staking functions
- */
-error Staking__cannotStakeNothing();
-error Staking__userIsStaker();
-error Staking__penaltyExceed3Percent();
-error Staking__airdropExceed20Percent();
-error Staking__noStakingFound();
-error Staking_noStakingPackageFound();
-
-/**
- * @notice Error handling message for Airdrop functions
- */
-error Airdrop__notStarted();
-error Airdrop__claimableOnceAWeek();
-
 contract Staking is ReentrancyGuard, Ownable {
     /**
      * @notice Constructor since this contract is not meant to be used without inheritance
@@ -102,9 +81,7 @@ contract Staking is ReentrancyGuard, Ownable {
     /* ------------------------------------------ Modifier ------------------------------------------ */
 
     function _checkAirdropStatus() internal view {
-        if (!airdropStatus) {
-            revert Airdrop__notStarted();
-        }
+        require(airdropStatus == true, "Airdrop not started");
     }
 
     modifier airdropStatusTrue() {
@@ -123,13 +100,9 @@ contract Staking is ReentrancyGuard, Ownable {
         // Simple check so that user does not stake 0
         // require(amount > 0, "Cannot stake nothing");
         // require(stakeholders[user].amount == 0, "User is a staker");
-        if (stakeholders[msg.sender].amount != 0) {
-            revert Staking__userIsStaker();
-        }
 
-        if (stakingPackage[stakePeriod] == 0) {
-            revert Staking_noStakingPackageFound();
-        }
+        require(stakeholders[msg.sender].amount == 0, "User is a Staker");
+        require(stakingPackage[stakePeriod] != 0, "Package not Found");
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -159,9 +132,7 @@ contract Staking is ReentrancyGuard, Ownable {
 
     function changePenaltyFee(uint256 amount) external onlyOwner {
         // require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
-        if (amount > 30) {
-            revert Staking__penaltyExceed3Percent();
-        }
+        require(amount <= 30, "Penalty max 30%");
         stakingPenaltyRate = amount;
         emit PenaltyChanged(amount);
     }
@@ -210,9 +181,7 @@ contract Staking is ReentrancyGuard, Ownable {
         // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
         Stake memory user_stake = stakeholders[msg.sender];
-        if (user_stake.amount == 0) {
-            revert Staking__noStakingFound();
-        }
+        require(user_stake.amount != 0, "Staking not found");
 
         uint256 reward = _calculateStakeReward(user_stake);
         delete stakeholders[msg.sender];
@@ -239,10 +208,7 @@ contract Staking is ReentrancyGuard, Ownable {
 
     function hasStake() external view returns (StakingSummary memory) {
         Stake memory user_stake = stakeholders[msg.sender];
-        // require(user_stake.amount > 0, "No Stake Found");
-        if (user_stake.amount == 0) {
-            revert Staking__noStakingFound();
-        }
+        require(user_stake.amount != 0, "Staking not found");
         StakingSummary memory summary = StakingSummary(0, 0, user_stake);
 
         uint256 reward = _calculateStakeReward(user_stake);
@@ -274,9 +240,7 @@ contract Staking is ReentrancyGuard, Ownable {
     }
 
     function changeAirdropPercentage(uint256 amount) external onlyOwner {
-        if (amount > 200) {
-            revert Staking__airdropExceed20Percent();
-        }
+        require(amount <= 200, "Airdrop max 20%");
         airdropRate = amount;
         emit AirdropChanged(amount);
     }
@@ -299,23 +263,21 @@ contract Staking is ReentrancyGuard, Ownable {
 
     function claimAirdrop() external airdropStatusTrue {
         // TODO: can be simplified if using address
-        Stake storage staker = stakeholders[msg.sender];
-        if (user_stake.amount == 0) {
-            revert Staking__noStakingFound();
-        }
+        Stake storage user_stake = stakeholders[msg.sender];
 
-        if (staker.amount > 0) {
-            if (calculateWeek(staker.latestClaimDrop) == 0) {
-                revert Airdrop__claimableOnceAWeek();
-            }
+        require(user_stake.amount != 0, "Staking not found");
+        uint256 latestClaim = calculateWeek(user_stake.latestClaimDrop);
 
-            staker.claimableAirdrop = 0;
-            staker.latestClaimDrop = block.timestamp;
+        if (user_stake.amount > 0) {
+            require(latestClaim != 0, "Claimable once a week");
+
+            user_stake.claimableAirdrop = 0;
+            user_stake.latestClaimDrop = block.timestamp;
 
             SafeERC20.safeTransfer(
                 IERC20(token_address),
                 msg.sender,
-                _calculateAirdrop(staker.amount)
+                _calculateAirdrop(user_stake.amount)
             );
         }
     }

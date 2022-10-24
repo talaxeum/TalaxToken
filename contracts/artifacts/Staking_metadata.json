@@ -17,41 +17,6 @@
 				"type": "constructor"
 			},
 			{
-				"inputs": [],
-				"name": "Airdrop__claimableOnceAWeek",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Airdrop__notStarted",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Staking__airdropExceed20Percent",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Staking__noStakingFound",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Staking__penaltyExceed3Percent",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Staking__userIsStaker",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "Staking_noStakingPackageFound",
-				"type": "error"
-			},
-			{
 				"anonymous": false,
 				"inputs": [
 					{
@@ -406,13 +371,6 @@
 			"version": 1
 		},
 		"userdoc": {
-			"errors": {
-				"Airdrop__notStarted()": [
-					{
-						"notice": "Error handling message for Airdrop functions"
-					}
-				]
-			},
 			"events": {
 				"Staked(address,uint256,uint256,uint256)": {
 					"notice": "Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable"
@@ -495,11 +453,11 @@
 			]
 		},
 		"contracts/Staking.sol": {
-			"keccak256": "0x964c630be90215a8df16c59186142fe26e7e85d2ea6afbbfa0d73fab622b7ef6",
+			"keccak256": "0xa2e67b2cfbc8dd6b797acca925e6d1f654c92384786ca04a0017ce6ff3a83e13",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://12e8ba468b09878c1c1619da4c5f8645a5d4f0d8b473b90740de3cb988ea0385",
-				"dweb:/ipfs/QmZ3ahwLfp1TJEjqPLpbyjB1fVirWaXmDCMRJVw9TTrvcB"
+				"bzz-raw://9316dc579ad697c9050301149065b6766b8c0abf5195d7af5bc577bb3ddf7dd5",
+				"dweb:/ipfs/QmRAuqxhM1DTYPoyd71W5H8WL9yz2NhMeXFNb6npZwApxm"
 			]
 		}
 	},
