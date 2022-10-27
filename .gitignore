@@ -1,12 +1,5 @@
-abi.txt
-bytecode.txt
-.env
-
-.prettierrc
-metamask.secret
-.secret*
-node_modules/
-build/
+artifacts/
+cache/
 .DS_Store
 
 # Logs
