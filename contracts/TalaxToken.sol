@@ -169,7 +169,7 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     event ChangePrivatePlacementAddress(address indexed to);
 
     event ChangeStrategicPartnerAddress(
-        address indexed from,
+        address from,
         address indexed to1,
         address indexed to2,
         address indexed to3
