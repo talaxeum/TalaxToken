@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Multilockable {
+contract Whitelist {
     using SafeMath for uint256;
     uint256 public privateSaleUsers;
 

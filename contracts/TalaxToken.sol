@@ -1,19 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.11;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 import "./Data.sol";
-import "./Stakable.sol";
-import "./Lockable.sol";
-import "./Multilockable.sol";
 
-contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
-    using SafeMath for uint256;
+contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+    uint256 private taxPercent = 1;
 
     mapping(address => uint256) private _balances;
 
@@ -24,8 +23,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     string private _name;
     string private _symbol;
 
-    mapping(uint256 => uint256) internal _stakingPackage;
-    uint256 public stakingReward;
     uint256 public daoProjectPool;
     uint8 public taxFee;
 
@@ -148,13 +145,37 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
         );
     }
 
-    fallback() external payable {
-        // Add any ethers send to this address to team and project coordinators addresses
-        _addThirdOfValue(msg.value);
+    event ChangeTaxPercentage(uint256 tax);
+
+    fallback() external payable {}
+
+    receive() external payable {}
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 
-    receive() external payable {
-        _addThirdOfValue(msg.value);
+    function withdrawFunds() external {
+        uint256 thirdOfValue = address(this).balance / 3;
+
+        (bool sent, bytes memory data) = team_and_project_coordinator_address_1
+            .call{value: thirdOfValue}("");
+
+        (
+            bool sent1,
+            bytes memory data1
+        ) = team_and_project_coordinator_address_2.call{value: thirdOfValue}(
+                ""
+            );
+
+        (
+            bool sent2,
+            bytes memory data2
+        ) = team_and_project_coordinator_address_3.call{value: thirdOfValue}(
+                ""
+            );
+
+        require(sent && sent1 && sent2 == true, "Failed to send Ether");
     }
 
     /* ---------------------------------------------------------------------------------------------- */
@@ -247,265 +268,64 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
             fromBalance >= amount,
             "ERC20: transfer amount exceeds balance"
         );
-        unchecked {
-            _balances[from] = fromBalance - amount;
-        }
-
-        uint256 tax = SafeMath.div(SafeMath.mul(amount, taxFee), 100);
-        uint256 taxedAmount = SafeMath.sub(amount, tax);
-
-        uint256 teamFee = SafeMath.div(SafeMath.mul(taxedAmount, 2), 10);
-        uint256 liquidityFee = SafeMath.div(SafeMath.mul(taxedAmount, 8), 10);
-
-        _addThirdOfValue(teamFee);
-        _balances[address(this)] = _balances[address(this)].add(liquidityFee);
-
-        _balances[to] = _balances[to].add(taxedAmount);
-        emit Transfer(from, to, taxedAmount);
-    }
-
-    /**
-     * @notice ERC20 FUNCTIONS
-     */
-
-    /**
-     * @dev Returns the name of the token.
-     */
-    function name() public view override returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() public view override returns (string memory) {
-        return _symbol;
-    }
-
-    /**
-     * @dev See {IERC20-totalSupply}.
-     */
-    function totalSupply() public view override returns (uint256) {
-        return _totalSupply;
-    }
-
-    /**
-     * @dev See {IERC20-balanceOf}.
-     */
-    function balanceOf(address account) public view override returns (uint256) {
-        return _balances[account];
-    }
-
-    /**
-     * @dev See {IERC20-transfer}.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     * - the caller must have a balance of at least `amount`.
-     */
-    function transfer(address to, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
-        address owner = _msgSender();
-        _transfer(owner, to, amount);
-        return true;
-    }
-
-    /**
-     * @dev See {IERC20-allowance}.
-     */
-    function allowance(address owner, address spender)
-        public
-        view
-        override
-        returns (uint256)
-    {
-        return _allowances[owner][spender];
-    }
-
-    /**
-     * @dev See {IERC20-approve}.
-     *
-     * NOTE: If `amount` is the maximum `uint256`, the allowance is not updated on
-     * `transferFrom`. This is semantically equivalent to an infinite approval.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    function approve(address spender, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
-        address owner = _msgSender();
-        _approve(owner, spender, amount);
-        return true;
-    }
-
-    /**
-     * @dev See {IERC20-transferFrom}.
-     *
-     * Emits an {Approval} event indicating the updated allowance. This is not
-     * required by the EIP. See the note at the beginning of {ERC20}.
-     *
-     * NOTE: Does not update the allowance if the current allowance
-     * is the maximum `uint256`.
-     *
-     * Requirements:
-     *
-     * - `from` and `to` cannot be the zero address.
-     * - `from` must have a balance of at least `amount`.
-     * - the caller must have allowance for ``from``'s tokens of at least
-     * `amount`.
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public override returns (bool) {
-        address spender = _msgSender();
-        _spendAllowance(from, spender, amount);
-        _transfer(from, to, amount);
-        return true;
-    }
-
-    /**
-     * @dev Atomically increases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    function increaseAllowance(address spender, uint256 addedValue)
-        public
-        override
-        returns (bool)
-    {
-        address owner = _msgSender();
-        _approve(owner, spender, allowance(owner, spender) + addedValue);
-        return true;
-    }
-
-    /**
-     * @dev Atomically decreases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     * - `spender` must have allowance for the caller of at least
-     * `subtractedValue`.
-     */
-    function decreaseAllowance(address spender, uint256 subtractedValue)
-        public
-        override
-        returns (bool)
-    {
-        address owner = _msgSender();
-        uint256 currentAllowance = allowance(owner, spender);
-        require(
-            currentAllowance >= subtractedValue,
-            "ERC20: decreased allowance below zero"
+        SafeERC20.safeTransfer(
+            IERC20(token),
+            team_and_project_coordinator_address_2,
+            thirdOfValue
         );
-        unchecked {
-            _approve(owner, spender, currentAllowance - subtractedValue);
-        }
+        SafeERC20.safeTransfer(
+            IERC20(token),
+            team_and_project_coordinator_address_3,
+            thirdOfValue
+        );
+    }
 
-        return true;
+    function changeTax(uint256 tax) external onlyOwner {
+        taxPercent = tax;
+        emit ChangeTaxPercentage(tax);
     }
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 
-    /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
-     *
-     * Emits a {Transfer} event with `to` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     * - `account` must have at least `amount` tokens.
-     */
-    function _burn(address account, uint256 amount) internal override {
-        require(account != address(0), "ERC20: burn from the zero address");
+    function transfer(address to, uint256 amount)
+        public
+        override
+        returns (bool)
+    {
+        address owner = _msgSender();
 
-        _beforeTokenTransfer(account, address(0), amount);
+        uint256 tax = (amount * taxPercent) / 100;
+        uint256 taxedAmount = amount - tax;
 
-        uint256 accountBalance = _balances[account];
-        require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
-        unchecked {
-            _balances[account] = accountBalance - amount;
-        }
-        _totalSupply -= amount;
+        uint256 teamFee = (tax * 2) / 10;
+        uint256 liquidityFee = (tax * 8) / 10;
 
-        emit Transfer(account, address(0), amount);
+        _transfer(owner, team_and_project_coordinator_address_1, (teamFee / 3));
+        _transfer(owner, team_and_project_coordinator_address_2, (teamFee / 3));
+        _transfer(owner, team_and_project_coordinator_address_3, (teamFee / 3));
+        _transfer(owner, liquidity_reserve, liquidityFee);
+        _transfer(owner, to, taxedAmount);
+        return true;
     }
 
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the `owner` s tokens.
-     *
-     * This internal function is equivalent to `approve`, and can be used to
-     * e.g. set automatic allowances for certain subsystems, etc.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `owner` cannot be the zero address.
-     * - `spender` cannot be the zero address.
-     */
-    function _approve(
-        address owner,
-        address spender,
+    // The following functions are overrides required by Solidity.
+
+    function _transfer(
+        address from,
+        address to,
         uint256 amount
     ) internal override {
-        require(owner != address(0), "ERC20: approve from the zero address");
-        require(spender != address(0), "ERC20: approve to the zero address");
-
-        _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, amount);
+        super._transfer(from, to, amount);
     }
 
-    /**
-     * @dev Updates `owner` s allowance for `spender` based on spent `amount`.
-     *
-     * Does not update the allowance amount in case of infinite allowance.
-     * Revert if not enough allowance is available.
-     *
-     * Might emit an {Approval} event.
-     */
-    function _spendAllowance(
-        address owner,
-        address spender,
+    function _afterTokenTransfer(
+        address from,
+        address to,
         uint256 amount
-    ) internal override {
-        uint256 currentAllowance = allowance(owner, spender);
-        if (currentAllowance != type(uint256).max) {
-            require(
-                currentAllowance >= amount,
-                "ERC20: insufficient allowance"
-            );
-            unchecked {
-                _approve(owner, spender, currentAllowance - amount);
-            }
-        }
+    ) internal override(ERC20, ERC20Votes) {
+        super._afterTokenTransfer(from, to, amount);
     }
 
     function _addThirdOfValue(uint256 amount_) internal {
@@ -611,52 +431,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
     function changeAirdropPercentage(uint256 airdrop_) external onlyOwner {
         _changeAirdropPercentage(airdrop_);
         emit ChangeAirdropPercentage(_msgSender(), airdrop_);
-    }
-
-    /* ------------------------ Stake function with burn function ------------------------ */
-    function stake(uint256 _amount, uint256 _stakePeriod) external {
-        // Make sure staker actually is good for it
-        require(
-            _stakePeriod == 90 days ||
-                _stakePeriod == 180 days ||
-                _stakePeriod == 365 days,
-            "Staking option doesnt exist"
-        );
-
-        // Burn the amount of tokens on the sender
-        _burn(_msgSender(), _amount);
-
-        _stake(
-            msg.sender,
-            _amount,
-            _stakePeriod,
-            _stakingPackage[_stakePeriod]
-        );
-
-        // Stake amount goes to liquidity reserve
-        _balances[address(this)] = _balances[address(this)].add(_amount);
-    }
-
-    /* ---- withdrawStake is used to withdraw stakes from the account holder ---- */
-    function withdrawStake() external {
-        (uint256 amount_, uint256 reward_) = _withdrawStake(msg.sender);
-        // Return staked tokens to user
-        // Amount staked on liquidity reserved goes to the user
-        // Staking reward, calculated from Stakable.sol, is minted and substracted
-        mintStakingReward(reward_);
-        _balances[address(this)] = _balances[address(this)].sub(amount_);
-        stakingReward = stakingReward.sub(reward_);
-        _totalSupply = _totalSupply.add(amount_);
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            amount_ + reward_
-        );
-    }
-
-    function claimAirdrop() external isInitialize {
-        require(airdropStatus == true, "Airdrop not yet started");
-        uint256 airdrop = _claimAirdrop(_msgSender());
-        _balances[address(this)] = _balances[address(this)].sub(airdrop);
-        _balances[_msgSender()] = _balances[_msgSender()].add(airdrop);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -817,53 +591,15 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable, Stakable, Multilockable {
 
     function _checkBeneficiaryAmount(uint256 amount)
         internal
-        view
-        isInitialize
+        override(ERC20, ERC20Votes)
     {
-        require(amount != 0, "Amount cannot be zero");
+        super._mint(to, amount);
     }
 
-    function unsafeInc(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            return x + 1;
-        }
-    }
-
-    function addMultipleBeneficiary(Beneficiary[] calldata benefs)
-        external
-        onlyOwner
-        isInitialize
+    function _burn(address account, uint256 amount)
+        internal
+        override(ERC20, ERC20Votes)
     {
-        require(benefs.length > 0, "Nothing to add");
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            _checkBeneficiaryAmount(benefs[i].amount);
-            _addBeneficiary(benefs[i].user, benefs[i].amount);
-        }
-        emit AddPrivateSale(msg.sender, benefs);
-    }
-
-    // function deleteBeneficiary(address user) external onlyOwner {
-    //     require(privateSaleStatus == true, "Private Sale not yet started");
-    //     uint256 amount = _deleteBeneficiary(user);
-    //     privateSale += amount;
-    //     emit DeletePrivateSale(msg.sender, user);
-    // }
-
-    function deleteMultipleBeneficiary(address[] calldata benefs)
-        external
-        onlyOwner
-        isInitialize
-    {
-        require(benefs.length > 0, "Nothing to delete");
-        for (uint256 i = 0; i < benefs.length; i = unsafeInc(i)) {
-            _deleteBeneficiary(benefs[i]);
-        }
-        emit DeletePrivateSale(msg.sender, benefs);
-    }
-
-    function claimPrivateSale() external isInitialize {
-        _balances[_msgSender()] = _balances[_msgSender()].add(
-            _releaseClaimable(_msgSender())
-        );
+        super._burn(account, amount);
     }
 }
