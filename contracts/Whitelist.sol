@@ -5,15 +5,17 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Whitelist {
     using SafeMath for uint256;
-    uint256 public privateSaleUsers;
+    uint256 public users;
 
-    uint256 public privateSaleAmount;
+    uint256 public amount;
     uint256 internal constant _phase1 = 73395000 * 1e18;
     uint256 internal constant _phase2 = 3820562 * 1e18; // daily limit
 
-    uint256 public startPrivateSale;
+    uint256 public start;
 
-    struct Multilock {
+    address internal _owner;
+
+    struct UserList {
         uint256 lockedAmount;
         uint256 amount;
         bool isPhase1Claimed;
@@ -21,17 +23,31 @@ contract Whitelist {
     }
 
     // beneficiary of tokens after they are released
-    mapping(address => Multilock) private beneficiary;
+    mapping(address => UserList) private beneficiary;
 
     constructor() {
-        privateSaleAmount = 1467900000 * 1e18;
+        amount = 1467900000 * 1e18;
+        _owner = msg.sender;
     }
 
-    function _initiatePrivateSale() internal {
-        startPrivateSale = block.timestamp;
+    /**
+     * @dev modifier functions
+     */
+
+    function _onlyTalax() internal view {
+        require(msg.sender == _owner, "Not _owner");
     }
 
-    function hasMultilockable() external view returns (Multilock memory) {
+    modifier onlyTalax() {
+        _onlyTalax();
+        _;
+    }
+
+    function initiateWhitelist() external onlyTalax {
+        start = block.timestamp;
+    }
+
+    function hasUserListable() external view returns (UserList memory) {
         return beneficiary[msg.sender];
     }
 
@@ -45,7 +61,7 @@ contract Whitelist {
     {
         uint256 claimable;
 
-        uint256 lockDuration = (block.timestamp - startPrivateSale) / 1 days;
+        uint256 lockDuration = (block.timestamp - start) / 1 days;
 
         //Phase 1 of locked wallet release - monthly
         if (lockDuration < 16 * 30) {
@@ -53,7 +69,7 @@ contract Whitelist {
                 claimable = claimable.add(
                     SafeMath.div(
                         SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
-                        privateSaleAmount
+                        amount
                     )
                 );
                 beneficiary[user].isPhase1Claimed = true;
@@ -66,7 +82,7 @@ contract Whitelist {
                 claimable = claimable.add(
                     SafeMath.div(
                         SafeMath.mul(_phase1, beneficiary[user].lockedAmount),
-                        privateSaleAmount
+                        amount
                     )
                 );
                 beneficiary[user].isPhase1Claimed = true;
@@ -79,7 +95,7 @@ contract Whitelist {
                 claimable.add(
                     SafeMath.div(
                         SafeMath.mul(_phase2, beneficiary[user].lockedAmount),
-                        privateSaleAmount
+                        amount
                     )
                 );
             beneficiary[user].latestClaimDay = lockDuration;
@@ -89,8 +105,8 @@ contract Whitelist {
         return claimable;
     }
 
-    function _addBeneficiary(address user_, uint256 amount_) internal {
-        require(amount_ <= privateSaleAmount, "Insufficient Total Balance");
+    function addBeneficiary(address user_, uint256 amount_) external onlyTalax {
+        require(amount_ <= amount, "Insufficient Total Balance");
         require(beneficiary[user_].amount == 0, "Cannot add Registered User");
 
         beneficiary[user_].lockedAmount = amount_;
@@ -98,14 +114,18 @@ contract Whitelist {
         beneficiary[user_].isPhase1Claimed = false;
         beneficiary[user_].latestClaimDay = 1;
 
-        privateSaleUsers += 1;
-        privateSaleAmount -= amount_;
+        users += 1;
+        amount -= amount_;
     }
 
-    function _deleteBeneficiary(address user_) internal returns (uint256) {
+    function deleteBeneficiary(address user_)
+        external
+        onlyTalax
+        returns (uint256)
+    {
         require(beneficiary[user_].amount != 0, "User not Registered");
-        privateSaleUsers -= 1;
-        privateSaleAmount += beneficiary[user_].amount;
+        users -= 1;
+        amount += beneficiary[user_].amount;
         uint256 ex_amount = beneficiary[user_].amount;
 
         delete beneficiary[user_];
@@ -115,7 +135,11 @@ contract Whitelist {
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function _releaseClaimable(address user_) internal returns (uint256) {
+    function releaseClaimable(address user_)
+        external
+        onlyTalax
+        returns (uint256)
+    {
         require(beneficiary[user_].amount > 0, "No Tokens Left");
 
         uint256 claimableLockedAmount = _calculateClaimableAmount(user_);
