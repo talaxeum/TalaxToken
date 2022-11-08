@@ -35,7 +35,7 @@ contract Whitelist {
      */
 
     function _onlyTalax() internal view {
-        require(msg.sender == _owner, "Not _owner");
+        require(msg.sender == _owner, "Not owner");
     }
 
     modifier onlyTalax() {

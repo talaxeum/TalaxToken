@@ -60,12 +60,6 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         // later divided by 100 to make percentage
         taxFee = 1;
 
-        /* --------------------------------------------- TGE -------------------------------------------- */
-        _balances[public_sale_address] = 120656184 * 1e18;
-        //! Private Sale
-        //! Seed Sale
-        _balances[liquidity_reserve_address] = 4200000 * 1e3 * 1e18;
-
         /* ------------------------------------------- Vesting ------------------------------------------ */
         publicSaleVesting = new Vesting(0, public_sale_address);
         teamAndProjectVesting = new Vesting(
@@ -81,6 +75,12 @@ contract TalaxToken is ERC20, ERC20Burnable, Ownable {
         privateSaleWhitelist = new Whitelist();
         seedSaleWhitelist = new Whitelist();
         strategicPartnerWhitelist = new Whitelist();
+
+        /* --------------------------------------------- TGE -------------------------------------------- */
+        _balances[public_sale_address] = 120656184 * 1e18;
+        _balances[address(privateSaleWhitelist)] = 212957757 * 1e18;
+        _balances[address(seedSaleWhitelist)] = 118811070 * 1e18;
+        _balances[liquidity_reserve_address] = 4200000 * 1e3 * 1e18;
 
         // Vesting -> Public Sale, Team, Marketing, Staking Reward, Liquidity Reserve, Dao Pool
         // Whitelist -> Private Sale, Seed Sale, Strategic Partner
