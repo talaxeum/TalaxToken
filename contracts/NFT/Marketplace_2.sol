@@ -3,6 +3,7 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Check out https://github.com/Fantom-foundation/Artion-Contracts/blob/5c90d2bc0401af6fb5abf35b860b762b31dfee02/contracts/FantomMarketplace.sol
 // For a full decentralized nft marketplace
@@ -19,10 +20,15 @@ error PriceMustBeAboveZero();
 // Error thrown for isNotOwner modifier
 // error IsNotOwner()
 
-contract NftMarketplace is ReentrancyGuard {
+contract TalaxNftMarketplace is ReentrancyGuard {
     struct Listing {
         uint256 price;
         address seller;
+    }
+
+    struct Bid {
+        uint256 price;
+        address buyer;
     }
 
     event ItemListed(
@@ -45,6 +51,30 @@ contract NftMarketplace is ReentrancyGuard {
         uint256 price
     );
 
+    event BidCreated(
+        address indexed buyer,
+        address indexed nftAddress,
+        uint256 indexed tokenId,
+        uint256 offeringPrice
+    );
+
+    event BidCancelled(
+        address indexed buyer,
+        address indexed nftAddress,
+        uint256 indexed tokenId
+    );
+
+    event BidAccepted(
+        address indexed buyer,
+        address indexed nftAddress,
+        uint256 indexed tokenId,
+        uint256 price
+    )
+
+    address token;
+
+    mapping(address => mapping(uint256 => mapping(address => Bid)))
+        private s_offerings;
     mapping(address => mapping(uint256 => Listing)) private s_listings;
     mapping(address => uint256) private s_proceeds;
 
@@ -80,7 +110,7 @@ contract NftMarketplace is ReentrancyGuard {
     // IsNotOwner Modifier - Nft Owner can't buy his/her NFT
     // Modifies buyItem function
     // Owner should only list, cancel listing or update listing
-    /* modifier isNotOwner(
+    modifier isNotOwner(
         address nftAddress,
         uint256 tokenId,
         address spender
@@ -91,7 +121,15 @@ contract NftMarketplace is ReentrancyGuard {
             revert IsNotOwner();
         }
         _;
-    } */
+    }
+
+    /////////////////////
+    //   Constructor   //
+    /////////////////////
+
+    constructor(address _token) {
+        token = _token;
+    }
 
     /////////////////////
     // Main Functions //
@@ -136,6 +174,62 @@ contract NftMarketplace is ReentrancyGuard {
         emit ItemCanceled(msg.sender, nftAddress, tokenId);
     }
 
+    function createBid(
+        address nftAddress,
+        uint256 tokenId,
+        uint256 price
+    )
+        external
+        payable
+        isListed(nftAddress, tokenId)
+        isNotOwner(nftAddress, tokenId, msg.sender)
+        nonReentrant
+    {
+        if (price <= 0) {
+            revert PriceMustBeAboveZero();
+        }
+
+        s_offerings[nftAddress][tokenId][msg.sender] = Bid(price,msg.sender);
+        emit BidCreated(msg.sender,nftAddress,tokenId,price);
+    }
+
+    function cancelBid(address nftAddress, uint256 tokenId)
+        external
+        isListed(nftAddress, tokenId)
+        nonReentrant
+    {
+        delete (s_offerings[nftAddress][tokenId][msg.sender]);
+        emit BidCancelled(msg.sender, nftAddress, tokenId);
+    }
+
+    function acceptBid(
+        address nftAddress,
+        uint256 tokenId,
+        address buyer
+    )
+        external
+        isListed(nftAddress, tokenId)
+        nonReentrant
+        isOwner(nftAddress, tokenId, msg.sender)
+    {
+        Listing memory listedItem = s_listings[nftAddress][tokenId];
+        Bid memory bidding = s_offerings[nftAddress][tokenId][buyer];
+        delete (s_listings[nftAddress][tokenId]);
+        delete (s_offerings[nftAddress][tokenId][buyer]);
+        SafeERC20.safeTransferFrom(
+            IERC20(token),
+            bidding.buyer,
+            msg.sender,
+            bidding.price
+        );
+        IERC721(nftAddress).safeTransferFrom(
+            listedItem.seller,
+            msg.sender,
+            tokenId
+        );
+        emit BidAccepted(msg.sender, nftAddress, tokenId, listedItem.price);
+    }
+
     /**
      * @notice Method for buying listing
      * @notice The owner of an NFT could unapprove the marketplace,
@@ -148,7 +242,7 @@ contract NftMarketplace is ReentrancyGuard {
         external
         payable
         isListed(nftAddress, tokenId)
-        // isNotOwner(nftAddress, tokenId, msg.sender)
+        isNotOwner(nftAddress, tokenId, msg.sender)
         nonReentrant
     {
         // Challenge - How would you refactor this contract to take:
@@ -156,13 +250,16 @@ contract NftMarketplace is ReentrancyGuard {
         // 2. Be able to set prices in other currencies?
         // 3. Tweet me @PatrickAlphaC if you come up with a solution!
         Listing memory listedItem = s_listings[nftAddress][tokenId];
-        if (msg.value < listedItem.price) {
-            revert PriceNotMet(nftAddress, tokenId, listedItem.price);
-        }
-        s_proceeds[listedItem.seller] += msg.value;
+
         // Could just send the money...
         // https://fravoll.github.io/solidity-patterns/pull_over_push.html
         delete (s_listings[nftAddress][tokenId]);
+        SafeERC20.safeTransferFrom(
+            IERC20(token),
+            msg.sender,
+            listedItem.seller,
+            amount
+        );
         IERC721(nftAddress).safeTransferFrom(
             listedItem.seller,
             msg.sender,
@@ -198,15 +295,15 @@ contract NftMarketplace is ReentrancyGuard {
     /**
      * @notice Method for withdrawing proceeds from sales
      */
-    function withdrawProceeds() external {
-        uint256 proceeds = s_proceeds[msg.sender];
-        if (proceeds <= 0) {
-            revert NoProceeds();
-        }
-        s_proceeds[msg.sender] = 0;
-        (bool success, ) = payable(msg.sender).call{value: proceeds}("");
-        require(success, "Transfer failed");
-    }
+    // function withdrawProceeds() external {
+    //     uint256 proceeds = s_proceeds[msg.sender];
+    //     if (proceeds <= 0) {
+    //         revert NoProceeds();
+    //     }
+    //     s_proceeds[msg.sender] = 0;
+    //     (bool success, ) = payable(msg.sender).call{value: proceeds}("");
+    //     require(success, "Transfer failed");
+    // }
 
     /////////////////////
     // Getter Functions //
