@@ -27,10 +27,8 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable {
     }
 
     function withdrawFunds() external {
-        uint256 thirdOfValue = address(this).balance / 3;
-
         (bool sent, ) = team_and_project_coordinator_address.call{
-            value: thirdOfValue
+            value: address(this).balance
         }("");
 
         require(sent == true, "Failed to send Ether");
