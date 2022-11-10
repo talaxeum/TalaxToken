@@ -24,6 +24,7 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
     constructor() ERC721("NAME", "SYMBOL") {}
 
     function init(
+        address _minter,
         address _token,
         address _escrowAddress,
         uint96 _royaltyPercentage
@@ -32,6 +33,7 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
         token = _token;
         escrowAddress = _escrowAddress;
         royaltyPercentage = _royaltyPercentage * 100;
+        transferOwnership(_minter);
     }
 
     function supportsInterface(bytes4 interfaceId)

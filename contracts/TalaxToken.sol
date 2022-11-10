@@ -35,42 +35,18 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     function withdrawFunds() external {
         uint256 thirdOfValue = address(this).balance / 3;
 
-        (bool sent, bytes memory data) = team_and_project_coordinator_address_1
-            .call{value: thirdOfValue}("");
+        (bool sent, ) = team_and_project_coordinator_address.call{
+            value: thirdOfValue
+        }("");
 
-        (
-            bool sent1,
-            bytes memory data1
-        ) = team_and_project_coordinator_address_2.call{value: thirdOfValue}(
-                ""
-            );
-
-        (
-            bool sent2,
-            bytes memory data2
-        ) = team_and_project_coordinator_address_3.call{value: thirdOfValue}(
-                ""
-            );
-
-        require(sent && sent1 && sent2 == true, "Failed to send Ether");
+        require(sent == true, "Failed to send Ether");
     }
 
     function withdrawFunds(address token) external {
-        uint256 thirdOfValue = IERC20(token).balanceOf(address(this)) / 3;
         SafeERC20.safeTransfer(
             IERC20(token),
-            team_and_project_coordinator_address_1,
-            thirdOfValue
-        );
-        SafeERC20.safeTransfer(
-            IERC20(token),
-            team_and_project_coordinator_address_2,
-            thirdOfValue
-        );
-        SafeERC20.safeTransfer(
-            IERC20(token),
-            team_and_project_coordinator_address_3,
-            thirdOfValue
+            team_and_project_coordinator_address,
+            IERC20(token).balanceOf(address(this))
         );
     }
 
@@ -96,10 +72,8 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         uint256 teamFee = (tax * 2) / 10;
         uint256 liquidityFee = (tax * 8) / 10;
 
-        _transfer(owner, team_and_project_coordinator_address_1, (teamFee / 3));
-        _transfer(owner, team_and_project_coordinator_address_2, (teamFee / 3));
-        _transfer(owner, team_and_project_coordinator_address_3, (teamFee / 3));
-        _transfer(owner, liquidity_reserve, liquidityFee);
+        _transfer(owner, team_and_project_coordinator_address, teamFee);
+        _transfer(owner, liquidity_reserve_address, liquidityFee);
         _transfer(owner, to, taxedAmount);
         return true;
     }

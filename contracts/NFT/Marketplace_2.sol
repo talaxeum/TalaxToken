@@ -14,6 +14,7 @@ error NotListed(address nftAddress, uint256 tokenId);
 error AlreadyListed(address nftAddress, uint256 tokenId);
 error NoProceeds();
 error NotOwner();
+error IsNotOwner();
 error NotApprovedForMarketplace();
 error PriceMustBeAboveZero();
 
@@ -69,9 +70,9 @@ contract TalaxNftMarketplace is ReentrancyGuard {
         address indexed nftAddress,
         uint256 indexed tokenId,
         uint256 price
-    )
+    );
 
-    address token;
+    address private token;
 
     mapping(address => mapping(uint256 => mapping(address => Bid)))
         private s_offerings;
@@ -189,8 +190,8 @@ contract TalaxNftMarketplace is ReentrancyGuard {
             revert PriceMustBeAboveZero();
         }
 
-        s_offerings[nftAddress][tokenId][msg.sender] = Bid(price,msg.sender);
-        emit BidCreated(msg.sender,nftAddress,tokenId,price);
+        s_offerings[nftAddress][tokenId][msg.sender] = Bid(price, msg.sender);
+        emit BidCreated(msg.sender, nftAddress, tokenId, price);
     }
 
     function cancelBid(address nftAddress, uint256 tokenId)
@@ -258,7 +259,7 @@ contract TalaxNftMarketplace is ReentrancyGuard {
             IERC20(token),
             msg.sender,
             listedItem.seller,
-            amount
+            listedItem.price
         );
         IERC721(nftAddress).safeTransferFrom(
             listedItem.seller,
