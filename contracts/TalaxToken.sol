@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 import "./Data.sol";
 
-contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+contract TalaxToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     uint256 private taxPercent = 1;
 
     constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
@@ -33,10 +33,8 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     function withdrawFunds() external {
-        uint256 thirdOfValue = address(this).balance / 3;
-
         (bool sent, ) = team_and_project_coordinator_address.call{
-            value: thirdOfValue
+            value: address(this).balance
         }("");
 
         require(sent == true, "Failed to send Ether");

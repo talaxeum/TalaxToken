@@ -70,8 +70,8 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/TalaxToken.sol": {
-      "lastModificationDate": 1668053279974,
-      "contentHash": "8716ed4d75f4d347b2e39a981862cb72",
+      "lastModificationDate": 1668393020547,
+      "contentHash": "d7524e7b6f44e4c84f1125bddb56ab8e",
       "sourceName": "contracts/TalaxToken.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -107,10 +107,10 @@
         "./Data.sol"
       ],
       "versionPragmas": [
-        "^0.8.4"
+        "0.8.11"
       ],
       "artifacts": [
-        "Talaxeum"
+        "TalaxToken"
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
