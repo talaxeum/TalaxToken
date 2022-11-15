@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 // OpenZeppelin Contracts (last updated v4.7.0) (finance/VestingWallet.sol)
-pragma solidity 0.8.11;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title VestingWallet
@@ -17,7 +18,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * be immediately releasable.
  */
 
-contract VestingWallet is Context {
+contract VestingWallet is Context, Ownable {
     event ERC20Released(address indexed token, uint256 amount);
 
     uint256 private _released;
@@ -41,13 +42,13 @@ contract VestingWallet is Context {
         uint64 startTimestamp,
         uint64 durationSeconds,
         uint64 cliff
-    ) external {
+    ) external onlyOwner {
         require(
             beneficiaryAddress != address(0),
             "VestingWallet: beneficiary is zero address"
         );
 
-        require(_initStatus == false, "Initiated");
+        require(!_initStatus, "Initiated");
         _initStatus = true;
         _token = token;
         _beneficiary = beneficiaryAddress;

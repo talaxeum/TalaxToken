@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 // OpenZeppelin Contracts (last updated v4.7.0) (finance/VestingWallet.sol)
-pragma solidity 0.8.11;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -51,8 +51,8 @@ contract Whitelist is Context, Ownable {
         uint64 startTimestamp,
         uint64 durationSeconds,
         uint64 cliff
-    ) external {
-        require(_initStatus == false, "Initiated");
+    ) external onlyOwner {
+        require(!_initStatus, "Initiated");
         _initStatus = true;
         _token = token;
         _start = startTimestamp + cliff;
