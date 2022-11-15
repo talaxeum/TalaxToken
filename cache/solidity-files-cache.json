@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Data.sol": {
-      "lastModificationDate": 1668053209457,
+      "lastModificationDate": 1668389970593,
       "contentHash": "8f81835768052503878340381d75f176",
       "sourceName": "contracts/Data.sol",
       "solcConfig": {
@@ -34,45 +34,10 @@
       ],
       "artifacts": []
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol": {
-      "lastModificationDate": 1668052701540,
-      "contentHash": "2337f0279507b5edf14a07067adf0d05",
-      "sourceName": "@openzeppelin/contracts/utils/math/SafeMath.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "SafeMath"
-      ]
-    },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/TalaxToken.sol": {
-      "lastModificationDate": 1668393020547,
-      "contentHash": "d7524e7b6f44e4c84f1125bddb56ab8e",
-      "sourceName": "contracts/TalaxToken.sol",
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Talaxeum.sol": {
+      "lastModificationDate": 1668409859902,
+      "contentHash": "fc9f5a1607913748498c07b8e21873c9",
+      "sourceName": "contracts/Talaxeum.sol",
       "solcConfig": {
         "version": "0.8.11",
         "settings": {
@@ -110,7 +75,7 @@
         "0.8.11"
       ],
       "artifacts": [
-        "TalaxToken"
+        "Talaxeum"
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
@@ -525,41 +490,6 @@
         "IERC20Permit"
       ]
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/utils/Counters.sol": {
-      "lastModificationDate": 1668052701530,
-      "contentHash": "74654e3ae5d7f39555055dfe244dab7a",
-      "sourceName": "@openzeppelin/contracts/utils/Counters.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Counters"
-      ]
-    },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol": {
       "lastModificationDate": 1668052701540,
       "contentHash": "fe1190dbb6431c2464246925713f0f7f",
@@ -595,6 +525,41 @@
       ],
       "artifacts": [
         "ECDSA"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/utils/Counters.sol": {
+      "lastModificationDate": 1668052701530,
+      "contentHash": "74654e3ae5d7f39555055dfe244dab7a",
+      "sourceName": "@openzeppelin/contracts/utils/Counters.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Counters"
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/utils/cryptography/EIP712.sol": {
@@ -1191,10 +1156,10 @@
         "DoubleEndedQueue"
       ]
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol": {
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol": {
       "lastModificationDate": 1668052701545,
-      "contentHash": "d75bd1fe3635665c9468947aa4c13bd5",
-      "sourceName": "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol",
+      "contentHash": "9d29fbf7536b618ba423373e26d690bc",
+      "sourceName": "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol",
       "solcConfig": {
         "version": "0.8.11",
         "settings": {
@@ -1219,57 +1184,18 @@
         }
       },
       "imports": [
-        "./IGovernorTimelock.sol",
-        "../Governor.sol",
-        "../TimelockController.sol"
+        "../Governor.sol"
       ],
       "versionPragmas": [
         "^0.8.0"
       ],
       "artifacts": [
-        "GovernorTimelockControl"
-      ]
-    },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/IGovernorTimelock.sol": {
-      "lastModificationDate": 1668052701545,
-      "contentHash": "eebb17e144c4fd58549d815db19552da",
-      "sourceName": "@openzeppelin/contracts/governance/extensions/IGovernorTimelock.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../IGovernor.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "IGovernorTimelock"
+        "GovernorCountingSimple"
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/governance/Governance.sol": {
-      "lastModificationDate": 1668048088900,
-      "contentHash": "635aec6959e8c1de631fe2dca65b4803",
+      "lastModificationDate": 1668415977433,
+      "contentHash": "e424f6064a6abc592e7b756520a957d0",
       "sourceName": "contracts/governance/Governance.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1300,7 +1226,8 @@
         "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol",
         "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol",
         "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol",
-        "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol"
+        "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
       ],
       "versionPragmas": [
         "0.8.11"
@@ -1346,43 +1273,6 @@
         "GovernorSettings"
       ]
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol": {
-      "lastModificationDate": 1668052701545,
-      "contentHash": "9d29fbf7536b618ba423373e26d690bc",
-      "sourceName": "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../Governor.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "GovernorCountingSimple"
-      ]
-    },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/GovernorVotes.sol": {
       "lastModificationDate": 1668052701545,
       "contentHash": "d5ec18eb16b8452e749ee7d3aaa304b1",
@@ -1419,6 +1309,45 @@
       ],
       "artifacts": [
         "GovernorVotes"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol": {
+      "lastModificationDate": 1668052701545,
+      "contentHash": "d75bd1fe3635665c9468947aa4c13bd5",
+      "sourceName": "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IGovernorTimelock.sol",
+        "../Governor.sol",
+        "../TimelockController.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "GovernorTimelockControl"
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol": {
@@ -1460,6 +1389,43 @@
         "GovernorVotesQuorumFraction"
       ]
     },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/governance/extensions/IGovernorTimelock.sol": {
+      "lastModificationDate": 1668052701545,
+      "contentHash": "eebb17e144c4fd58549d815db19552da",
+      "sourceName": "@openzeppelin/contracts/governance/extensions/IGovernorTimelock.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IGovernor.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IGovernorTimelock"
+      ]
+    },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/utils/Checkpoints.sol": {
       "lastModificationDate": 1668052701530,
       "contentHash": "fc44afad5696dcf2d3b9494f2be47f2d",
@@ -1499,7 +1465,7 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/governance/ERC20Votes.sol": {
-      "lastModificationDate": 1668048088900,
+      "lastModificationDate": 1668389970649,
       "contentHash": "cb1e640af3e9b16dc1c5b747b0ed9c00",
       "sourceName": "contracts/governance/ERC20Votes.sol",
       "solcConfig": {
@@ -1656,10 +1622,10 @@
         "IERC721Metadata"
       ]
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol": {
-      "lastModificationDate": 1668052701546,
-      "contentHash": "8af32effd0536e2971ff8496812a5016",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/NFT/Marketplace_2.sol": {
+      "lastModificationDate": 1668418425554,
+      "contentHash": "633c0a38e715694c3bf09e8878c06df4",
+      "sourceName": "contracts/NFT/Marketplace_2.sol",
       "solcConfig": {
         "version": "0.8.11",
         "settings": {
@@ -1684,17 +1650,208 @@
         }
       },
       "imports": [
-        "../ERC721.sol"
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"
       ],
+      "versionPragmas": [
+        "0.8.11"
+      ],
+      "artifacts": [
+        "TalaxNftMarketplace"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol": {
+      "lastModificationDate": 1668052701530,
+      "contentHash": "a8e2d1c30042f64ed89c9d4157eb6cb9",
+      "sourceName": "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
       "versionPragmas": [
         "^0.8.0"
       ],
       "artifacts": [
-        "ERC721URIStorage"
+        "ReentrancyGuard"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Staking.sol": {
+      "lastModificationDate": 1667896705410,
+      "contentHash": "2885dfe8bdd40b7895014860a685bbf3",
+      "sourceName": "contracts/Staking.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.11"
+      ],
+      "artifacts": [
+        "Staking"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Whitelist.sol": {
+      "lastModificationDate": 1668393055210,
+      "contentHash": "a7eccdfa6a801ac805788579a5173e88",
+      "sourceName": "contracts/Whitelist.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/Address.sol",
+        "@openzeppelin/contracts/utils/Context.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.11"
+      ],
+      "artifacts": [
+        "Whitelist"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Factory/WhitelistFactory.sol": {
+      "lastModificationDate": 1668389970594,
+      "contentHash": "9db592510a7e4d82f9a72e7490bb6c53",
+      "sourceName": "contracts/Factory/WhitelistFactory.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Whitelist.sol",
+        "@openzeppelin/contracts/proxy/Clones.sol",
+        "@openzeppelin/contracts/utils/Counters.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.11"
+      ],
+      "artifacts": [
+        "WhitelistFactory"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/proxy/Clones.sol": {
+      "lastModificationDate": 1668052701530,
+      "contentHash": "11535a839f5494023c396098504f5646",
+      "sourceName": "@openzeppelin/contracts/proxy/Clones.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Clones"
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/NFT/ProjectNameNFT.sol": {
-      "lastModificationDate": 1668052995330,
+      "lastModificationDate": 1668389970594,
       "contentHash": "c7f1b09a3e8acb3ce3e2091779787546",
       "sourceName": "contracts/NFT/ProjectNameNFT.sol",
       "solcConfig": {
@@ -1736,7 +1893,7 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/NFT/ProjectNameEscrow.sol": {
-      "lastModificationDate": 1668048088830,
+      "lastModificationDate": 1668389970594,
       "contentHash": "a03c865c0e0cb1639b33e77f437abb13",
       "sourceName": "contracts/NFT/ProjectNameEscrow.sol",
       "solcConfig": {
@@ -1812,6 +1969,43 @@
         "ERC2981"
       ]
     },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol": {
+      "lastModificationDate": 1668052701546,
+      "contentHash": "8af32effd0536e2971ff8496812a5016",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC721URIStorage"
+      ]
+    },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/interfaces/IERC2981.sol": {
       "lastModificationDate": 1668052701530,
       "contentHash": "608566bc5327454ba54e487e7c226ff6",
@@ -1850,7 +2044,7 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/NFT/NFTFactory.sol": {
-      "lastModificationDate": 1668053087786,
+      "lastModificationDate": 1668389970594,
       "contentHash": "698db13e6de70361ef698b417d48adb9",
       "sourceName": "contracts/NFT/NFTFactory.sol",
       "solcConfig": {
@@ -1889,123 +2083,8 @@
         "NFTFactory"
       ]
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/proxy/Clones.sol": {
-      "lastModificationDate": 1668052701530,
-      "contentHash": "11535a839f5494023c396098504f5646",
-      "sourceName": "@openzeppelin/contracts/proxy/Clones.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Clones"
-      ]
-    },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Whitelist.sol": {
-      "lastModificationDate": 1668052740091,
-      "contentHash": "a7eccdfa6a801ac805788579a5173e88",
-      "sourceName": "contracts/Whitelist.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/utils/Address.sol",
-        "@openzeppelin/contracts/utils/Context.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "0.8.11"
-      ],
-      "artifacts": [
-        "Whitelist"
-      ]
-    },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Factory/WhitelistFactory.sol": {
-      "lastModificationDate": 1668048088829,
-      "contentHash": "9db592510a7e4d82f9a72e7490bb6c53",
-      "sourceName": "contracts/Factory/WhitelistFactory.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../Whitelist.sol",
-        "@openzeppelin/contracts/proxy/Clones.sol",
-        "@openzeppelin/contracts/utils/Counters.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "0.8.11"
-      ],
-      "artifacts": [
-        "WhitelistFactory"
-      ]
-    },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Factory/VestingFactory.sol": {
-      "lastModificationDate": 1668052762709,
+      "lastModificationDate": 1668389970593,
       "contentHash": "c863416bd6b3f99e4b08bbf1e7df6e41",
       "sourceName": "contracts/Factory/VestingFactory.sol",
       "solcConfig": {
@@ -2045,8 +2124,8 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Vesting.sol": {
-      "lastModificationDate": 1668052743281,
-      "contentHash": "6ac70db4c5a8708add1ae98d97ad39ea",
+      "lastModificationDate": 1668411015094,
+      "contentHash": "1b511ebf8f3555eaf592023a3e11a94d",
       "sourceName": "contracts/Vesting.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2083,121 +2162,8 @@
         "VestingWallet"
       ]
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Staking.sol": {
-      "lastModificationDate": 1667896705410,
-      "contentHash": "2885dfe8bdd40b7895014860a685bbf3",
-      "sourceName": "contracts/Staking.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "0.8.11"
-      ],
-      "artifacts": [
-        "Staking"
-      ]
-    },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol": {
-      "lastModificationDate": 1668052701530,
-      "contentHash": "a8e2d1c30042f64ed89c9d4157eb6cb9",
-      "sourceName": "@openzeppelin/contracts/security/ReentrancyGuard.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "ReentrancyGuard"
-      ]
-    },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/NFT/Marketplace_2.sol": {
-      "lastModificationDate": 1668052860575,
-      "contentHash": "8d1c1dc6835eeacbb53db05c915885ef",
-      "sourceName": "contracts/NFT/Marketplace_2.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
-        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"
-      ],
-      "versionPragmas": [
-        "0.8.11"
-      ],
-      "artifacts": [
-        "TalaxNftMarketplace"
-      ]
-    },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/NFT/Marketplace_1.sol": {
-      "lastModificationDate": 1668048088829,
+      "lastModificationDate": 1668389970594,
       "contentHash": "f85732d76fdaa97d1433336ffee729a8",
       "sourceName": "contracts/NFT/Marketplace_1.sol",
       "solcConfig": {
@@ -2236,7 +2202,7 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/governance/moralis_dao.sol": {
-      "lastModificationDate": 1668048088936,
+      "lastModificationDate": 1668389970684,
       "contentHash": "05bfb7e69275711ea170d5a33d7f191c",
       "sourceName": "contracts/governance/moralis_dao.sol",
       "solcConfig": {

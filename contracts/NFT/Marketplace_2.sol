@@ -25,6 +25,7 @@ contract TalaxNftMarketplace is ReentrancyGuard {
     struct Listing {
         uint256 price;
         address seller;
+        uint256 endDate;
     }
 
     struct Bid {
@@ -36,7 +37,8 @@ contract TalaxNftMarketplace is ReentrancyGuard {
         address indexed seller,
         address indexed nftAddress,
         uint256 indexed tokenId,
-        uint256 price
+        uint256 price,
+        uint256 endDate
     );
 
     event ItemCanceled(
@@ -92,6 +94,9 @@ contract TalaxNftMarketplace is ReentrancyGuard {
         if (listing.price <= 0) {
             revert NotListed(nftAddress, tokenId);
         }
+        if (listing.endDate > block.timestamp) {
+            revert NotListed(nftAddress, tokenId);
+        }
         _;
     }
 
@@ -140,11 +145,13 @@ contract TalaxNftMarketplace is ReentrancyGuard {
      * @param nftAddress Address of NFT contract
      * @param tokenId Token ID of NFT
      * @param price sale price for each item
+     * @param duration listing duration for each item
      */
     function listItem(
         address nftAddress,
         uint256 tokenId,
-        uint256 price
+        uint256 price,
+        uint256 duration
     )
         external
         notListed(nftAddress, tokenId)
@@ -157,8 +164,19 @@ contract TalaxNftMarketplace is ReentrancyGuard {
         if (nft.getApproved(tokenId) != address(this)) {
             revert NotApprovedForMarketplace();
         }
-        s_listings[nftAddress][tokenId] = Listing(price, msg.sender);
-        emit ItemListed(msg.sender, nftAddress, tokenId, price);
+
+        s_listings[nftAddress][tokenId] = Listing(
+            price,
+            msg.sender,
+            block.timestamp + duration
+        );
+        emit ItemListed(
+            msg.sender,
+            nftAddress,
+            tokenId,
+            price,
+            block.timestamp + duration
+        );
     }
 
     /**
@@ -278,7 +296,8 @@ contract TalaxNftMarketplace is ReentrancyGuard {
     function updateListing(
         address nftAddress,
         uint256 tokenId,
-        uint256 newPrice
+        uint256 newPrice,
+        uint256 additionalDuration
     )
         external
         isListed(nftAddress, tokenId)
@@ -290,7 +309,10 @@ contract TalaxNftMarketplace is ReentrancyGuard {
             revert PriceMustBeAboveZero();
         }
         s_listings[nftAddress][tokenId].price = newPrice;
-        emit ItemListed(msg.sender, nftAddress, tokenId, newPrice);
+
+        uint256 newEndDate = s_listings[nftAddress][tokenId].endDate +
+            additionalDuration;
+        emit ItemListed(msg.sender, nftAddress, tokenId, newPrice, newEndDate);
     }
 
     /**
