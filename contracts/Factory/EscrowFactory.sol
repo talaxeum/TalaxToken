@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
-import "./ProjectNameEscrow.sol";
+import "../ERC721/ProjectNameEscrow.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -27,7 +27,7 @@ contract EscrowFactory is Ownable {
         returns (address)
     {
         address project = Clones.clone(_masterContract);
-        ProjectNameNFT(project).init(tokenAddress);
+        ProjectNameEscrow(project).init(tokenAddress);
         projects[_counter.current()] = project;
         _counter.increment();
         return project;

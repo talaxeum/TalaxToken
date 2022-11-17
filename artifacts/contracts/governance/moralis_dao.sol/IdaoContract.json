@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
   "contractName": "IdaoContract",
-  "sourceName": "contracts/governance/moralis_dao.sol",
+  "sourceName": "contracts/Governance/moralis_dao.sol",
   "abi": [
     {
       "inputs": [
