@@ -20,7 +20,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
  */
-contract NFTEscrow is Ownable {
+contract Escrow is Ownable {
     using Address for address payable;
 
     event Deposited(address indexed payee, uint256 weiAmount);
