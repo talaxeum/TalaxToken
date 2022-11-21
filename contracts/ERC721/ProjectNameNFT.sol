@@ -87,7 +87,9 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
     function claimReward(uint256 tokenId) external {
         require(ownerOf(tokenId) == msg.sender, "Not eligible to claim reward");
         uint256 contractBalance = IERC20(token).balanceOf(address(this));
-        uint256 capstone = ProjectNameEscrow(escrowAddress).finalCap();
+        uint256 capstone = ProjectNameEscrow(escrowAddress).getCapstone(
+            address(this)
+        );
         uint256 reward = (tokenPrices[tokenId] * contractBalance) / capstone;
         SafeERC20.safeTransfer(IERC20(token), msg.sender, reward);
     }

@@ -33,7 +33,7 @@ describe("Secondary_NFT_Test", function () {
         token = await Talaxeum.deploy();
 
         const ProjectNameEscrow = await hre.ethers.getContractFactory("ProjectNameEscrow");
-        escrow = await ProjectNameEscrow.deploy();
+        escrow = await ProjectNameEscrow.deploy(token.address);
 
         const ProjectNameNFT = await hre.ethers.getContractFactory("ProjectNameNFT");
         nft = await ProjectNameNFT.deploy();
@@ -41,7 +41,7 @@ describe("Secondary_NFT_Test", function () {
         const NFTMarketplace = await hre.ethers.getContractFactory("NFTMarketplace");
         market = await NFTMarketplace.deploy(token.address);
 
-        await escrow.init(token.address, nft.address, DURATION, SOFT, MEDIUM, HARD);
+        await escrow.init(token.address);
         await nft.init(token.address, escrow.address, ROYALTY_PERCENTAGE);
 
         await token.approve(escrow.address, hre.ethers.utils.parseEther("700"));
@@ -150,4 +150,3 @@ describe("Secondary_NFT_Test", function () {
         ).to.be.revertedWith("Not Owner");
     });
 });
-Footer;

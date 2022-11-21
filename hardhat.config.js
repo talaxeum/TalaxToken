@@ -1,6 +1,7 @@
 /** @type import('hardhat/config').HardhatUserConfig */
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
+require("@nomiclabs/hardhat-ethers");
 
 module.exports = {
     solidity: "0.8.11",

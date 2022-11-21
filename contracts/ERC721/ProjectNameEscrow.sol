@@ -20,33 +20,37 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
  */
-contract ProjectNameEscrow is Ownable {
+contract NFTEscrow is Ownable {
     using Address for address payable;
 
     event Deposited(address indexed payee, uint256 weiAmount);
     event Withdrawn(address indexed payee, uint256 weiAmount);
 
-    // Cap for the project
-    uint256 public softCap;
-    uint256 public mediumCap;
-    uint256 public hardCap;
-    uint256 public finalCap;
-    // Current total from user transfer
-    uint256 public softTotal;
-    uint256 public mediumTotal;
-    uint256 public hardTotal;
-    // Filled status for each cap
-    bool public softFilled;
-    bool public mediumFilled;
-    bool public hardFilled;
-    // Duration in seconds and if the duration is changed by admin
-    uint256 public deadline;
-    bool public durationChanged;
+    struct Project {
+        bool initiated;
+        // Cap for the project
+        uint256 softCap;
+        uint256 mediumCap;
+        uint256 hardCap;
+        uint256 finalCap;
+        // Current total from user transfer
+        uint256 softTotal;
+        uint256 mediumTotal;
+        uint256 hardTotal;
+        // Filled status for each cap
+        bool softFilled;
+        bool mediumFilled;
+        bool hardFilled;
+        // Duration in seconds and if the duration is changed by admin
+        uint256 deadline;
+        bool durationChanged;
+        // mapping(address => uint256) private _deposits;
+        mapping(address => uint256) _softMap;
+        mapping(address => uint256) _mediumMap;
+        mapping(address => uint256) _hardMap;
+    }
 
-    // mapping(address => uint256) private _deposits;
-    mapping(address => uint256) private _softMap;
-    mapping(address => uint256) private _mediumMap;
-    mapping(address => uint256) private _hardMap;
+    mapping(address => Project) public nftEscrow;
 
     address private token;
 
@@ -59,67 +63,126 @@ contract ProjectNameEscrow is Ownable {
         token = _token;
     }
 
+    function initiateNFTProject(
+        address nftContract,
+        uint256 duration,
+        uint256 soft,
+        uint256 medium,
+        uint256 hard
+    ) external onlyOwner {
+        require(!nftEscrow[nftContract].initiated, "Project was initiated");
+        nftEscrow[nftContract].deadline = duration + block.timestamp;
+        nftEscrow[nftContract].softCap = soft;
+        nftEscrow[nftContract].mediumCap = medium;
+        nftEscrow[nftContract].hardCap = hard;
+    }
+
     /**
      * @dev Stores the sent amount as credit to be withdrawn.
      * @param amount The amount that needed to be transferred by the user.
      *
      * Emits a {Deposited} event.
      */
-    function deposit(uint256 amount) public payable virtual onlyOwner {
+    function deposit(address nftContract, uint256 amount)
+        public
+        payable
+        virtual
+        onlyOwner
+    {
         // uint256 amount = msg.value;
         // _deposits[payee] += amount;
         // emit Deposited(payee, amount);
-        require(!hardFilled, "Project fully supported");
-        if (!softFilled) {
+        require(nftEscrow[nftContract].initiated, "Project not initiated");
+        require(!nftEscrow[nftContract].hardFilled, "Project fully supported");
+        if (!nftEscrow[nftContract].softFilled) {
             SafeERC20.safeTransferFrom(
                 IERC20(token),
                 msg.sender,
                 address(this),
                 amount
             );
-            softTotal += amount;
-            _softMap[msg.sender] += amount;
+            nftEscrow[nftContract].softTotal += amount;
+            nftEscrow[nftContract]._softMap[msg.sender] += amount;
             emit Deposited(msg.sender, amount);
-            if (softTotal >= softCap) {
-                softFilled = true;
-                finalCap = softCap;
+            if (
+                nftEscrow[nftContract].softTotal >=
+                nftEscrow[nftContract].softCap
+            ) {
+                nftEscrow[nftContract].softFilled = true;
+                nftEscrow[nftContract].finalCap = nftEscrow[nftContract]
+                    .softCap;
             }
-        } else if (!mediumFilled) {
+        } else if (!nftEscrow[nftContract].mediumFilled) {
             SafeERC20.safeTransferFrom(
                 IERC20(token),
                 msg.sender,
                 address(this),
                 amount
             );
-            mediumTotal += amount;
-            _mediumMap[msg.sender] += amount;
+            nftEscrow[nftContract].mediumTotal += amount;
+            nftEscrow[nftContract]._mediumMap[msg.sender] += amount;
             emit Deposited(msg.sender, amount);
-            if (mediumTotal >= mediumCap + softCap) {
-                mediumFilled = true;
-                finalCap = mediumCap;
+            if (
+                nftEscrow[nftContract].mediumTotal >=
+                nftEscrow[nftContract].mediumCap
+            ) {
+                nftEscrow[nftContract].mediumFilled = true;
+                nftEscrow[nftContract].finalCap = nftEscrow[nftContract]
+                    .mediumCap;
             }
-        } else if (!hardFilled) {
+        } else if (!nftEscrow[nftContract].hardFilled) {
             SafeERC20.safeTransferFrom(
                 IERC20(token),
                 msg.sender,
                 address(this),
                 amount
             );
-            hardTotal += amount;
-            _hardMap[msg.sender] += amount;
+            nftEscrow[nftContract].hardTotal += amount;
+            nftEscrow[nftContract]._hardMap[msg.sender] += amount;
             emit Deposited(msg.sender, amount);
-            if (hardTotal >= hardCap + mediumCap + softCap) {
-                hardFilled = true;
-                finalCap = hardCap;
+            if (
+                nftEscrow[nftContract].hardTotal >=
+                nftEscrow[nftContract].hardCap
+            ) {
+                nftEscrow[nftContract].hardFilled = true;
+                nftEscrow[nftContract].finalCap = nftEscrow[nftContract]
+                    .hardCap;
             }
         } else {}
     }
 
-    function withdrawalAllowed() public view virtual returns (bool) {
-        if (deadline < block.timestamp) {
+    function withdrawalAllowed(address nftContract)
+        public
+        view
+        virtual
+        returns (bool)
+    {
+        if (nftEscrow[nftContract].deadline < block.timestamp) {
             return true;
         }
         return false;
+    }
+
+    function getWithdrawalAble(address nftContract)
+        public
+        view
+        returns (uint256)
+    {
+        if (nftEscrow[nftContract].deadline < block.timestamp) {
+            if (nftEscrow[nftContract].hardFilled) {
+                return 0;
+            } else if (nftEscrow[nftContract].mediumFilled) {
+                uint256 payment = nftEscrow[nftContract]._hardMap[msg.sender];
+                return payment;
+            } else if (nftEscrow[nftContract].softFilled) {
+                uint256 payment = nftEscrow[nftContract]._mediumMap[msg.sender];
+                return payment;
+            } else {
+                uint256 payment = nftEscrow[nftContract]._softMap[msg.sender];
+                return payment;
+            }
+        }
+        return 0;
     }
 
     /**
@@ -132,29 +195,35 @@ contract ProjectNameEscrow is Ownable {
      *
      * Emits a {Withdrawn} event.
      */
-    function withdraw() public virtual {
-        require(withdrawalAllowed(), "Crowdfunding is running");
+    function withdraw(address nftContract) public virtual {
+        require(withdrawalAllowed(nftContract), "Crowdfunding is running");
         // uint256 payment = _deposits[payee];
         // _deposits[payee] = 0;
         // payee.sendValue(payment);
         // emit Withdrawn(payee, payment);
-        if (hardFilled) {} else if (mediumFilled) {
-            uint256 payment = _hardMap[msg.sender];
-            delete _hardMap[msg.sender];
+        if (nftEscrow[nftContract].hardFilled) {} else if (
+            nftEscrow[nftContract].mediumFilled
+        ) {
+            uint256 payment = nftEscrow[nftContract]._hardMap[msg.sender];
+            delete nftEscrow[nftContract]._hardMap[msg.sender];
             SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
             emit Withdrawn(msg.sender, payment);
-        } else if (softFilled) {
-            uint256 payment = _mediumMap[msg.sender];
-            delete _mediumMap[msg.sender];
+        } else if (nftEscrow[nftContract].softFilled) {
+            uint256 payment = nftEscrow[nftContract]._mediumMap[msg.sender];
+            delete nftEscrow[nftContract]._mediumMap[msg.sender];
             SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
             emit Withdrawn(msg.sender, payment);
         } else {
-            uint256 payment = _softMap[msg.sender];
-            delete _softMap[msg.sender];
+            uint256 payment = nftEscrow[nftContract]._softMap[msg.sender];
+            delete nftEscrow[nftContract]._softMap[msg.sender];
             SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
             emit Withdrawn(msg.sender, payment);
         }
     }
 
-    function transfer() public {}
+    function transferBalance() external onlyOwner {}
+
+    function getCapstone(address nftContract) public view returns (uint256) {
+        return nftEscrow[nftContract].finalCap;
+    }
 }
