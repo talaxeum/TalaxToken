@@ -5,8 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-// Check out https://github.com/Fantom-foundation/Artion-Contracts/blob/5c90d2bc0401af6fb5abf35b860b762b31dfee02/contracts/FantomMarketplace.sol
-// For a full decentralized nft marketplace
+// modified version of marketplace contract from this https://github.com/smartcontractkit/full-blockchain-solidity-course-js
 
 error PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error ItemNotForSale(address nftAddress, uint256 tokenId);
@@ -21,7 +20,7 @@ error PriceMustBeAboveZero();
 // Error thrown for isNotOwner modifier
 // error IsNotOwner()
 
-contract TalaxNftMarketplace is ReentrancyGuard {
+contract NFTMarketplace is ReentrancyGuard {
     struct Listing {
         uint256 price;
         address seller;
