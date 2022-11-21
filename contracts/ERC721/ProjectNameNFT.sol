@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./ProjectNameEscrow.sol";
+import "./Escrow.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol"; // Royalties contract
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -87,7 +87,7 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
     function claimReward(uint256 tokenId) external {
         require(ownerOf(tokenId) == msg.sender, "Not eligible to claim reward");
         uint256 contractBalance = IERC20(token).balanceOf(address(this));
-        uint256 capstone = ProjectNameEscrow(escrowAddress).finalCap();
+        uint256 capstone = Escrow(escrowAddress).getCapstone(address(this));
         uint256 reward = (tokenPrices[tokenId] * contractBalance) / capstone;
         SafeERC20.safeTransfer(IERC20(token), msg.sender, reward);
     }
