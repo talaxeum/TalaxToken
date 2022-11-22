@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.11;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -49,7 +49,7 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         emit ChangeTaxPercentage(tax);
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to,uint256 amount) onlyOwner public {
         _mint(to, amount);
     }
 

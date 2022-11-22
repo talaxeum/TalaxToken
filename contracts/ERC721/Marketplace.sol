@@ -26,7 +26,6 @@ contract NFTMarketplace is ReentrancyGuard {
         address seller;
         uint256 endDate;
     }
-
     struct Bid {
         uint256 price;
         address buyer;
@@ -39,33 +38,28 @@ contract NFTMarketplace is ReentrancyGuard {
         uint256 price,
         uint256 endDate
     );
-
     event ItemCanceled(
         address indexed seller,
         address indexed nftAddress,
         uint256 indexed tokenId
     );
-
     event ItemBought(
         address indexed buyer,
         address indexed nftAddress,
         uint256 indexed tokenId,
         uint256 price
     );
-
     event BidCreated(
         address indexed buyer,
         address indexed nftAddress,
         uint256 indexed tokenId,
         uint256 offeringPrice
     );
-
     event BidCancelled(
         address indexed buyer,
         address indexed nftAddress,
         uint256 indexed tokenId
     );
-
     event BidAccepted(
         address indexed buyer,
         address indexed nftAddress,

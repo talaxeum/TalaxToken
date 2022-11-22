@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 // OpenZeppelin Contracts (last updated v4.7.0) (utils/escrow/Escrow.sol)
 
-pragma solidity 0.8.11;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title Escrow
@@ -20,46 +22,50 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
  */
-contract Escrow is Ownable {
+contract Escrow is Ownable, ReentrancyGuard {
     using Address for address payable;
 
-    event Deposited(address indexed payee, uint256 weiAmount);
-    event Withdrawn(address indexed payee, uint256 weiAmount);
+    event Deposited(
+        address indexed payee,
+        uint256 talaxAmount,
+        address nftContract,
+        uint256 tokenId
+    );
+    event Withdrawn(
+        address indexed payee,
+        uint256 talaxAmount,
+        address nftContract
+    );
+    event NFTClaimed(
+        address indexed payee,
+        address indexed nftContract,
+        uint256 tokenId
+    );
 
+    enum Status {
+        Soft,
+        Medium,
+        Hard,
+        NonQualified
+    }
     struct Project {
+        Status status;
         bool initiated;
-        // Cap for the project
+        bool durationChanged;
+        uint256 deadline;
+        uint256 totalDeposit;
         uint256 softCap;
         uint256 mediumCap;
         uint256 hardCap;
         uint256 finalCap;
-        // Current total from user transfer
-        uint256 softTotal;
-        uint256 mediumTotal;
-        uint256 hardTotal;
-        // Filled status for each cap
-        bool softFilled;
-        bool mediumFilled;
-        bool hardFilled;
-        // Duration in seconds and if the duration is changed by admin
-        uint256 deadline;
-        bool durationChanged;
-        // mapping(address => uint256) private _deposits;
-        mapping(address => uint256) _softMap;
-        mapping(address => uint256) _mediumMap;
-        mapping(address => uint256) _hardMap;
+        mapping(Status => mapping(uint256 => address)) tokenToUser;
+        mapping(Status => mapping(address => uint256)) userTotalDeposits;
     }
 
-    mapping(address => Project) public nftEscrow;
-
+    mapping(address => Project) private nftProjects;
     address private token;
 
-    // function depositsOf(address payee) public view returns (uint256) {
-    //     return _deposits[payee];
-    // }
-
-    function init(address _token) external {
-        require(token == address(0), "Initiated");
+    constructor(address _token) {
         token = _token;
     }
 
@@ -70,94 +76,58 @@ contract Escrow is Ownable {
         uint256 medium,
         uint256 hard
     ) external onlyOwner {
-        require(!nftEscrow[nftContract].initiated, "Project was initiated");
-        nftEscrow[nftContract].deadline = duration + block.timestamp;
-        nftEscrow[nftContract].softCap = soft;
-        nftEscrow[nftContract].mediumCap = medium;
-        nftEscrow[nftContract].hardCap = hard;
+        require(!nftProjects[nftContract].initiated, "Project was initiated");
+        nftProjects[nftContract].deadline = duration + block.timestamp;
+        nftProjects[nftContract].softCap = soft;
+        nftProjects[nftContract].mediumCap = medium;
+        nftProjects[nftContract].hardCap = hard;
     }
 
     /**
      * @dev Stores the sent amount as credit to be withdrawn.
-     * @param amount The amount that needed to be transferred by the user.
+     * @param nftContract The nft contract address of the NFT that chosen by the msg.sender
+     * @param tokenId The tokenId of the NFT that chosen by the msg.sender
+     * @param amount The amount deposited in TALAX of the NFT price that chosen by the msg.sender
      *
      * Emits a {Deposited} event.
      */
-    function deposit(address nftContract, uint256 amount)
-        public
-        payable
-        virtual
-        onlyOwner
-    {
-        // uint256 amount = msg.value;
-        // _deposits[payee] += amount;
-        // emit Deposited(payee, amount);
-        require(nftEscrow[nftContract].initiated, "Project not initiated");
-        require(!nftEscrow[nftContract].hardFilled, "Project fully supported");
-        if (!nftEscrow[nftContract].softFilled) {
-            SafeERC20.safeTransferFrom(
-                IERC20(token),
-                msg.sender,
-                address(this),
-                amount
-            );
-            nftEscrow[nftContract].softTotal += amount;
-            nftEscrow[nftContract]._softMap[msg.sender] += amount;
-            emit Deposited(msg.sender, amount);
-            if (
-                nftEscrow[nftContract].softTotal >=
-                nftEscrow[nftContract].softCap
-            ) {
-                nftEscrow[nftContract].softFilled = true;
-                nftEscrow[nftContract].finalCap = nftEscrow[nftContract]
-                    .softCap;
-            }
-        } else if (!nftEscrow[nftContract].mediumFilled) {
-            SafeERC20.safeTransferFrom(
-                IERC20(token),
-                msg.sender,
-                address(this),
-                amount
-            );
-            nftEscrow[nftContract].mediumTotal += amount;
-            nftEscrow[nftContract]._mediumMap[msg.sender] += amount;
-            emit Deposited(msg.sender, amount);
-            if (
-                nftEscrow[nftContract].mediumTotal >=
-                nftEscrow[nftContract].mediumCap
-            ) {
-                nftEscrow[nftContract].mediumFilled = true;
-                nftEscrow[nftContract].finalCap = nftEscrow[nftContract]
-                    .mediumCap;
-            }
-        } else if (!nftEscrow[nftContract].hardFilled) {
-            SafeERC20.safeTransferFrom(
-                IERC20(token),
-                msg.sender,
-                address(this),
-                amount
-            );
-            nftEscrow[nftContract].hardTotal += amount;
-            nftEscrow[nftContract]._hardMap[msg.sender] += amount;
-            emit Deposited(msg.sender, amount);
-            if (
-                nftEscrow[nftContract].hardTotal >=
-                nftEscrow[nftContract].hardCap
-            ) {
-                nftEscrow[nftContract].hardFilled = true;
-                nftEscrow[nftContract].finalCap = nftEscrow[nftContract]
-                    .hardCap;
-            }
-        } else {}
+    function deposit(
+        address nftContract,
+        uint256 tokenId,
+        uint256 amount
+    ) public nonReentrant {
+        Project storage project = nftProjects[nftContract];
+        require(project.initiated, "Project not initiated");
+        require(project.status != Status.Hard, "Project fully supported");
+
+        // Deposit for the current status
+        project.userTotalDeposits[project.status][msg.sender] += amount;
+        // Add to total amount for tracking
+        project.totalDeposit += amount;
+        SafeERC20.safeTransferFrom(
+            IERC20(token),
+            msg.sender,
+            address(this),
+            amount
+        );
+
+        // Check if total surpass any capstone
+        if (project.totalDeposit >= project.hardCap) {
+            project.status = Status.NonQualified;
+            project.finalCap = project.hardCap;
+        } else if (project.totalDeposit >= project.mediumCap) {
+            project.status = Status.Hard;
+            project.finalCap = project.mediumCap;
+        } else if (project.totalDeposit >= project.softCap) {
+            project.status = Status.Medium;
+            project.finalCap = project.softCap;
+        }
+
+        emit Deposited(msg.sender, amount, nftContract, tokenId);
     }
 
-    function withdrawalAllowed(address nftContract)
-        public
-        view
-        virtual
-        returns (bool)
-    {
-        if (nftEscrow[nftContract].deadline < block.timestamp) {
+    function withdrawalAllowed(address nftContract) public view returns (bool) {
+        if (nftProjects[nftContract].deadline < block.timestamp) {
             return true;
         }
         return false;
@@ -168,19 +138,10 @@ contract Escrow is Ownable {
         view
         returns (uint256)
     {
-        if (nftEscrow[nftContract].deadline < block.timestamp) {
-            if (nftEscrow[nftContract].hardFilled) {
-                return 0;
-            } else if (nftEscrow[nftContract].mediumFilled) {
-                uint256 payment = nftEscrow[nftContract]._hardMap[msg.sender];
-                return payment;
-            } else if (nftEscrow[nftContract].softFilled) {
-                uint256 payment = nftEscrow[nftContract]._mediumMap[msg.sender];
-                return payment;
-            } else {
-                uint256 payment = nftEscrow[nftContract]._softMap[msg.sender];
-                return payment;
-            }
+        Project storage project = nftProjects[nftContract];
+
+        if (withdrawalAllowed(nftContract)) {
+            return project.userTotalDeposits[project.status][msg.sender];
         }
         return 0;
     }
@@ -193,37 +154,54 @@ contract Escrow is Ownable {
      * Make sure you trust the recipient, or are either following the
      * checks-effects-interactions pattern or using {ReentrancyGuard}.
      *
+     * @param nftContract The nftAddress that user chose when supporting a project
+     *
      * Emits a {Withdrawn} event.
      */
-    function withdraw(address nftContract) public virtual {
-        require(withdrawalAllowed(nftContract), "Crowdfunding is running");
-        // uint256 payment = _deposits[payee];
-        // _deposits[payee] = 0;
-        // payee.sendValue(payment);
-        // emit Withdrawn(payee, payment);
-        if (nftEscrow[nftContract].hardFilled) {} else if (
-            nftEscrow[nftContract].mediumFilled
-        ) {
-            uint256 payment = nftEscrow[nftContract]._hardMap[msg.sender];
-            delete nftEscrow[nftContract]._hardMap[msg.sender];
-            SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
-            emit Withdrawn(msg.sender, payment);
-        } else if (nftEscrow[nftContract].softFilled) {
-            uint256 payment = nftEscrow[nftContract]._mediumMap[msg.sender];
-            delete nftEscrow[nftContract]._mediumMap[msg.sender];
-            SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
-            emit Withdrawn(msg.sender, payment);
-        } else {
-            uint256 payment = nftEscrow[nftContract]._softMap[msg.sender];
-            delete nftEscrow[nftContract]._softMap[msg.sender];
-            SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
-            emit Withdrawn(msg.sender, payment);
-        }
+    function withdraw(address nftContract) public nonReentrant {
+        Project storage project = nftProjects[nftContract];
+
+        uint256 payment = project.userTotalDeposits[project.status][msg.sender];
+        delete project.userTotalDeposits[project.status][msg.sender];
+        SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
+        emit Withdrawn(msg.sender, payment, nftContract);
     }
 
-    function transferBalance() external onlyOwner {}
+    function claimNFT(address nftContract, uint256 tokenId)
+        public
+        nonReentrant
+    {
+        Project storage project = nftProjects[nftContract];
+        // Check if Crowdfund success
+        require(project.status != Status.Soft, "Crowdfund Failed");
+        // Check if msg.sender is depositor
+        address soft = project.tokenToUser[Status.Soft][tokenId];
+        address medium = project.tokenToUser[Status.Medium][tokenId];
+        address hard = project.tokenToUser[Status.Hard][tokenId];
+
+        if (project.status == Status.NonQualified) {
+            require(
+                soft == msg.sender ||
+                    medium == msg.sender ||
+                    hard == msg.sender,
+                "Not Authorized"
+            );
+        } else if (project.status == Status.Hard) {
+            require(
+                soft == msg.sender || medium == msg.sender,
+                "Not Authorized"
+            );
+        } else {
+            require(soft == msg.sender, "Not Authorized");
+        }
+        // Transfer from first owner(platform administrator) to msg.sender
+        // NFT first owner have to approve right after minting process
+        address owner = IERC721(nftContract).ownerOf(tokenId);
+        IERC721(nftContract).transferFrom(owner, msg.sender, tokenId);
+        emit NFTClaimed(msg.sender, nftContract, tokenId);
+    }
 
     function getCapstone(address nftContract) public view returns (uint256) {
-        return nftEscrow[nftContract].finalCap;
+        return nftProjects[nftContract].finalCap;
     }
 }

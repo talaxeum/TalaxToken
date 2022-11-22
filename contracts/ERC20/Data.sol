@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.11;
+pragma solidity ^0.8.0;
 
 address constant public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
 address payable constant team_and_project_coordinator_address = payable(
