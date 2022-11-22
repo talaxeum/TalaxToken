@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 import "./Data.sol";
 
-contract Talaxeum is ERC20Burnable, Ownable {
+contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     uint256 private taxPercent = 1;
 
-    constructor() ERC20("Talaxeum", "TALAX") {
+    constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
         _mint(_msgSender(), 21 * 1e9 * 10**decimals());
     }
 
@@ -29,7 +33,15 @@ contract Talaxeum is ERC20Burnable, Ownable {
             value: address(this).balance
         }("");
 
-        require(sent, "Failed to send Ether");
+        require(sent == true, "Failed to send Ether");
+    }
+
+    function withdrawFunds(address token) external {
+        SafeERC20.safeTransfer(
+            IERC20(token),
+            team_and_project_coordinator_address,
+            IERC20(token).balanceOf(address(this))
+        );
     }
 
     function changeTax(uint256 tax) external onlyOwner {
@@ -37,7 +49,7 @@ contract Talaxeum is ERC20Burnable, Ownable {
         emit ChangeTaxPercentage(tax);
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to,uint256 amount) onlyOwner public {
         _mint(to, amount);
     }
 
@@ -62,11 +74,33 @@ contract Talaxeum is ERC20Burnable, Ownable {
 
     // The following functions are overrides required by Solidity.
 
-    function _afterTokenTransfer(
+    function _transfer(
         address from,
         address to,
         uint256 amount
     ) internal override {
+        super._transfer(from, to, amount);
+    }
+
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
         super._afterTokenTransfer(from, to, amount);
+    }
+
+    function _mint(address to, uint256 amount)
+        internal
+        override(ERC20, ERC20Votes)
+    {
+        super._mint(to, amount);
+    }
+
+    function _burn(address account, uint256 amount)
+        internal
+        override(ERC20, ERC20Votes)
+    {
+        super._burn(account, amount);
     }
 }
