@@ -20,6 +20,7 @@ error PriceMustBeAboveZero();
 
 // Error thrown for isNotOwner modifier
 // error IsNotOwner()
+// TODO: Implement Royalties for NFT Transactions (Using Talax or Ethers)
 
 contract NFTMarketplace is ReentrancyGuard {
     struct Listing {

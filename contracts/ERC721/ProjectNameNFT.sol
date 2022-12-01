@@ -24,7 +24,7 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
     constructor() ERC721("NAME", "SYMBOL") {}
 
     function init(
-        address _minter,
+        address _projectOwner,
         address _token,
         address _escrowAddress,
         uint96 _royaltyPercentage
@@ -33,16 +33,12 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
         token = _token;
         escrowAddress = _escrowAddress;
         royaltyPercentage = _royaltyPercentage * 100;
-        transferOwnership(_minter);
+        transferOwnership(_projectOwner);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721, ERC2981)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC721, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -60,10 +56,10 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
         _burn(tokenId);
     }
 
-    function _mintNFT(address recipient, string memory tokenURI)
-        internal
-        returns (uint256)
-    {
+    function _mintNFT(
+        address recipient,
+        string memory tokenURI
+    ) internal returns (uint256) {
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
