@@ -515,6 +515,11 @@
 			{
 				"inputs": [
 					{
+						"internalType": "address",
+						"name": "to",
+						"type": "address"
+					},
+					{
 						"internalType": "uint256",
 						"name": "amount",
 						"type": "uint256"
@@ -647,6 +652,19 @@
 						"internalType": "string",
 						"name": "",
 						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "taxRate",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -859,7 +877,7 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": true,
+			"enabled": false,
 			"runs": 200
 		},
 		"remappings": []
@@ -1018,11 +1036,11 @@
 			]
 		},
 		"contracts/ERC20/Talaxeum.sol": {
-			"keccak256": "0xa80669406727da6707bf366953f7c13ad6a89b061d74abe14f52cc66aa1268a1",
+			"keccak256": "0xc5dd2c4ee000be6ae21ae00fbfaa4d656ef2bfeb376cebb25c07f325fcbc9521",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://da1c4e508fc72d47f5e406133b6741f7d2561303aea862344dbf4f262e40ee97",
-				"dweb:/ipfs/QmNyMc9HZJU6Ri2DQjwT1MEA1wma4HY5KsvQ4i39skKKm5"
+				"bzz-raw://addd46c788abfc10394086083429f116fbadac391342f423b89786f77c64683a",
+				"dweb:/ipfs/QmeqZuyUq9QNpRSYiSXKEvkR18fBN55DLcekabhvvEsZyi"
 			]
 		}
 	},

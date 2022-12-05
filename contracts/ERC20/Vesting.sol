@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * be immediately releasable.
  */
 
-contract VestingWallet is Context {
+contract Vesting is Context {
     event ERC20Released(address indexed token, uint256 amount);
 
     uint256 private _released;
@@ -47,12 +47,21 @@ contract VestingWallet is Context {
             "VestingWallet: beneficiary is zero address"
         );
 
-        require(_initStatus == false, "Initiated");
+        require(!_initStatus, "Initiated");
         _initStatus = true;
         _token = token;
         _beneficiary = beneficiaryAddress;
         _start = startTimestamp + cliff;
         _duration = durationSeconds;
+    }
+
+    function _isInitiated() internal view {
+        require(_initStatus, "Not initiated");
+    }
+
+    modifier isInitiated() {
+        _isInitiated();
+        _;
     }
 
     /**
@@ -114,23 +123,12 @@ contract VestingWallet is Context {
         }
     }
 
-    // ? Default function
-    // function release(address token) public virtual {
-    //     uint256 amount = releasable(token);
-    //     _erc20Released[token] += amount;
-    //     emit ERC20Released(token, amount);
-    //     SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
-    // }
-
     /**
      * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
      */
-    function vestedAmount(uint64 timestamp)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
+    function vestedAmount(
+        uint64 timestamp
+    ) public view virtual returns (uint256) {
         return
             _vestingSchedule(
                 IERC20(_token).balanceOf(address(this)) + released(),
@@ -142,12 +140,10 @@ contract VestingWallet is Context {
      * @dev Virtual implementation of the vesting formula. This returns the amount vested, as a function of time, for
      * an asset given its total historical allocation.
      */
-    function _vestingSchedule(uint256 totalAllocation, uint64 timestamp)
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
+    function _vestingSchedule(
+        uint256 totalAllocation,
+        uint64 timestamp
+    ) internal view virtual isInitiated returns (uint256) {
         if (timestamp < start()) {
             return 0;
         } else if (timestamp > start() + duration()) {

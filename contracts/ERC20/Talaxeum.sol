@@ -12,10 +12,10 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "./Data.sol";
 
 contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
-    uint256 private taxPercent = 1;
+    uint256 public taxRate = 1;
 
     constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
-        _mint(_msgSender(), 21 * 1e9 * 10**decimals());
+        _mint(_msgSender(), 21 * 1e9 * 10 ** decimals());
     }
 
     event ChangeTaxPercentage(uint256 tax);
@@ -45,22 +45,22 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     }
 
     function changeTax(uint256 tax) external onlyOwner {
-        taxPercent = tax;
+        require(taxRate < 5, "Tax Fee maximum is 5%");
+        taxRate = tax;
         emit ChangeTaxPercentage(tax);
     }
 
-    function mint(address to,uint256 amount) onlyOwner public {
+    function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 
-    function transfer(address to, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function transfer(
+        address to,
+        uint256 amount
+    ) public override returns (bool) {
         address owner = _msgSender();
 
-        uint256 tax = (amount * taxPercent) / 100;
+        uint256 tax = (amount * taxRate) / 100;
         uint256 taxedAmount = amount - tax;
 
         uint256 teamFee = (tax * 2) / 10;
@@ -90,17 +90,17 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         super._afterTokenTransfer(from, to, amount);
     }
 
-    function _mint(address to, uint256 amount)
-        internal
-        override(ERC20, ERC20Votes)
-    {
+    function _mint(
+        address to,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
         super._mint(to, amount);
     }
 
-    function _burn(address account, uint256 amount)
-        internal
-        override(ERC20, ERC20Votes)
-    {
+    function _burn(
+        address account,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
         super._burn(account, amount);
     }
 }

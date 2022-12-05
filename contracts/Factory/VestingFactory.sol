@@ -14,7 +14,7 @@ contract VestingFactory is Ownable {
     address immutable _masterContract;
 
     constructor() {
-        _masterContract = address(new VestingWallet());
+        _masterContract = address(new Vesting());
     }
 
     function getCurrentCounter() external view returns (uint256) {
@@ -29,17 +29,15 @@ contract VestingFactory is Ownable {
         uint64 cliff
     ) external onlyOwner returns (address) {
         address vesting = Clones.clone(_masterContract);
-        VestingWallet(vesting).init(token, beneficiary, start, duration, cliff);
+        Vesting(vesting).init(token, beneficiary, start, duration, cliff);
         vestingWallets[_counter.current()] = vesting;
         _counter.increment();
         return vesting;
     }
 
-    function getVestingWallet(uint256 counterIdx)
-        external
-        view
-        returns (address)
-    {
+    function getVestingWallet(
+        uint256 counterIdx
+    ) external view returns (address) {
         return vestingWallets[counterIdx];
     }
 }

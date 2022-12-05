@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.7.0) (finance/VestingWallet.sol)
-pragma solidity 0.8.11;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -17,6 +17,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * Consequently, if the vesting has already started, any amount of tokens sent to this contract will (at least partly)
  * be immediately releasable.
  */
+
+interface Token {
+    function taxRate() external returns (uint256);
+}
 
 contract Whitelist is Context, Ownable {
     event ERC20Released(
@@ -52,11 +56,20 @@ contract Whitelist is Context, Ownable {
         uint64 durationSeconds,
         uint64 cliff
     ) external {
-        require(_initStatus == false, "Initiated");
+        require(!_initStatus, "Initiated");
         _initStatus = true;
         _token = token;
         _start = startTimestamp + cliff;
         _duration = durationSeconds;
+    }
+
+    function _isInitiated() view internal{
+        require(_initStatus,"Not initiated");
+    }
+
+    modifier isInitiated(){
+        _isInitiated();
+        _;
     }
 
     /**
@@ -118,16 +131,18 @@ contract Whitelist is Context, Ownable {
         delete _beneficiary[user];
     }
 
-    function addMultiVesting(Beneficiary[] calldata users) external onlyOwner {
+    function addBeneficiaries(Beneficiary[] calldata users) external onlyOwner isInitiated {
         for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
-            _vest(users[i].user, users[i].amount);
+            _vest(
+                users[i].user,
+                ((100 - Token(_token).taxRate()) * users[i].amount) / 100
+            );
         }
     }
 
-    function deleteMultiVesting(Beneficiary[] calldata users)
-        external
-        onlyOwner
-    {
+    function deleteBeneficiaries(
+        Beneficiary[] calldata users
+    ) external onlyOwner isInitiated{
         for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
             _delete(users[i].user);
         }
@@ -138,7 +153,7 @@ contract Whitelist is Context, Ownable {
      *
      * Emits a {ERC20Released} event.
      */
-    function release() public virtual {
+    function release() public virtual{
         uint256 amount = releasable();
         if (_currentMonth() > _lastMonth[msg.sender]) {
             _lastMonth[msg.sender] = _currentMonth();
@@ -160,12 +175,9 @@ contract Whitelist is Context, Ownable {
     /**
      * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
      */
-    function vestedAmount(uint64 timestamp)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
+    function vestedAmount(
+        uint64 timestamp
+    ) public view virtual returns (uint256) {
         // return
         //     _vestingSchedule(
         //         IERC20(token).balanceOf(address(this)) + released(token),
@@ -179,12 +191,10 @@ contract Whitelist is Context, Ownable {
      * @dev Virtual implementation of the vesting formula. This returns the amount vested, as a function of time, for
      * an asset given its total historical allocation.
      */
-    function _vestingSchedule(uint256 totalAllocation, uint64 timestamp)
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
+    function _vestingSchedule(
+        uint256 totalAllocation,
+        uint64 timestamp
+    ) internal view virtual isInitiated returns (uint256) {
         if (timestamp < start()) {
             return 0;
         } else if (timestamp > start() + duration()) {
