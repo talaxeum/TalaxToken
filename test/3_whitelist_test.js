@@ -22,16 +22,16 @@ describe("Whitelist contract", function () {
         return { Whitelist, whitelist };
     }
 
-    it("Should assign the total supply of tokens to the owner", async function () {
-        const { token, owner } = await loadFixture(deployTokenFixture);
-        const ownerBalance = await token.balanceOf(owner.address);
-        expect(await token.totalSupply()).to.equal(ownerBalance);
-    });
+    // it("Should assign the total supply of tokens to the owner", async function () {
+    //     const { token, owner } = await loadFixture(deployTokenFixture);
+    //     const ownerBalance = await token.balanceOf(owner.address);
+    //     expect(await token.totalSupply()).to.equal(ownerBalance);
+    // });
 
-    it("Should deploy the whitelist contract correctly", async function () {
-        const { whitelist } = await loadFixture(deployWhitelistFixture);
-        expect(await whitelist.start()).to.equal(0);
-    });
+    // it("Should deploy the whitelist contract correctly", async function () {
+    //     const { whitelist } = await loadFixture(deployWhitelistFixture);
+    //     expect(await whitelist.start()).to.equal(0);
+    // });
 
     it("Should initialize the whitelist contract correctly", async function () {
         const { token } = await loadFixture(deployTokenFixture);

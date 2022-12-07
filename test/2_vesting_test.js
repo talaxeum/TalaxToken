@@ -22,16 +22,16 @@ describe("Vesting contract", function () {
         return { Vesting, vesting };
     }
 
-    it("Should assign the total supply of tokens to the owner", async function () {
-        const { token, owner } = await loadFixture(deployTokenFixture);
-        const ownerBalance = await token.balanceOf(owner.address);
-        expect(await token.totalSupply()).to.equal(ownerBalance);
-    });
+    // it("Should assign the total supply of tokens to the owner", async function () {
+    //     const { token, owner } = await loadFixture(deployTokenFixture);
+    //     const ownerBalance = await token.balanceOf(owner.address);
+    //     expect(await token.totalSupply()).to.equal(ownerBalance);
+    // });
 
-    it("Should deploy the vesting contract correctly", async function () {
-        const { vesting } = await loadFixture(deployVestingFixture);
-        expect(await vesting.start()).to.equal(0);
-    });
+    // it("Should deploy the vesting contract correctly", async function () {
+    //     const { vesting } = await loadFixture(deployVestingFixture);
+    //     expect(await vesting.start()).to.equal(0);
+    // });
 
     it("Should initialize the vesting contract correctly", async function () {
         const { token, addr1 } = await loadFixture(deployTokenFixture);

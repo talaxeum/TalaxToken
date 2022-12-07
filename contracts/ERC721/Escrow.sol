@@ -23,6 +23,10 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  * to the escrow's deposit and withdraw.
  */
 
+interface Token {
+    function taxRate() external returns (uint256);
+}
+
 // TODO: Change the functions based on who mints the NFT (tokenID or tokenURI for tracking who picks the NFT)
 contract Escrow is Ownable, ReentrancyGuard {
     using Address for address payable;
@@ -152,8 +156,11 @@ contract Escrow is Ownable, ReentrancyGuard {
         require(project.initiated, "Project not initiated");
         require(project.status != Status.Hard, "Project fully supported");
 
+        uint256 amountIncludeTax = ((100 - Token(token).taxRate()) * _amount) /
+            100;
+
         // Deposit for the current status
-        project.userTotalDeposits[status][msg.sender] += _amount;
+        project.userTotalDeposits[status][msg.sender] += amountIncludeTax;
         // TODO: track selected NFT
         project.tokenIdToData[status][_tokenId].payee = msg.sender;
         project.tokenIdToData[status][_tokenId].artist = _artist;
