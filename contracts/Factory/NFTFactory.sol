@@ -25,14 +25,16 @@ contract NFTFactory is Ownable {
         address payable minter,
         address tokenAddress,
         address escrowAddress,
-        uint96 royaltyPercentage
+        uint96 royaltyPercentage,
+        uint256 tokenPrice
     ) external onlyOwner returns (address) {
         address project = Clones.clone(_masterContract);
         ProjectNameNFT(project).init(
             minter,
             tokenAddress,
             escrowAddress,
-            royaltyPercentage
+            royaltyPercentage,
+            tokenPrice
         );
         projects[_counter.current()] = project;
         _counter.increment();

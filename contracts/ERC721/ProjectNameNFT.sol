@@ -12,10 +12,7 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    /**
-     * @dev tokenPrices is mapping to keep track of each NFT prices, tokenId => tokenPrice
-     */
-    mapping(uint256 => uint256) private tokenPrices;
+    uint256 tokenPrice;
     uint96 public royaltyPercentage;
     address private token;
     address private escrowAddress;
@@ -27,12 +24,14 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
         address _projectOwner,
         address _token,
         address _escrowAddress,
-        uint96 _royaltyPercentage
+        uint96 _royaltyPercentage,
+        uint256 _tokenPrice
     ) external {
         require(token == address(0), "Initiated");
         token = _token;
         escrowAddress = _escrowAddress;
         royaltyPercentage = _royaltyPercentage * 100;
+        tokenPrice = _tokenPrice;
         transferOwnership(_projectOwner);
     }
 
@@ -40,11 +39,6 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
         bytes4 interfaceId
     ) public view virtual override(ERC721, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
-    }
-
-    function getTokenPrice(uint256 tokenId) external view returns (uint256) {
-        require(tokenId != 0, "Invalid Id");
-        return tokenPrices[tokenId];
     }
 
     function _burn(uint256 tokenId) internal virtual override {
@@ -84,16 +78,18 @@ contract ProjectNameNFT is ERC721URIStorage, ERC2981, Ownable {
         require(ownerOf(tokenId) == msg.sender, "Not eligible");
         uint256 contractBalance = IERC20(token).balanceOf(address(this));
         uint256 capstone = Escrow(escrowAddress).getCapstone(address(this));
-        uint256 reward = (tokenPrices[tokenId] * contractBalance) / capstone;
+        uint256 reward = (tokenPrice * contractBalance) / capstone;
         SafeERC20.safeTransfer(IERC20(token), msg.sender, reward);
     }
 
     // If all of the NFT in this project is priced the same
-    // function claimTotalReward() external {
-    //     require(balanceOf(msg.sender) > 0, "Not eligible");
-    //     uint256 contractBalance = IERC20(token).balanceOf(address(this));
-    //     uint256 reward = (balanceOf(msg.sender) * contractBalance) /
-    //         _tokenIds.current();
-    //     SafeERC20.safeTransfer(IERC20(token), msg.sender, reward);
-    // }
+    function claimTotalReward() external {
+        require(balanceOf(msg.sender) > 0, "Not eligible");
+        uint256 contractBalance = IERC20(token).balanceOf(address(this));
+        uint256 capstone = Escrow(escrowAddress).getCapstone(address(this));
+        uint256 reward = (balanceOf(msg.sender) *
+            tokenPrice *
+            contractBalance) / capstone;
+        SafeERC20.safeTransfer(IERC20(token), msg.sender, reward);
+    }
 }

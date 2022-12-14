@@ -28,6 +28,7 @@ interface Token {
 }
 
 // TODO: Change the functions based on who mints the NFT (tokenID or tokenURI for tracking who picks the NFT)
+// TODO: How to track claimable NFT for certain user without tracking the status for that NFT
 contract Escrow is Ownable, ReentrancyGuard {
     using Address for address payable;
 
@@ -106,12 +107,11 @@ contract Escrow is Ownable, ReentrancyGuard {
         uint256 _tokenPrice
     ) external onlyOwner {
         require(!nftProjects[_nftContract].initiated, "Project was initiated");
-        Project storage project = nftProjects[_nftContract];
-        project.deadline = _duration + block.timestamp;
-        project.capstone.softCap = _soft;
-        project.capstone.mediumCap = _medium;
-        project.capstone.hardCap = _hard;
-        project.tokenPrice = _tokenPrice;
+        nftProjects[_nftContract].deadline = _duration + block.timestamp;
+        nftProjects[_nftContract].capstone.softCap = _soft;
+        nftProjects[_nftContract].capstone.mediumCap = _medium;
+        nftProjects[_nftContract].capstone.hardCap = _hard;
+        nftProjects[_nftContract].tokenPrice = _tokenPrice;
 
         require(
             _advisory >= 2 && _projectWallet <= 5,
@@ -123,17 +123,17 @@ contract Escrow is Ownable, ReentrancyGuard {
                 _projectWallet >= 77 && _projectWallet <= 80,
                 "Project Wallet only between 77% and 80%"
             );
-            project.benefs.platform = 8;
+            nftProjects[_nftContract].benefs.platform = 8;
         } else {
             require(
                 _projectWallet >= 80 && _projectWallet <= 83,
                 "Project Wallet only between 77% and 80%"
             );
-            project.benefs.platform = 5;
+            nftProjects[_nftContract].benefs.platform = 5;
         }
 
-        project.benefs.projectWallet = _projectWallet;
-        project.benefs.advisory = _advisory;
+        nftProjects[_nftContract].benefs.projectWallet = _projectWallet;
+        nftProjects[_nftContract].benefs.advisory = _advisory;
     }
 
     /**
@@ -165,7 +165,7 @@ contract Escrow is Ownable, ReentrancyGuard {
         project.tokenIdToData[status][_tokenId].payee = msg.sender;
         project.tokenIdToData[status][_tokenId].artist = _artist;
         // Add to total amount for tracking
-        project.totalDeposit += _amount;
+        project.totalDeposit += amountIncludeTax;
         SafeERC20.safeTransferFrom(
             IERC20(token),
             msg.sender,
@@ -188,24 +188,6 @@ contract Escrow is Ownable, ReentrancyGuard {
         emit Deposited(msg.sender, _amount, _nftContract, status, _tokenId);
     }
 
-    function withdrawalAllowed(address nftContract) public view returns (bool) {
-        if (nftProjects[nftContract].deadline < block.timestamp) {
-            return true;
-        }
-        return false;
-    }
-
-    function getWithdrawalAble(
-        address nftContract
-    ) public view returns (uint256) {
-        Project storage project = nftProjects[nftContract];
-
-        if (withdrawalAllowed(nftContract)) {
-            return project.userTotalDeposits[project.status][msg.sender];
-        }
-        return 0;
-    }
-
     /**
      * @dev Withdraw accumulated balance for a payee, forwarding all gas to the
      * recipient.
@@ -220,24 +202,21 @@ contract Escrow is Ownable, ReentrancyGuard {
      */
     function withdraw(address nftContract) public nonReentrant {
         Project storage project = nftProjects[nftContract];
-
         uint256 payment = project.userTotalDeposits[project.status][msg.sender];
         delete project.userTotalDeposits[project.status][msg.sender];
         _transferTokenToAddress(msg.sender, payment);
         emit Withdrawn(msg.sender, payment, nftContract);
     }
 
-    function claimNFT(
+    function _claimNFT(
         address _nftContract,
         uint256 _tokenId,
         Status _nftDepositStatus
-    ) public nonReentrant {
+    ) internal nonReentrant {
         Project storage project = nftProjects[_nftContract];
         NFTData memory data = project.tokenIdToData[_nftDepositStatus][
             _tokenId
         ];
-        // Check if Crowdfund success
-        require(project.status != Status.Soft, "Crowdfund Failed");
         // Check if msg.sender is depositor
         require(data.payee == msg.sender, "Not Authorized");
 
@@ -245,9 +224,28 @@ contract Escrow is Ownable, ReentrancyGuard {
         // Transfer from first owner(platform administrator) to msg.sender
         address owner = IERC721(_nftContract).ownerOf(_tokenId);
         IERC721(_nftContract).transferFrom(owner, msg.sender, _tokenId);
-        // TODO: Transfer Deposited Talax Token to beneficiaries
 
         emit NFTClaimed(msg.sender, _nftContract, _tokenId);
+    }
+
+    function claimAllNFT(
+        address _nftContract,
+        uint256[] memory _tokenIds
+    ) public nonReentrant {
+        Project storage project = nftProjects[_nftContract];
+        require(project.deadline > block.timestamp, "Crowdfund not finished");
+        require(project.status != Status.Soft, "Crowdfund Failed");
+
+        Status[] memory statuses = _getAvailableStatus(project.status);
+        // TODO: Transfer Deposited Talax Token to beneficiaries
+        // uint256 totalToken = _tokenIds.length;
+        // _distributeToken();
+
+        for (uint i = 0; i < _tokenIds.length; i++) {
+            for (uint j = 0; j < statuses.length; j++) {
+                _claimNFT(_nftContract, _tokenIds[i], statuses[j]);
+            }
+        }
     }
 
     /**
@@ -262,35 +260,65 @@ contract Escrow is Ownable, ReentrancyGuard {
         SafeERC20.safeTransfer(IERC20(token), _to, _amount);
     }
 
-    function _getFee(
-        uint256 _percentage,
-        uint256 _tokenPrice
-    ) internal pure returns (uint256) {
-        return (_percentage * _tokenPrice) / 100;
+    function getWithdrawalAble(
+        address _nftContract
+    ) public view returns (uint256) {
+        if (nftProjects[_nftContract].deadline > block.timestamp) {
+            return
+                nftProjects[_nftContract].userTotalDeposits[
+                    nftProjects[_nftContract].status
+                ][msg.sender];
+        }
+        return 0;
     }
 
-    function _distributeToken(
-        address _nftContract,
-        NFTData memory _data
-    ) internal {
-        Project storage project = nftProjects[_nftContract];
+    // TODO: Need to confirm either set default or can be updated after the crowdfund is running
+    // function _distributeToken(
+    //     address _nftContract,
+    //     NFTData memory _data
+    // ) internal {
+    //     Project storage project = nftProjects[_nftContract];
 
-        uint256 artistFee = _getFee(10, project.tokenPrice);
-        uint256 projectWallet = _getFee(
-            project.benefs.projectWallet,
-            project.tokenPrice
-        );
-        uint256 advisory = _getFee(project.benefs.advisory, project.tokenPrice);
-        uint256 platformFee = _getFee(
-            project.benefs.platform,
-            project.tokenPrice
-        );
+    //     uint256 artistFee = _getFee(10, project.tokenPrice);
+    //     uint256 projectWallet = _getFee(
+    //         project.benefs.projectWallet,
+    //         project.tokenPrice
+    //     );
+    //     uint256 advisory = _getFee(project.benefs.advisory, project.tokenPrice);
+    //     uint256 platformFee = _getFee(
+    //         project.benefs.platform,
+    //         project.tokenPrice
+    //     );
 
-        // TODO: Transfer to Artist
-        _transferTokenToAddress(_data.artist, artistFee);
-        // TODO: Transfer to Project Contract
-        _transferTokenToAddress(_nftContract, projectWallet);
-        // TODO: Transfer to Advisory
-        // TODO: Transfer to Platform Address
+    //     // TODO: Transfer to Artist
+    //     _transferTokenToAddress(_data.artist, artistFee);
+    //     // TODO: Transfer to Project Contract
+    //     _transferTokenToAddress(_nftContract, projectWallet);
+    //     // TODO: Transfer to Advisory
+    //     // TODO: Transfer to Platform Address
+    // }
+
+    /**
+     * @dev function for getting the capstone statuses
+     */
+    function _getAvailableStatus(
+        Status status
+    ) internal pure returns (Status[] memory) {
+        if (status == Status.Medium) {
+            Status[] memory statuses = new Status[](1);
+            statuses[0] = Status.Soft;
+            return statuses;
+        } else if (status == Status.Hard) {
+            Status[] memory statuses = new Status[](2);
+            statuses[0] = Status.Soft;
+            statuses[1] = Status.Medium;
+            return statuses;
+        } else {
+            Status[] memory statuses = new Status[](3);
+            statuses[0] = Status.Soft;
+            statuses[1] = Status.Medium;
+            statuses[2] = Status.Hard;
+            return statuses;
+        }
     }
 }

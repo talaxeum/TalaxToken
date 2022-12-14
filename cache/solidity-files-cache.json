@@ -1777,8 +1777,8 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Factory/NFTFactory.sol": {
-      "lastModificationDate": 1669883204380,
-      "contentHash": "433598e6cce46602a50a01140459f09a",
+      "lastModificationDate": 1670563844748,
+      "contentHash": "a656e6382def369dade41b0796078841",
       "sourceName": "contracts/Factory/NFTFactory.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1817,8 +1817,8 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC721/ProjectNameNFT.sol": {
-      "lastModificationDate": 1669883204380,
-      "contentHash": "05fb84bfdfb717629a80afce0d00bf74",
+      "lastModificationDate": 1670558699826,
+      "contentHash": "d865715c305e29babcaaf8f70ffe9bf3",
       "sourceName": "contracts/ERC721/ProjectNameNFT.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1859,8 +1859,8 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC721/Escrow.sol": {
-      "lastModificationDate": 1670316314515,
-      "contentHash": "3dd4c0b6d2ce8d3319554c1fcd318d95",
+      "lastModificationDate": 1670564102738,
+      "contentHash": "acf905d35e91e44597cb6a76edee5564",
       "sourceName": "contracts/ERC721/Escrow.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2165,6 +2165,124 @@
       ],
       "artifacts": [
         "ERC20Votes"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol": {
+      "lastModificationDate": 1669884207728,
+      "contentHash": "5a341bfc4fe3ee5357ccdebd3a78ad2c",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC721.sol",
+        "../../../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC721Burnable"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC721/SingleArtistNFT.sol": {
+      "lastModificationDate": 1670559228353,
+      "contentHash": "fa1566a9ebef73899786a3c761bd1420",
+      "sourceName": "contracts/ERC721/SingleArtistNFT.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/common/ERC2981.sol",
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol",
+        "@openzeppelin/contracts/utils/Counters.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "MyToken"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC721/SingleProjectEscrow.sol": {
+      "lastModificationDate": 1670557913431,
+      "contentHash": "552c6510e4332f8586f87d6c8ff093c7",
+      "sourceName": "contracts/ERC721/SingleProjectEscrow.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/Address.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Escrow"
       ]
     }
   }
