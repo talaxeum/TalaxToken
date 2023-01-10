@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.7.0) (utils/escrow/Escrow.sol)
 
 pragma solidity ^0.8.0;
@@ -22,22 +22,30 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
  */
-contract Escrow is Ownable, ReentrancyGuard {
+
+interface NFT {
+    function tokenPrice() external returns (uint256);
+}
+
+contract ProjectEscrow is Ownable {
     using Address for address payable;
 
     event Deposited(
         address indexed payee,
+        address indexed projectContract,
         uint256 talaxAmount,
         address nftContract,
+        Status status,
         uint256 tokenId
     );
     event Withdrawn(
         address indexed payee,
-        uint256 talaxAmount,
-        address nftContract
+        address indexed projectContract,
+        uint256 talaxAmount
     );
     event NFTClaimed(
         address indexed payee,
+        address indexed projectContract,
         address indexed nftContract,
         uint256 tokenId
     );
@@ -48,102 +56,90 @@ contract Escrow is Ownable, ReentrancyGuard {
         Hard,
         NonQualified
     }
-    struct Project {
-        Status status;
-        bool initiated;
-        bool durationChanged;
-        uint256 deadline;
-        uint256 totalDeposit;
+
+    struct Cap {
         uint256 softCap;
         uint256 mediumCap;
         uint256 hardCap;
         uint256 finalCap;
-        mapping(Status => mapping(uint256 => address)) tokenToUser;
-        mapping(Status => mapping(address => uint256)) userTotalDeposits;
     }
 
-    mapping(address => Project) private nftProjects;
-    address private token;
+    bool private _initiated;
+    bool private _durationChanged;
+    uint256 private _deadline;
+    uint256 private _totalDeposit;
+    Status private _status;
+    Cap private _capstone;
 
-    constructor(address _token) {
-        token = _token;
-    }
+    address private _token;
+    address private _advisory;
+    address private _platform;
 
-    function initiateNFTProject(
-        address nftContract,
-        uint256 duration,
-        uint256 soft,
-        uint256 medium,
-        uint256 hard
-    ) external onlyOwner {
-        require(!nftProjects[nftContract].initiated, "Project was initiated");
-        nftProjects[nftContract].deadline = duration + block.timestamp;
-        nftProjects[nftContract].softCap = soft;
-        nftProjects[nftContract].mediumCap = medium;
-        nftProjects[nftContract].hardCap = hard;
+    // Mapping for tracking Status => nft contract => user address => tokenIds
+    mapping(Status => mapping(address => mapping(address => uint256[])))
+        private _selectedNFTs;
+    // Mapping for tracking all the deposits for each Status/Capstone
+    mapping(Status => mapping(address => uint256)) private _userDeposits;
+
+    // TODO: restructure for single project escrow contract
+    // TODO: constructor for initiate the project
+    constructor() {}
+
+    // Track the NFT the user selects
+
+    function totalDepositsOf(address payee) public view returns (uint256) {
+        return (_userDeposits[Status.Soft][payee] +
+            _userDeposits[Status.Medium][payee] +
+            _userDeposits[Status.Hard][payee] +
+            _userDeposits[Status.NonQualified][payee]);
     }
 
     /**
      * @dev Stores the sent amount as credit to be withdrawn.
-     * @param nftContract The nft contract address of the NFT that chosen by the msg.sender
-     * @param tokenId The tokenId of the NFT that chosen by the msg.sender
-     * @param amount The amount deposited in TALAX of the NFT price that chosen by the msg.sender
      *
      * Emits a {Deposited} event.
      */
     function deposit(
         address nftContract,
-        uint256 tokenId,
-        uint256 amount
-    ) public nonReentrant {
-        Project storage project = nftProjects[nftContract];
-        require(project.initiated, "Project not initiated");
-        require(project.status != Status.Hard, "Project fully supported");
+        uint256 tokenId
+    ) public payable virtual onlyOwner {
+        require(_initiated, "Project not initiated");
+        require(_status != Status.NonQualified, "Project fully supported");
+
+        uint256 _tokenPrice = NFT(nftContract).tokenPrice();
+        // TODO: compute the tax if tax implemented
 
         // Deposit for the current status
-        project.userTotalDeposits[project.status][msg.sender] += amount;
-        // Add to total amount for tracking
-        project.totalDeposit += amount;
+        _userDeposits[_status][msg.sender] += _tokenPrice;
+        _totalDeposit += _tokenPrice;
+        // Track selected NFT
+        _selectedNFTs[_status][nftContract][msg.sender].push(tokenId);
         SafeERC20.safeTransferFrom(
-            IERC20(token),
+            IERC20(_token),
             msg.sender,
             address(this),
-            amount
+            _tokenPrice
         );
 
         // Check if total surpass any capstone
-        if (project.totalDeposit >= project.hardCap) {
-            project.status = Status.NonQualified;
-            project.finalCap = project.hardCap;
-        } else if (project.totalDeposit >= project.mediumCap) {
-            project.status = Status.Hard;
-            project.finalCap = project.mediumCap;
-        } else if (project.totalDeposit >= project.softCap) {
-            project.status = Status.Medium;
-            project.finalCap = project.softCap;
+        if (_totalDeposit >= _capstone.hardCap) {
+            _status = Status.NonQualified;
+            _capstone.finalCap = _capstone.hardCap;
+        } else if (_totalDeposit >= _capstone.mediumCap) {
+            _status = Status.Hard;
+            _capstone.finalCap = _capstone.mediumCap;
+        } else if (_totalDeposit >= _capstone.softCap) {
+            _status = Status.Medium;
+            _capstone.finalCap = _capstone.softCap;
         }
-
-        emit Deposited(msg.sender, amount, nftContract, tokenId);
-    }
-
-    function withdrawalAllowed(address nftContract) public view returns (bool) {
-        if (nftProjects[nftContract].deadline < block.timestamp) {
-            return true;
-        }
-        return false;
-    }
-
-    function getWithdrawalAble(address nftContract)
-        public
-        view
-        returns (uint256)
-    {
-        Project storage project = nftProjects[nftContract];
-
-        if (withdrawalAllowed(nftContract)) {
-            return project.userTotalDeposits[project.status][msg.sender];
-        }
-        return 0;
+        emit Deposited(
+            msg.sender,
+            address(this),
+            _tokenPrice,
+            nftContract,
+            _status,
+            tokenId
+        );
     }
 
     /**
@@ -154,54 +150,50 @@ contract Escrow is Ownable, ReentrancyGuard {
      * Make sure you trust the recipient, or are either following the
      * checks-effects-interactions pattern or using {ReentrancyGuard}.
      *
-     * @param nftContract The nftAddress that user chose when supporting a project
      *
      * Emits a {Withdrawn} event.
      */
-    function withdraw(address nftContract) public nonReentrant {
-        Project storage project = nftProjects[nftContract];
-
-        uint256 payment = project.userTotalDeposits[project.status][msg.sender];
-        delete project.userTotalDeposits[project.status][msg.sender];
-        SafeERC20.safeTransfer(IERC20(token), msg.sender, payment);
-        emit Withdrawn(msg.sender, payment, nftContract);
+    function withdraw() public virtual onlyOwner {
+        uint256 payment = _userDeposits[_status][msg.sender];
+        delete _userDeposits[_status][msg.sender];
+        SafeERC20.safeTransfer(IERC20(_token), msg.sender, payment);
+        emit Withdrawn(msg.sender, address(this), payment);
     }
 
-    function claimNFT(address nftContract, uint256 tokenId)
-        public
-        nonReentrant
-    {
-        Project storage project = nftProjects[nftContract];
-        // Check if Crowdfund success
-        require(project.status != Status.Soft, "Crowdfund Failed");
-        // Check if msg.sender is depositor
-        address soft = project.tokenToUser[Status.Soft][tokenId];
-        address medium = project.tokenToUser[Status.Medium][tokenId];
-        address hard = project.tokenToUser[Status.Hard][tokenId];
+    /**
+     * @dev Helper functions
+     */
 
-        if (project.status == Status.NonQualified) {
-            require(
-                soft == msg.sender ||
-                    medium == msg.sender ||
-                    hard == msg.sender,
-                "Not Authorized"
-            );
-        } else if (project.status == Status.Hard) {
-            require(
-                soft == msg.sender || medium == msg.sender,
-                "Not Authorized"
-            );
-        } else {
-            require(soft == msg.sender, "Not Authorized");
+    function getCapstone() public view returns (uint256) {
+        return _capstone.finalCap;
+    }
+
+    function getWithdrawalAble() public view returns (uint256) {
+        if (_deadline > block.timestamp) {
+            return _userDeposits[_status][msg.sender];
         }
-        // Transfer from first owner(platform administrator) to msg.sender
-        // NFT first owner have to approve right after minting process
-        address owner = IERC721(nftContract).ownerOf(tokenId);
-        IERC721(nftContract).transferFrom(owner, msg.sender, tokenId);
-        emit NFTClaimed(msg.sender, nftContract, tokenId);
+        return 0;
     }
 
-    function getCapstone(address nftContract) public view returns (uint256) {
-        return nftProjects[nftContract].finalCap;
+    // TODO: confirm this function first
+    function _distributeToken() public {}
+
+    function _getAvailableStatus() internal view returns (Status[] memory) {
+        if (_status == Status.Medium) {
+            Status[] memory statuses = new Status[](1);
+            statuses[0] = Status.Soft;
+            return statuses;
+        } else if (_status == Status.Hard) {
+            Status[] memory statuses = new Status[](2);
+            statuses[0] = Status.Soft;
+            statuses[1] = Status.Medium;
+            return statuses;
+        } else {
+            Status[] memory statuses = new Status[](3);
+            statuses[0] = Status.Soft;
+            statuses[1] = Status.Medium;
+            statuses[2] = Status.Hard;
+            return statuses;
+        }
     }
 }

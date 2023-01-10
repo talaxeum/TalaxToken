@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 address constant public_sale_address = 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
 address payable constant team_and_project_coordinator_address = payable(
     0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A

@@ -5,6 +5,10 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface Token {
+    function taxRate() external returns (uint256);
+}
+
 contract Staking is ReentrancyGuard, Ownable {
     /**
      * @notice Constructor since this contract is not meant to be used without inheritance
@@ -78,17 +82,6 @@ contract Staking is ReentrancyGuard, Ownable {
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
 
-    /* ------------------------------------------ Modifier ------------------------------------------ */
-
-    function _checkAirdropStatus() internal view {
-        require(airdropStatus, "Airdrop not started");
-    }
-
-    modifier airdropStatusTrue() {
-        _checkAirdropStatus();
-        _;
-    }
-
     /* ---------------------------------------------- - --------------------------------------------- */
 
     /**
@@ -98,9 +91,9 @@ contract Staking is ReentrancyGuard, Ownable {
      */
     function stake(uint256 amount, uint256 stakePeriod) external nonReentrant {
         // Simple check so that user does not stake 0
-        // require(amount > 0, "Cannot stake nothing");
         // require(stakeholders[user].amount == 0, "User is a staker");
 
+        require(amount > 0, "Cannot stake nothing");
         require(stakeholders[msg.sender].amount == 0, "User is a Staker");
         require(stakingPackage[stakePeriod] != 0, "Package not Found");
 
@@ -110,8 +103,11 @@ contract Staking is ReentrancyGuard, Ownable {
         // Use the index to push a new Stake
         // push a newly created Stake with the current block timestamp.
 
+        uint256 amountIncludeTax = ((100 - Token(token_address).taxRate()) *
+            amount) / 100;
+
         stakeholders[msg.sender] = Stake(
-            amount,
+            amountIncludeTax,
             timestamp,
             stakingPackage[stakePeriod],
             (stakePeriod + timestamp),
@@ -126,31 +122,32 @@ contract Staking is ReentrancyGuard, Ownable {
             address(this),
             amount
         );
-        // Emit an event that the stake has occured
-        emit Staked(msg.sender, amount, timestamp, (stakePeriod + timestamp));
+        // Emit an event that the stake has occurred
+        emit Staked(
+            msg.sender,
+            amountIncludeTax,
+            timestamp,
+            (stakePeriod + timestamp)
+        );
     }
 
     function changePenaltyFee(uint256 amount) external onlyOwner {
         // require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
-        require(amount <= 30, "Penalty max 30%");
+        require(amount <= 30, "Penalty max 3%");
         stakingPenaltyRate = amount;
         emit PenaltyChanged(amount);
     }
 
-    function _calculateStakingDuration(uint256 since)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calculateStakingDuration(
+        uint256 since
+    ) internal view returns (uint256) {
         // times by 1e24 so theres no missing value
         return ((block.timestamp - since) * 1e24) / 365 days;
     }
 
-    function _calculateStakeReward(Stake memory user_stake)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calculateStakeReward(
+        Stake memory user_stake
+    ) internal view returns (uint256) {
         // divided by 1e26 because 1e2 for APY and 1e24 from calculate staking duration
         return
             (user_stake.amount *
@@ -158,11 +155,10 @@ contract Staking is ReentrancyGuard, Ownable {
                 _calculateStakingDuration(user_stake.since)) / 1e26;
     }
 
-    function _calculateStakingWithPenalty(uint256 amount, uint256 reward)
-        internal
-        view
-        returns (uint256, uint256)
-    {
+    function _calculateStakingWithPenalty(
+        uint256 amount,
+        uint256 reward
+    ) internal view returns (uint256, uint256) {
         return (
             amount - ((amount * stakingPenaltyRate) / 1000),
             reward - ((reward * stakingPenaltyRate) / 1000)
@@ -253,16 +249,15 @@ contract Staking is ReentrancyGuard, Ownable {
         return (block.timestamp - timestamp) / 7 days;
     }
 
-    function _calculateAirdrop(uint256 stakeAmount)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calculateAirdrop(
+        uint256 stakeAmount
+    ) internal view returns (uint256) {
         return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
     }
 
-    function claimAirdrop() external airdropStatusTrue {
+    function claimAirdrop() external {
         // TODO: can be simplified if using address
+        require(airdropStatus, "Not Initialized");
         Stake storage user_stake = stakeholders[msg.sender];
 
         require(user_stake.amount != 0, "Staking not found");
