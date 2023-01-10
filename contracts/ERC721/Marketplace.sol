@@ -12,21 +12,29 @@ error ItemNotForSale(address nftAddress, uint256 tokenId);
 error NotListed(address nftAddress, uint256 tokenId);
 error Listed(address nftAddress, uint256 tokenId);
 error AlreadyListed(address nftAddress, uint256 tokenId);
+error BidAlreadyAccepted(address nftAddress, uint256 tokenId);
 error NoProceeds();
 error NotOwner();
 error IsNotOwner();
 error NotApprovedForMarketplace();
 error PriceMustBeAboveZero();
+error PriceMustBeGreater();
+error NotBidder();
 
 // Error thrown for isNotOwner modifier
 // error IsNotOwner()
 // TODO: Implement Royalties for NFT Transactions (Using Talax or Ethers)
 
 contract NFTMarketplace is ReentrancyGuard {
+    // Bid and Make Offer Differ in Status
+    // Bid => Auction Status
+    // Make Offer => Not on Sale Status
     struct Listing {
         uint256 price;
         address seller;
         uint256 endDate;
+        bool bidAccepted;
+        Bid s_bid;
     }
     struct Bid {
         uint256 price;
@@ -90,16 +98,15 @@ contract NFTMarketplace is ReentrancyGuard {
 
     address private token;
 
-    mapping(address => mapping(uint256 => mapping(address => Bid)))
-        private s_biddings;
-    mapping(address => mapping(uint256 => mapping(address => Bid)))
-        private s_offerings;
     mapping(address => mapping(uint256 => Listing)) private s_listings;
     // mapping(address => uint256) private s_proceeds;
 
     modifier notListed(address nftAddress, uint256 tokenId) {
         Listing memory listing = s_listings[nftAddress][tokenId];
         if (listing.price > 0) {
+            revert AlreadyListed(nftAddress, tokenId);
+        }
+        if (listing.endDate > 0) {
             revert AlreadyListed(nftAddress, tokenId);
         }
         _;
@@ -123,6 +130,14 @@ contract NFTMarketplace is ReentrancyGuard {
         }
         if (listing.endDate > block.timestamp) {
             revert Listed(nftAddress, tokenId);
+        }
+        _;
+    }
+
+    modifier isBidAccepted(address nftAddress, uint256 tokenId) {
+        Listing memory listing = s_listings[nftAddress][tokenId];
+        if (listing.bidAccepted) {
+            revert BidAlreadyAccepted(nftAddress, tokenId);
         }
         _;
     }
@@ -184,7 +199,7 @@ contract NFTMarketplace is ReentrancyGuard {
         notListed(nftAddress, tokenId)
         isOwner(nftAddress, tokenId, msg.sender)
     {
-        if (price <= 0) {
+        if (price == 0) {
             revert PriceMustBeAboveZero();
         }
         IERC721 nft = IERC721(nftAddress);
@@ -195,7 +210,9 @@ contract NFTMarketplace is ReentrancyGuard {
         s_listings[nftAddress][tokenId] = Listing(
             price,
             msg.sender,
-            block.timestamp + duration
+            block.timestamp + duration,
+            false,
+            Bid(0, address(0))
         );
         emit ItemListed(
             msg.sender,
@@ -211,7 +228,10 @@ contract NFTMarketplace is ReentrancyGuard {
      * @param nftAddress Address of NFT contract
      * @param tokenId Token ID of NFT
      */
-    function cancelListing(address nftAddress, uint256 tokenId)
+    function cancelListing(
+        address nftAddress,
+        uint256 tokenId
+    )
         external
         isOwner(nftAddress, tokenId, msg.sender)
         isListed(nftAddress, tokenId)
@@ -228,7 +248,10 @@ contract NFTMarketplace is ReentrancyGuard {
      * @param nftAddress Address of NFT contract
      * @param tokenId Token ID of NFT
      */
-    function buyItem(address nftAddress, uint256 tokenId)
+    function buyItem(
+        address nftAddress,
+        uint256 tokenId
+    )
         external
         payable
         isListed(nftAddress, tokenId)
@@ -276,13 +299,15 @@ contract NFTMarketplace is ReentrancyGuard {
         isOwner(nftAddress, tokenId, msg.sender)
     {
         //We should check the value of `newPrice` and revert if it's below zero (like we also check in `listItem()`)
-        if (newPrice <= 0) {
+        if (newPrice == 0) {
             revert PriceMustBeAboveZero();
         }
         s_listings[nftAddress][tokenId].price = newPrice;
 
         uint256 newEndDate = s_listings[nftAddress][tokenId].endDate +
             additionalDuration;
+
+        s_listings[nftAddress][tokenId].endDate = newEndDate;
         emit ItemListed(msg.sender, nftAddress, tokenId, newPrice, newEndDate);
     }
 
@@ -303,42 +328,27 @@ contract NFTMarketplace is ReentrancyGuard {
     )
         external
         payable
-        isListed(nftAddress, tokenId)
+        isBidAccepted(nftAddress, tokenId)
         isNotOwner(nftAddress, tokenId, msg.sender)
         nonReentrant
     {
-        if (price <= 0) {
-            revert PriceMustBeAboveZero();
+        Listing memory listedItem = s_listings[nftAddress][tokenId];
+        if (price < listedItem.s_bid.price) {
+            revert PriceMustBeGreater();
         }
+        listedItem.s_bid = Bid(price, msg.sender);
 
-        s_biddings[nftAddress][tokenId][msg.sender] = Bid(price, msg.sender);
         emit BidCreated(msg.sender, nftAddress, tokenId, price);
-    }
-
-    /**
-     * @notice Method to cancel Bid
-     * @param nftAddress Address of NFT contract
-     * @param tokenId Token ID of NFT
-     */
-    function cancelBid(address nftAddress, uint256 tokenId)
-        external
-        isListed(nftAddress, tokenId)
-        nonReentrant
-    {
-        delete (s_biddings[nftAddress][tokenId][msg.sender]);
-        emit BidCancelled(msg.sender, nftAddress, tokenId);
     }
 
     /**
      * @notice Method to accept Bid (Only callable by owner of NFT)
      * @param nftAddress Address of NFT contract
      * @param tokenId Token ID of NFT
-     * @param buyer The buyer/bidder of the selected bid
      */
     function acceptBid(
         address nftAddress,
-        uint256 tokenId,
-        address buyer
+        uint256 tokenId
     )
         external
         isListed(nftAddress, tokenId)
@@ -346,14 +356,16 @@ contract NFTMarketplace is ReentrancyGuard {
         isOwner(nftAddress, tokenId, msg.sender)
     {
         Listing memory listedItem = s_listings[nftAddress][tokenId];
-        Bid memory bidding = s_biddings[nftAddress][tokenId][buyer];
+        Bid memory bid = listedItem.s_bid;
+
+        listedItem.bidAccepted = true;
+
         delete (s_listings[nftAddress][tokenId]);
-        delete (s_biddings[nftAddress][tokenId][buyer]);
         SafeERC20.safeTransferFrom(
             IERC20(token),
-            bidding.buyer,
+            bid.buyer,
             msg.sender,
-            bidding.price
+            bid.price
         );
         IERC721(nftAddress).safeTransferFrom(
             listedItem.seller,
@@ -361,89 +373,6 @@ contract NFTMarketplace is ReentrancyGuard {
             tokenId
         );
         emit BidAccepted(
-            listedItem.seller,
-            msg.sender,
-            nftAddress,
-            tokenId,
-            listedItem.price
-        );
-    }
-
-    /* ---------------------------------------------------------------------------------------------- */
-    /*                                       Offering Functions                                       */
-    /* ---------------------------------------------------------------------------------------------- */
-
-    /**
-     * @notice Method for create Bidding (Bid on a listed NFT)
-     * @param nftAddress Address of NFT contract
-     * @param tokenId Token ID of NFT
-     * @param price Amount of placed bid
-     */
-    function createOffer(
-        address nftAddress,
-        uint256 tokenId,
-        uint256 price
-    )
-        external
-        payable
-        isNotListed(nftAddress, tokenId)
-        isNotOwner(nftAddress, tokenId, msg.sender)
-        nonReentrant
-    {
-        if (price <= 0) {
-            revert PriceMustBeAboveZero();
-        }
-
-        s_offerings[nftAddress][tokenId][msg.sender] = Bid(price, msg.sender);
-        emit OfferCreated(msg.sender, nftAddress, tokenId, price);
-    }
-
-    /**
-     * @notice Method to cancel Bid
-     * @param nftAddress Address of NFT contract
-     * @param tokenId Token ID of NFT
-     */
-    function cancelOffer(address nftAddress, uint256 tokenId)
-        external
-        isNotListed(nftAddress, tokenId)
-        nonReentrant
-    {
-        delete (s_offerings[nftAddress][tokenId][msg.sender]);
-        emit OfferCancelled(msg.sender, nftAddress, tokenId);
-    }
-
-    /**
-     * @notice Method to accept Bid (Only callable by owner of NFT)
-     * @param nftAddress Address of NFT contract
-     * @param tokenId Token ID of NFT
-     * @param buyer The buyer/bidder of the selected bid
-     */
-    function acceptOffer(
-        address nftAddress,
-        uint256 tokenId,
-        address buyer
-    )
-        external
-        isNotListed(nftAddress, tokenId)
-        nonReentrant
-        isOwner(nftAddress, tokenId, msg.sender)
-    {
-        Listing memory listedItem = s_listings[nftAddress][tokenId];
-        Bid memory bidding = s_offerings[nftAddress][tokenId][buyer];
-        delete (s_listings[nftAddress][tokenId]);
-        delete (s_offerings[nftAddress][tokenId][buyer]);
-        SafeERC20.safeTransferFrom(
-            IERC20(token),
-            bidding.buyer,
-            msg.sender,
-            bidding.price
-        );
-        IERC721(nftAddress).safeTransferFrom(
-            listedItem.seller,
-            msg.sender,
-            tokenId
-        );
-        emit OfferAccepted(
             listedItem.seller,
             msg.sender,
             nftAddress,
@@ -469,11 +398,10 @@ contract NFTMarketplace is ReentrancyGuard {
     // Getter Functions //
     /////////////////////
 
-    function getListing(address nftAddress, uint256 tokenId)
-        external
-        view
-        returns (Listing memory)
-    {
+    function getListing(
+        address nftAddress,
+        uint256 tokenId
+    ) external view returns (Listing memory) {
         return s_listings[nftAddress][tokenId];
     }
 

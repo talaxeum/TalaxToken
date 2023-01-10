@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.11;
 
-import "../ERC721/ProjectNameNFT.sol";
+import "../ERC721/NFT.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -14,7 +14,7 @@ contract NFTFactory is Ownable {
     address immutable _masterContract;
 
     constructor() {
-        _masterContract = address(new ProjectNameNFT());
+        _masterContract = address(new NFT());
     }
 
     function getCurrentCounter() external view returns (uint256) {
@@ -29,7 +29,7 @@ contract NFTFactory is Ownable {
         uint256 tokenPrice
     ) external onlyOwner returns (address) {
         address project = Clones.clone(_masterContract);
-        ProjectNameNFT(project).init(
+        NFT(project).init(
             minter,
             tokenAddress,
             escrowAddress,
