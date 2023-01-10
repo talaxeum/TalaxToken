@@ -77,24 +77,6 @@ contract NFTMarketplace is ReentrancyGuard {
         uint256 indexed tokenId,
         uint256 price
     );
-    event OfferCreated(
-        address indexed buyer,
-        address indexed nftAddress,
-        uint256 indexed tokenId,
-        uint256 offeringPrice
-    );
-    event OfferCancelled(
-        address indexed buyer,
-        address indexed nftAddress,
-        uint256 indexed tokenId
-    );
-    event OfferAccepted(
-        address seller,
-        address indexed buyer,
-        address indexed nftAddress,
-        uint256 indexed tokenId,
-        uint256 price
-    );
 
     address private token;
 
@@ -349,12 +331,7 @@ contract NFTMarketplace is ReentrancyGuard {
     function acceptBid(
         address nftAddress,
         uint256 tokenId
-    )
-        external
-        isListed(nftAddress, tokenId)
-        nonReentrant
-        isOwner(nftAddress, tokenId, msg.sender)
-    {
+    ) external nonReentrant isOwner(nftAddress, tokenId, msg.sender) {
         Listing memory listedItem = s_listings[nftAddress][tokenId];
         Bid memory bid = listedItem.s_bid;
 
