@@ -9,10 +9,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
-import "./Data.sol";
-
 contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
-    uint256 public taxRate = 1;
+    uint256 public taxRate = 100; // basis points
 
     constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
         _mint(_msgSender(), 21 * 1e9 * 10 ** decimals());
@@ -28,18 +26,16 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         return address(this).balance;
     }
 
-    function withdrawFunds() external {
-        (bool sent, ) = team_and_project_coordinator_address.call{
-            value: address(this).balance
-        }("");
+    function withdrawFunds() external onlyOwner {
+        (bool sent, ) = owner().call{value: address(this).balance}("");
 
         require(sent == true, "Failed to send Ether");
     }
 
-    function withdrawFunds(address token) external {
+    function withdrawFunds(address token) external onlyOwner {
         SafeERC20.safeTransfer(
             IERC20(token),
-            team_and_project_coordinator_address,
+            owner(),
             IERC20(token).balanceOf(address(this))
         );
     }
@@ -60,17 +56,15 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     ) public override returns (bool) {
         address owner = _msgSender();
 
-        uint256 tax = (amount * taxRate) / 100;
+        uint256 tax = (amount * taxRate) / 10_000;
         uint256 taxedAmount = amount - tax;
 
-        uint256 teamFee = (tax * 2) / 10;
-        uint256 liquidityFee = (tax * 8) / 10;
-
-        _transfer(owner, team_and_project_coordinator_address, teamFee);
-        _transfer(owner, liquidity_reserve_address, liquidityFee);
+        _transfer(owner, address(this), tax);
         _transfer(owner, to, taxedAmount);
         return true;
     }
+
+    // TODO: Possible to add mint functions for [escrowContracts]
 
     // The following functions are overrides required by Solidity.
 

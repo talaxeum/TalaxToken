@@ -18,8 +18,11 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
     address private token;
     address private escrowAddress;
 
-    constructor() ERC721("MyToken", "MTK") {}
+    constructor() ERC721("TokenName", "TKN") {}
 
+    /**
+     * @notice Using init function instead of constructor because the contract will be deployed using clone contract
+     */
     function init(
         address _artist,
         address _token,
@@ -51,7 +54,16 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
         _setTokenURI(tokenId, uri);
     }
 
-    // The following functions are overrides required by Solidity.
+    function mintNFTWithRoyalty(
+        address recipient,
+        string memory _tokenURI
+    ) public onlyOwner returns (uint256) {
+        uint256 tokenId = _mintNFT(recipient, _tokenURI);
+        _setTokenRoyalty(tokenId, artist, royaltyPercentage);
+        return tokenId;
+    }
+
+    /* ----------------- The following functions are overrides required by Solidity. ---------------- */
 
     function _burn(
         uint256 tokenId
@@ -76,14 +88,5 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
         _setTokenURI(newItemId, _tokenURI);
 
         return newItemId;
-    }
-
-    function mintNFTWithRoyalty(
-        address recipient,
-        string memory _tokenURI
-    ) public onlyOwner returns (uint256) {
-        uint256 tokenId = _mintNFT(recipient, _tokenURI);
-        _setTokenRoyalty(tokenId, artist, royaltyPercentage);
-        return tokenId;
     }
 }

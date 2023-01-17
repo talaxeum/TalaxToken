@@ -11,32 +11,6 @@ interface Token {
 
 contract Staking is ReentrancyGuard, Ownable {
     /**
-     * @notice Constructor since this contract is not meant to be used without inheritance
-     * push once to stakeholders for it to work properly
-     */
-
-    mapping(uint256 => uint256) internal stakingPackage;
-
-    uint256 public stakingPenaltyRate;
-    uint256 public airdropRate;
-    uint256 public airdropSince;
-    bool public airdropStatus;
-
-    address public token_address;
-
-    constructor(address token) {
-        //Staking penalty and Airdrop in 0.1 times percentage
-        stakingPenaltyRate = 15;
-        airdropRate = 80;
-
-        token_address = token;
-
-        stakingPackage[90 days] = 6;
-        stakingPackage[180 days] = 7;
-        stakingPackage[365 days] = 8;
-    }
-
-    /**
      * @notice
      * A stake struct is used to represent the way we store stakes,
      * A Stake will contain the users address, the amount staked and a timestamp,
@@ -69,6 +43,13 @@ contract Staking is ReentrancyGuard, Ownable {
      */
     mapping(address => Stake) internal stakeholders;
 
+    address public token_address;
+    uint256 public stakingPenaltyRate;
+    uint256 public airdropRate;
+    uint256 public airdropSince;
+    bool public airdropStatus;
+    mapping(uint256 => uint256) internal _stakingPackage;
+
     /**
      * @notice Staked event is triggered whenever a user stakes tokens, address is indexed to make it filterable
      */
@@ -82,7 +63,31 @@ contract Staking is ReentrancyGuard, Ownable {
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
 
-    /* ---------------------------------------------- - --------------------------------------------- */
+    /**
+     * @notice Constructor since this contract is not meant to be used without inheritance
+     * push once to stakeholders for it to work properly
+     */
+    constructor(address token) {
+        //Staking penalty and Airdrop in 0.1 times percentage
+        stakingPenaltyRate = 150; // bps
+        airdropRate = 800; // bps
+
+        token_address = token;
+
+        // APY in bps
+        _stakingPackage[90 days] = 600;
+        _stakingPackage[180 days] = 700;
+        _stakingPackage[365 days] = 800;
+    }
+
+    function changePenaltyFee(uint256 amount) external onlyOwner {
+        // require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
+        require(amount <= 300, "Penalty max 3%");
+        stakingPenaltyRate = amount;
+        emit PenaltyChanged(amount);
+    }
+
+    /* ------------------------------------ Main Stake Functions ------------------------------------ */
 
     /**
      * @notice
@@ -95,7 +100,7 @@ contract Staking is ReentrancyGuard, Ownable {
 
         require(amount > 0, "Cannot stake nothing");
         require(stakeholders[msg.sender].amount == 0, "User is a Staker");
-        require(stakingPackage[stakePeriod] != 0, "Package not Found");
+        require(_stakingPackage[stakePeriod] != 0, "Package not Found");
 
         // block.timestamp = timestamp of the current block in seconds since the epoch
         uint256 timestamp = block.timestamp;
@@ -109,7 +114,7 @@ contract Staking is ReentrancyGuard, Ownable {
         stakeholders[msg.sender] = Stake(
             amountIncludeTax,
             timestamp,
-            stakingPackage[stakePeriod],
+            _stakingPackage[stakePeriod],
             (stakePeriod + timestamp),
             0,
             0,
@@ -131,40 +136,6 @@ contract Staking is ReentrancyGuard, Ownable {
         );
     }
 
-    function changePenaltyFee(uint256 amount) external onlyOwner {
-        // require(amount <= 30, "Penalty fee cannot exceed 3 percent.");
-        require(amount <= 30, "Penalty max 3%");
-        stakingPenaltyRate = amount;
-        emit PenaltyChanged(amount);
-    }
-
-    function _calculateStakingDuration(
-        uint256 since
-    ) internal view returns (uint256) {
-        // times by 1e24 so theres no missing value
-        return ((block.timestamp - since) * 1e24) / 365 days;
-    }
-
-    function _calculateStakeReward(
-        Stake memory user_stake
-    ) internal view returns (uint256) {
-        // divided by 1e26 because 1e2 for APY and 1e24 from calculate staking duration
-        return
-            (user_stake.amount *
-                user_stake.rewardAPY *
-                _calculateStakingDuration(user_stake.since)) / 1e26;
-    }
-
-    function _calculateStakingWithPenalty(
-        uint256 amount,
-        uint256 reward
-    ) internal view returns (uint256, uint256) {
-        return (
-            amount - ((amount * stakingPenaltyRate) / 1000),
-            reward - ((reward * stakingPenaltyRate) / 1000)
-        );
-    }
-
     /**
      * @notice
      * withdrawStake takes in an amount and a index of the stake and will remove tokens from that stake
@@ -174,7 +145,6 @@ contract Staking is ReentrancyGuard, Ownable {
      */
 
     function withdrawStake() external nonReentrant {
-        // TODO: can be simplified
         // Grab user_index which is the index to use to grab the Stake[]
         Stake memory user_stake = stakeholders[msg.sender];
         require(user_stake.amount != 0, "Staking not found");
@@ -183,15 +153,10 @@ contract Staking is ReentrancyGuard, Ownable {
         delete stakeholders[msg.sender];
 
         if (user_stake.releaseTime > block.timestamp) {
-            (
-                uint256 amount_reduced,
-                uint256 reward_reduced
-            ) = _calculateStakingWithPenalty(user_stake.amount, reward);
-
             SafeERC20.safeTransfer(
                 IERC20(token_address),
                 msg.sender,
-                (amount_reduced + reward_reduced)
+                (_calculateStakingWithPenalty(user_stake.amount, reward))
             );
         } else {
             SafeERC20.safeTransfer(
@@ -202,32 +167,6 @@ contract Staking is ReentrancyGuard, Ownable {
         }
     }
 
-    function hasStake() external view returns (StakingSummary memory) {
-        Stake memory user_stake = stakeholders[msg.sender];
-        require(user_stake.amount != 0, "Staking not found");
-        StakingSummary memory summary = StakingSummary(0, 0, user_stake);
-
-        uint256 reward = _calculateStakeReward(user_stake);
-
-        if (summary.stake.releaseTime > block.timestamp) {
-            summary.penalty =
-                ((user_stake.amount * stakingPenaltyRate) / 1000) +
-                ((reward * stakingPenaltyRate) / 1000);
-        }
-
-        if (calculateWeek(user_stake.latestClaimDrop) > 0) {
-            uint256 airdrop = _calculateAirdrop(user_stake.amount);
-            summary.stake.claimableAirdrop = airdrop;
-        } else {
-            summary.stake.claimableAirdrop = 0;
-        }
-
-        summary.stake.claimable = reward;
-        summary.total_amount = user_stake.amount;
-
-        return summary;
-    }
-
     /* -------------------------------------- Airdrop functions ------------------------------------- */
 
     function startAirdrop() external onlyOwner {
@@ -236,27 +175,17 @@ contract Staking is ReentrancyGuard, Ownable {
     }
 
     function changeAirdropPercentage(uint256 amount) external onlyOwner {
-        require(amount <= 200, "Airdrop max 20%");
+        require(amount <= 2_000, "Airdrop max 20%");
         airdropRate = amount;
         emit AirdropChanged(amount);
-    }
-
-    function blockTimestamp() public view returns (uint256) {
-        return block.timestamp;
     }
 
     function calculateWeek(uint256 timestamp) public view returns (uint256) {
         return (block.timestamp - timestamp) / 7 days;
     }
 
-    function _calculateAirdrop(
-        uint256 stakeAmount
-    ) internal view returns (uint256) {
-        return ((stakeAmount * airdropRate) / 1000) / 52 weeks;
-    }
-
     function claimAirdrop() external {
-        // TODO: can be simplified if using address
+        // Airdrop status need to be updated by admin first
         require(airdropStatus, "Not Initialized");
         Stake storage user_stake = stakeholders[msg.sender];
 
@@ -275,5 +204,68 @@ contract Staking is ReentrancyGuard, Ownable {
                 _calculateAirdrop(user_stake.amount)
             );
         }
+    }
+
+    /* ----------------------------------------- Get Summary ---------------------------------------- */
+
+    function hasStake() external view returns (StakingSummary memory) {
+        Stake memory user_stake = stakeholders[msg.sender];
+        require(user_stake.amount != 0, "Staking not found");
+        StakingSummary memory summary = StakingSummary(0, 0, user_stake);
+
+        uint256 reward = _calculateStakeReward(user_stake);
+
+        if (summary.stake.releaseTime > block.timestamp) {
+            summary.penalty = _calculateStakingWithPenalty(
+                user_stake.amount,
+                reward
+            );
+        }
+
+        if (calculateWeek(user_stake.latestClaimDrop) > 0) {
+            uint256 airdrop = _calculateAirdrop(user_stake.amount);
+            summary.stake.claimableAirdrop = airdrop;
+        } else {
+            summary.stake.claimableAirdrop = 0;
+        }
+
+        summary.stake.claimable = reward;
+        summary.total_amount = user_stake.amount;
+
+        return summary;
+    }
+
+    /* -------------------------------------- Helpers Function -------------------------------------- */
+
+    function _calculateStakingDuration(
+        uint256 since
+    ) internal view returns (uint256) {
+        // times by 1e24 so theres no missing value
+        return ((block.timestamp - since) * 1e24) / 365 days;
+    }
+
+    function _calculateStakeReward(
+        Stake memory user_stake
+    ) internal view returns (uint256) {
+        // divided by 1e26 because 1e4 for APY and 1e24 from calculate staking duration
+        return
+            (user_stake.amount *
+                user_stake.rewardAPY *
+                _calculateStakingDuration(user_stake.since)) / 1e28;
+    }
+
+    function _calculateStakingWithPenalty(
+        uint256 amount,
+        uint256 reward
+    ) internal view returns (uint256) {
+        return
+            ((amount * stakingPenaltyRate) / 10_000) +
+            ((reward * stakingPenaltyRate) / 10_000);
+    }
+
+    function _calculateAirdrop(
+        uint256 stakeAmount
+    ) internal view returns (uint256) {
+        return ((stakeAmount * airdropRate) / 10_000) / 52 weeks;
     }
 }

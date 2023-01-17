@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC20/Data.sol": {
-      "lastModificationDate": 1669883204333,
-      "contentHash": "b4d1ef1cf4e9db27861a604585ea533f",
+      "lastModificationDate": 1673921482393,
+      "contentHash": "160e881fbf8016ee07e8bbb80b261745",
       "sourceName": "contracts/ERC20/Data.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -35,8 +35,8 @@
       "artifacts": []
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC20/Talaxeum.sol": {
-      "lastModificationDate": 1670220763032,
-      "contentHash": "3bce6afabd1429eb092b9e05af8b9215",
+      "lastModificationDate": 1673921586187,
+      "contentHash": "1a66988b2ce87aae2111241a9565efca",
       "sourceName": "contracts/ERC20/Talaxeum.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -68,8 +68,7 @@
         "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol",
-        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
-        "./Data.sol"
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol"
       ],
       "versionPragmas": [
         "^0.8.0"
@@ -1616,49 +1615,9 @@
         "Clones"
       ]
     },
-    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Factory/NFTFactory.sol": {
-      "lastModificationDate": 1673318166736,
-      "contentHash": "1f015d4ced7d228d0654c8921fe2014f",
-      "sourceName": "contracts/Factory/NFTFactory.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC721/NFT.sol",
-        "@openzeppelin/contracts/proxy/Clones.sol",
-        "@openzeppelin/contracts/utils/Counters.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "0.8.11"
-      ],
-      "artifacts": [
-        "NFTFactory"
-      ]
-    },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC721/Escrow.sol": {
-      "lastModificationDate": 1673314791739,
-      "contentHash": "e66a3000f88f9e517797efb3b54283d7",
+      "lastModificationDate": 1673858105380,
+      "contentHash": "6cca63af56274191fd959718607ed84c",
       "sourceName": "contracts/ERC721/Escrow.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1695,7 +1654,8 @@
       ],
       "artifacts": [
         "NFT",
-        "ProjectEscrow"
+        "ProjectEscrow",
+        "Token"
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/node_modules/@openzeppelin/contracts/token/common/ERC2981.sol": {
@@ -1846,8 +1806,8 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC721/Marketplace.sol": {
-      "lastModificationDate": 1673325673576,
-      "contentHash": "a4b0c5acffe375f5efb68ffc86a695e6",
+      "lastModificationDate": 1673326646096,
+      "contentHash": "578c38abce1863413cae8808d5d7ef94",
       "sourceName": "contracts/ERC721/Marketplace.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1885,8 +1845,8 @@
       ]
     },
     "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/ERC20/Staking.sol": {
-      "lastModificationDate": 1670320190086,
-      "contentHash": "942ca8e50bb0870f3c60ff23daa011db",
+      "lastModificationDate": 1673922111556,
+      "contentHash": "aef830aadc3c4382269e5cdd83811a04",
       "sourceName": "contracts/ERC20/Staking.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2043,6 +2003,86 @@
       ],
       "artifacts": [
         "NFT"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Factories/NFTFactory.sol": {
+      "lastModificationDate": 1673326279460,
+      "contentHash": "fd3f24af0fbec3f6c7ebe6748fd5b1fd",
+      "sourceName": "contracts/Factories/NFTFactory.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC721/NFT.sol",
+        "@openzeppelin/contracts/proxy/Clones.sol",
+        "@openzeppelin/contracts/utils/Counters.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "NFTFactory"
+      ]
+    },
+    "/Users/evan/Work/Projects/Blockchain/TalaxToken/contracts/Factories/EscrowFactory.sol": {
+      "lastModificationDate": 1673858122188,
+      "contentHash": "e96fcd782637f5bb47f1f2a2cc3229ac",
+      "sourceName": "contracts/Factories/EscrowFactory.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC721/Escrow.sol",
+        "@openzeppelin/contracts/proxy/Clones.sol",
+        "@openzeppelin/contracts/utils/Counters.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "NFTFactory"
       ]
     }
   }

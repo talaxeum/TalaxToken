@@ -27,6 +27,12 @@ interface NFT {
     function tokenPrice() external returns (uint256);
 }
 
+interface Token {
+    function advisory() external returns (address);
+
+    function platform() external returns (address);
+}
+
 contract ProjectEscrow is Ownable {
     using Address for address payable;
 
@@ -64,7 +70,6 @@ contract ProjectEscrow is Ownable {
         uint256 finalCap;
     }
 
-    bool private _initiated;
     bool private _durationChanged;
     uint256 private _deadline;
     uint256 private _totalDeposit;
@@ -72,26 +77,24 @@ contract ProjectEscrow is Ownable {
     Cap private _capstone;
 
     address private _token;
-    address private _advisory;
-    address private _platform;
 
     // Mapping for tracking Status => nft contract => user address => tokenIds
     mapping(Status => mapping(address => mapping(address => uint256[])))
         private _selectedNFTs;
-    // Mapping for tracking all the deposits for each Status/Capstone
+    // Mapping for tracking total deposits for each Status/Capstone
     mapping(Status => mapping(address => uint256)) private _userDeposits;
 
     // TODO: restructure for single project escrow contract
     // TODO: constructor for initiate the project
     constructor() {}
 
-    // Track the NFT the user selects
+    function init(address token) external {
+        _token = token;
+    }
 
-    function totalDepositsOf(address payee) public view returns (uint256) {
-        return (_userDeposits[Status.Soft][payee] +
-            _userDeposits[Status.Medium][payee] +
-            _userDeposits[Status.Hard][payee] +
-            _userDeposits[Status.NonQualified][payee]);
+    modifier isRunning() {
+        _isRunning();
+        _;
     }
 
     /**
@@ -102,12 +105,11 @@ contract ProjectEscrow is Ownable {
     function deposit(
         address nftContract,
         uint256 tokenId
-    ) public payable virtual onlyOwner {
-        require(_initiated, "Project not initiated");
+    ) public payable virtual {
+        require(block.timestamp < _deadline, "Project is running");
         require(_status != Status.NonQualified, "Project fully supported");
 
         uint256 _tokenPrice = NFT(nftContract).tokenPrice();
-        // TODO: compute the tax if tax implemented
 
         // Deposit for the current status
         _userDeposits[_status][msg.sender] += _tokenPrice;
@@ -142,6 +144,12 @@ contract ProjectEscrow is Ownable {
         );
     }
 
+    // TODO: Create functions to mint NFT
+    function mintNFTs(address nftContract) public payable isRunning {
+        Status[] memory statuses = _getAvailableStatus();
+        uint256[] memory tokenIds;
+    }
+
     /**
      * @dev Withdraw accumulated balance for a payee, forwarding all gas to the
      * recipient.
@@ -153,16 +161,25 @@ contract ProjectEscrow is Ownable {
      *
      * Emits a {Withdrawn} event.
      */
-    function withdraw() public virtual onlyOwner {
+    function withdraw() public virtual isRunning {
         uint256 payment = _userDeposits[_status][msg.sender];
         delete _userDeposits[_status][msg.sender];
         SafeERC20.safeTransfer(IERC20(_token), msg.sender, payment);
         emit Withdrawn(msg.sender, address(this), payment);
     }
 
-    /**
-     * @dev Helper functions
-     */
+    /* ------------------------------------------- Helpers ------------------------------------------ */
+
+    function _isRunning() internal {
+        require(block.timestamp > _deadline, "Project is still funding");
+    }
+
+    function totalDepositsOf(address payee) public view returns (uint256) {
+        return (_userDeposits[Status.Soft][payee] +
+            _userDeposits[Status.Medium][payee] +
+            _userDeposits[Status.Hard][payee] +
+            _userDeposits[Status.NonQualified][payee]);
+    }
 
     function getCapstone() public view returns (uint256) {
         return _capstone.finalCap;
@@ -176,6 +193,7 @@ contract ProjectEscrow is Ownable {
     }
 
     // TODO: confirm this function first
+    // TODO: Need to be called when NFT is minted
     function _distributeToken() public {}
 
     function _getAvailableStatus() internal view returns (Status[] memory) {
