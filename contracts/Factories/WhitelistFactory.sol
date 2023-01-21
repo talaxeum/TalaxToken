@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../ERC721/Escrow.sol";
+import "../ERC20/Whitelist.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract EscrowFactory is Ownable {
+contract WhitelistFactory is Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _counter;
 
@@ -14,7 +14,7 @@ contract EscrowFactory is Ownable {
     address immutable _masterContract;
 
     constructor() {
-        _masterContract = address(new ProjectEscrow());
+        _masterContract = address(new Whitelist());
     }
 
     function getCurrentCounter() external view returns (uint256) {
@@ -23,18 +23,16 @@ contract EscrowFactory is Ownable {
 
     function createProject(
         address tokenAddress,
-        uint256 artistFee,
-        uint256 projectFee,
-        uint256 advisoryFee,
-        uint256 platformFee
+        uint64 startTimestamp,
+        uint64 durationSeconds,
+        uint64 cliff
     ) external onlyOwner returns (address) {
         address project = Clones.clone(_masterContract);
-        ProjectEscrow(project).init(
+        Whitelist(project).init(
             tokenAddress,
-            artistFee,
-            projectFee,
-            advisoryFee,
-            platformFee
+            startTimestamp,
+            durationSeconds,
+            cliff
         );
         projects[_counter.current()] = project;
         _counter.increment();

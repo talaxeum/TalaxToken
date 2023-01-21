@@ -59,6 +59,11 @@ contract Staking is ReentrancyGuard, Ownable {
         uint256 timestamp,
         uint256 releaseTime
     );
+    event StakeClaimed(
+        address indexed user,
+        uint256 claimed,
+        uint256 timestamp
+    );
 
     event PenaltyChanged(uint256 amount);
     event AirdropChanged(uint256 amount);
@@ -109,7 +114,7 @@ contract Staking is ReentrancyGuard, Ownable {
         // push a newly created Stake with the current block timestamp.
 
         uint256 amountIncludeTax = ((100 - Token(token_address).taxRate()) *
-            amount) / 100;
+            amount) / 10_000;
 
         stakeholders[msg.sender] = Stake(
             amountIncludeTax,
@@ -158,11 +163,21 @@ contract Staking is ReentrancyGuard, Ownable {
                 msg.sender,
                 (_calculateStakingWithPenalty(user_stake.amount, reward))
             );
+            emit StakeClaimed(
+                msg.sender,
+                _calculateStakingWithPenalty(user_stake.amount, reward),
+                block.timestamp
+            );
         } else {
             SafeERC20.safeTransfer(
                 IERC20(token_address),
                 msg.sender,
                 (user_stake.amount + reward)
+            );
+            emit StakeClaimed(
+                msg.sender,
+                (user_stake.amount + reward),
+                block.timestamp
             );
         }
     }

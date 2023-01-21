@@ -25,6 +25,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface NFT {
     function tokenPrice() external returns (uint256);
+
+    function artist() external returns (address);
 }
 
 interface Token {
@@ -49,6 +51,12 @@ contract ProjectEscrow is Ownable {
         address indexed projectContract,
         uint256 talaxAmount
     );
+    event FundClaimed(
+        address indexed owner,
+        address indexed projectContract,
+        uint256 talaxAmount,
+        uint256 timestamp
+    );
     event NFTClaimed(
         address indexed payee,
         address indexed projectContract,
@@ -70,17 +78,27 @@ contract ProjectEscrow is Ownable {
         uint256 finalCap;
     }
 
+    // in bps
+    struct Distribution {
+        uint256 artist;
+        uint256 project;
+        uint256 advisory;
+        uint256 platform;
+    }
+
     bool private _durationChanged;
     uint256 private _deadline;
     uint256 private _totalDeposit;
     Status private _status;
     Cap private _capstone;
+    Distribution private _distribution;
 
     address private _token;
+    uint256 internal _claimableToken;
 
-    // Mapping for tracking Status => nft contract => user address => tokenIds
-    mapping(Status => mapping(address => mapping(address => uint256[])))
-        private _selectedNFTs;
+    // Mapping for tracking Status => nft contract => tokenId => user address
+    mapping(Status => mapping(address => mapping(uint256 => address)))
+        private _preservedNft;
     // Mapping for tracking total deposits for each Status/Capstone
     mapping(Status => mapping(address => uint256)) private _userDeposits;
 
@@ -88,8 +106,18 @@ contract ProjectEscrow is Ownable {
     // TODO: constructor for initiate the project
     constructor() {}
 
-    function init(address token) external {
+    function init(
+        address token,
+        uint256 artistFee,
+        uint256 projectFee,
+        uint256 advisoryFee,
+        uint256 platformFee
+    ) external {
         _token = token;
+        _distribution.artist = artistFee;
+        _distribution.project = projectFee;
+        _distribution.advisory = advisoryFee;
+        _distribution.platform = platformFee;
     }
 
     modifier isRunning() {
@@ -115,7 +143,7 @@ contract ProjectEscrow is Ownable {
         _userDeposits[_status][msg.sender] += _tokenPrice;
         _totalDeposit += _tokenPrice;
         // Track selected NFT
-        _selectedNFTs[_status][nftContract][msg.sender].push(tokenId);
+        _preservedNft[_status][nftContract][tokenId] = msg.sender;
         SafeERC20.safeTransferFrom(
             IERC20(_token),
             msg.sender,
@@ -145,9 +173,30 @@ contract ProjectEscrow is Ownable {
     }
 
     // TODO: Create functions to mint NFT
-    function mintNFTs(address nftContract) public payable isRunning {
+    function claimNft(
+        address nftContract,
+        uint256 tokenId
+    ) public payable isRunning {
+        require(
+            _status != Status.Soft,
+            "This project failed to pass the funding process"
+        );
         Status[] memory statuses = _getAvailableStatus();
-        uint256[] memory tokenIds;
+        bool picker;
+
+        for (uint256 i = 0; i < statuses.length; i++) {
+            if (
+                _preservedNft[statuses[i]][nftContract][tokenId] == msg.sender
+            ) {
+                picker = true;
+            }
+        }
+
+        require(picker, "This NFT is not picked by the user");
+        address artist = NFT(nftContract).artist();
+        IERC721(nftContract).safeTransferFrom(artist, msg.sender, tokenId);
+        _distributeToken(nftContract, artist);
+        emit NFTClaimed(msg.sender, address(this), nftContract, tokenId);
     }
 
     /**
@@ -168,9 +217,16 @@ contract ProjectEscrow is Ownable {
         emit Withdrawn(msg.sender, address(this), payment);
     }
 
+    function claimFunding() public onlyOwner isRunning {
+        uint256 payment = _claimableToken;
+        delete _claimableToken;
+        SafeERC20.safeTransfer(IERC20(_token), owner(), payment);
+        emit FundClaimed(owner(), address(this), payment, block.timestamp);
+    }
+
     /* ------------------------------------------- Helpers ------------------------------------------ */
 
-    function _isRunning() internal {
+    function _isRunning() internal view {
         require(block.timestamp > _deadline, "Project is still funding");
     }
 
@@ -194,7 +250,36 @@ contract ProjectEscrow is Ownable {
 
     // TODO: confirm this function first
     // TODO: Need to be called when NFT is minted
-    function _distributeToken() public {}
+    function _distributeToken(address nftContract, address artist) internal {
+        uint256 tokenPrice = NFT(nftContract).tokenPrice();
+        // distribution
+        SafeERC20.safeTransferFrom(
+            IERC20(_token),
+            msg.sender,
+            artist,
+            _count(tokenPrice, _distribution.artist)
+        );
+        SafeERC20.safeTransferFrom(
+            IERC20(_token),
+            msg.sender,
+            Token(_token).platform(),
+            _count(tokenPrice, _distribution.artist)
+        );
+        SafeERC20.safeTransferFrom(
+            IERC20(_token),
+            msg.sender,
+            Token(_token).advisory(),
+            _count(tokenPrice, _distribution.artist)
+        );
+        _claimableToken += _count(tokenPrice, _distribution.project);
+    }
+
+    function _count(
+        uint256 amount,
+        uint256 bps
+    ) internal pure returns (uint256) {
+        return (amount * bps) / 10_000;
+    }
 
     function _getAvailableStatus() internal view returns (Status[] memory) {
         if (_status == Status.Medium) {
