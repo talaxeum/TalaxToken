@@ -5,7 +5,15 @@ require("hardhat-contract-sizer");
 require("hardhat-gas-reporter");
 
 module.exports = {
-    solidity: "0.8.11",
+    solidity: {
+        version: "0.8.11",
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 200,
+            },
+        },
+    },
     contractSizer: {
         alphaSort: true,
         disambiguatePaths: false,

@@ -10,7 +10,7 @@ contract NFTFactory is Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _counter;
 
-    mapping(uint256 => address) public projects;
+    mapping(uint256 => address) public collections;
     address immutable _masterContract;
 
     constructor() {
@@ -21,27 +21,27 @@ contract NFTFactory is Ownable {
         return _counter.current();
     }
 
-    function createProject(
+    function createCollection(
         address payable minter,
         address tokenAddress,
         address escrowAddress,
         uint96 royaltyPercentage,
         uint256 tokenPrice
     ) external onlyOwner returns (address) {
-        address project = Clones.clone(_masterContract);
-        NFT(project).init(
+        address collection = Clones.clone(_masterContract);
+        NFT(collection).init(
             minter,
             tokenAddress,
             escrowAddress,
             royaltyPercentage,
             tokenPrice
         );
-        projects[_counter.current()] = project;
+        collections[_counter.current()] = collection;
         _counter.increment();
-        return project;
+        return collection;
     }
 
-    function getProject(uint256 counterIdx) external view returns (address) {
-        return projects[counterIdx];
+    function getCollection(uint256 counterIdx) external view returns (address) {
+        return collections[counterIdx];
     }
 }

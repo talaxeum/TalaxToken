@@ -222,7 +222,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     function _delegate(address delegator, address delegatee) internal virtual {
         address currentDelegate = delegates(delegator);
         uint256 delegatorBalance = balanceOf(delegator);
-        uint256 votePower = delegatorBalance > 0 ? 1 : 0;
+        uint256 votePower = delegatorBalance > 0 ? 1e18 : 0;
         _delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);

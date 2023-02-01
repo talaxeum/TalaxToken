@@ -15,7 +15,7 @@ const whitelistFactoryAddress = "";
 
 //to create 'signer' object;here 'account'
 const mnemonic = ""; // seed phrase for your Metamask account
-const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545"); // testnet smart chain
+const provider = new ethers.providers.JsonRpcProvider("https://endpoints.omniatech.io/v1/bsc/testnet/public"); // testnet smart chain
 const wallet = ethers.Wallet.fromMnemonic(mnemonic);
 const account = wallet.connect(provider);
 

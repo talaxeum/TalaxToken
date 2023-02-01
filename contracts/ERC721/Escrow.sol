@@ -49,6 +49,8 @@ contract ProjectEscrow is Ownable {
     event Withdrawn(
         address indexed payee,
         address indexed projectContract,
+        address indexed nftContract,
+        uint256 tokenId,
         uint256 talaxAmount
     );
     event FundClaimed(
@@ -94,7 +96,6 @@ contract ProjectEscrow is Ownable {
     Distribution private _distribution;
 
     address private _token;
-    uint256 internal _claimableToken;
 
     // Mapping for tracking Status => nft contract => tokenId => user address
     mapping(Status => mapping(address => mapping(uint256 => address)))
@@ -126,7 +127,7 @@ contract ProjectEscrow is Ownable {
     }
 
     /**
-     * @dev Stores the sent amount as credit to be withdrawn.
+     * @dev Stores the sent amount as credit to fund a project or withdrawn when the funding process fail.
      *
      * Emits a {Deposited} event.
      */
@@ -134,7 +135,7 @@ contract ProjectEscrow is Ownable {
         address nftContract,
         uint256 tokenId
     ) public payable virtual {
-        require(block.timestamp < _deadline, "Project is running");
+        require(block.timestamp < _deadline, "End of Timeline");
         require(_status != Status.NonQualified, "Project fully supported");
 
         uint256 _tokenPrice = NFT(nftContract).tokenPrice();
@@ -152,13 +153,13 @@ contract ProjectEscrow is Ownable {
         );
 
         // Check if total surpass any capstone
-        if (_totalDeposit >= _capstone.hardCap) {
+        if (_totalDeposit > _capstone.hardCap) {
             _status = Status.NonQualified;
             _capstone.finalCap = _capstone.hardCap;
-        } else if (_totalDeposit >= _capstone.mediumCap) {
+        } else if (_totalDeposit > _capstone.mediumCap) {
             _status = Status.Hard;
             _capstone.finalCap = _capstone.mediumCap;
-        } else if (_totalDeposit >= _capstone.softCap) {
+        } else if (_totalDeposit > _capstone.softCap) {
             _status = Status.Medium;
             _capstone.finalCap = _capstone.softCap;
         }
@@ -177,10 +178,6 @@ contract ProjectEscrow is Ownable {
         address nftContract,
         uint256 tokenId
     ) public payable isRunning {
-        require(
-            _status != Status.Soft,
-            "This project failed to pass the funding process"
-        );
         Status[] memory statuses = _getAvailableStatus();
         bool picker;
 
@@ -189,6 +186,7 @@ contract ProjectEscrow is Ownable {
                 _preservedNft[statuses[i]][nftContract][tokenId] == msg.sender
             ) {
                 picker = true;
+                break;
             }
         }
 
@@ -210,16 +208,27 @@ contract ProjectEscrow is Ownable {
      *
      * Emits a {Withdrawn} event.
      */
-    function withdraw() public virtual isRunning {
-        uint256 payment = _userDeposits[_status][msg.sender];
-        delete _userDeposits[_status][msg.sender];
+    function withdraw(address nftContract, uint256 tokenId) public virtual {
+        require(block.timestamp > _deadline, "Project is still funding");
+        require(
+            _preservedNft[_status][nftContract][tokenId] == msg.sender,
+            "NFT not Exist"
+        );
+        uint256 payment = NFT(nftContract).tokenPrice();
+        _userDeposits[_status][msg.sender] -= payment;
+        _totalDeposit -= payment;
         SafeERC20.safeTransfer(IERC20(_token), msg.sender, payment);
-        emit Withdrawn(msg.sender, address(this), payment);
+        emit Withdrawn(
+            msg.sender,
+            address(this),
+            nftContract,
+            tokenId,
+            payment
+        );
     }
 
     function claimFunding() public onlyOwner isRunning {
-        uint256 payment = _claimableToken;
-        delete _claimableToken;
+        uint256 payment = (_capstone.finalCap * _distribution.project) / 10_000;
         SafeERC20.safeTransfer(IERC20(_token), owner(), payment);
         emit FundClaimed(owner(), address(this), payment, block.timestamp);
     }
@@ -228,6 +237,18 @@ contract ProjectEscrow is Ownable {
 
     function _isRunning() internal view {
         require(block.timestamp > _deadline, "Project is still funding");
+        require(
+            _status != Status.Soft,
+            "This project failed to pass the funding process"
+        );
+    }
+
+    function status() public view returns (Status) {
+        return _status;
+    }
+
+    function totalDeposit() public view returns (uint256) {
+        return _totalDeposit;
     }
 
     function totalDepositsOf(address payee) public view returns (uint256) {
@@ -263,15 +284,14 @@ contract ProjectEscrow is Ownable {
             IERC20(_token),
             msg.sender,
             Token(_token).platform(),
-            _count(tokenPrice, _distribution.artist)
+            _count(tokenPrice, _distribution.platform)
         );
         SafeERC20.safeTransferFrom(
             IERC20(_token),
             msg.sender,
             Token(_token).advisory(),
-            _count(tokenPrice, _distribution.artist)
+            _count(tokenPrice, _distribution.advisory)
         );
-        _claimableToken += _count(tokenPrice, _distribution.project);
     }
 
     function _count(

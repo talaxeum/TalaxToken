@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    Counters.Counter private _tokenIdCounter;
 
     address public artist;
     uint256 tokenPrice;
@@ -34,8 +34,8 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
         artist = _artist;
         token = _token;
         escrowAddress = _escrowAddress;
-        royaltyPercentage = _royaltyPercentage * 100;
         tokenPrice = _tokenPrice;
+        _setDefaultRoyalty(_artist, _royaltyPercentage);
         transferOwnership(_artist);
     }
 
@@ -45,22 +45,11 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
         return super.supportsInterface(interfaceId);
     }
 
-    function safeMint(
-        address to,
-        uint256 tokenId,
-        string memory uri
-    ) public onlyOwner {
+    function safeMint(address to, string memory uri) public onlyOwner {
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
-    }
-
-    function mintNFTWithRoyalty(
-        address recipient,
-        string memory _tokenURI
-    ) public onlyOwner returns (uint256) {
-        uint256 tokenId = _mintNFT(recipient, _tokenURI);
-        _setTokenRoyalty(tokenId, artist, royaltyPercentage);
-        return tokenId;
     }
 
     /* ----------------- The following functions are overrides required by Solidity. ---------------- */
@@ -75,18 +64,5 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
         uint256 tokenId
     ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
-    }
-
-    function _mintNFT(
-        address recipient,
-        string memory _tokenURI
-    ) internal returns (uint256) {
-        _tokenIds.increment();
-
-        uint256 newItemId = _tokenIds.current();
-        _safeMint(recipient, newItemId);
-        _setTokenURI(newItemId, _tokenURI);
-
-        return newItemId;
     }
 }

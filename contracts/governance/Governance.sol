@@ -19,13 +19,12 @@ contract MyGovernor is
     GovernorTimelockControl,
     Ownable
 {
-    constructor(IVotes _token, TimelockController _timelock)
+    constructor(
+        IVotes _token,
+        TimelockController _timelock
+    )
         Governor("MyGovernor")
-        GovernorSettings(
-            2, /* 2 block */
-            2880, /* 1 day */
-            0
-        )
+        GovernorSettings(2 /* 2 block */, 2880 /* 1 day */, 0)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(51)
         GovernorTimelockControl(_timelock)
@@ -51,7 +50,9 @@ contract MyGovernor is
         return super.votingPeriod();
     }
 
-    function quorum(uint256 blockNumber)
+    function quorum(
+        uint256 blockNumber
+    )
         public
         view
         override(IGovernor, GovernorVotesQuorumFraction)
@@ -60,7 +61,9 @@ contract MyGovernor is
         return super.quorum(blockNumber);
     }
 
-    function state(uint256 proposalId)
+    function state(
+        uint256 proposalId
+    )
         public
         view
         override(Governor, GovernorTimelockControl)
@@ -115,12 +118,9 @@ contract MyGovernor is
         return super._executor();
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(Governor, GovernorTimelockControl)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(Governor, GovernorTimelockControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

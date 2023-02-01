@@ -7,20 +7,56 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+
+import "../governance/ERC20Votes.sol";
 
 contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
     uint256 public taxRate = 100; // basis points
+
+    address public advisor = address(0);
+    address public platform = address(0);
 
     constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
         _mint(_msgSender(), 21 * 1e9 * 10 ** decimals());
     }
 
     event ChangeTaxPercentage(uint256 tax);
+    event ChangeAdvisorAddress(address indexed advisor);
+    event ChangePlatformAddress(address indexed platform);
 
     fallback() external payable {}
 
     receive() external payable {}
+
+    function publicSale() public pure returns (address) {
+        return 0x5470c8FF25EC05980fc7C2967D076B8012298fE7;
+    }
+
+    function teamAndProjectCoordinator() public pure returns (address) {
+        return 0x45094071c4DAaf6A9a73B0a0f095a2b138bd8A3A;
+    }
+
+    function marketing() public pure returns (address) {
+        return 0xf09f65dD4D229E991901669Ad7c7549f060E30b9;
+    }
+
+    function stakingReward() public pure returns (address) {
+        return 0x2F838cF0Df38b2E91E747a01ddAE5EBad5558b7A;
+    }
+
+    function daoPool() public pure returns (address) {
+        return 0x75837E79215250C45331b92c35B7Be506eD015AC;
+    }
+
+    function changeAdvisor(address newAddress) external onlyOwner {
+        advisor = newAddress;
+        emit ChangeAdvisorAddress(newAddress);
+    }
+
+    function changePlatform(address newAddress) external onlyOwner {
+        platform = newAddress;
+        emit ChangePlatformAddress(newAddress);
+    }
 
     function getBalance() public view returns (uint256) {
         return address(this).balance;
@@ -59,7 +95,8 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         uint256 tax = (amount * taxRate) / 10_000;
         uint256 taxedAmount = amount - tax;
 
-        _transfer(owner, address(this), tax);
+        _transfer(owner, teamAndProjectCoordinator(), (tax * 2000) / 10_000);
+        _transfer(owner, address(this), (tax * 8000) / 10_000);
         _transfer(owner, to, taxedAmount);
         return true;
     }
