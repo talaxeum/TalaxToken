@@ -38,6 +38,11 @@ interface Token {
 contract ProjectEscrow is Ownable {
     using Address for address payable;
 
+    event DurationChanged(
+        address project,
+        uint256 originalTimestamp,
+        uint256 newTimestamp
+    );
     event Deposited(
         address indexed payee,
         address indexed projectContract,
@@ -124,6 +129,14 @@ contract ProjectEscrow is Ownable {
     modifier isRunning() {
         _isRunning();
         _;
+    }
+
+    function changeDuration(uint256 additionalTime) external onlyOwner {
+        require(!_durationChanged, "Duration has been changed before");
+        uint256 old = _deadline;
+        _durationChanged = true;
+        _deadline += additionalTime;
+        emit DurationChanged(address(this), old, _deadline);
     }
 
     /**

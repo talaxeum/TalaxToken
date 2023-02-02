@@ -110,8 +110,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
-      "lastModificationDate": 1674096229715,
-      "contentHash": "e436cea06129be2c73cda4b1acc848b5",
+      "lastModificationDate": 1675240173317,
+      "contentHash": "8ddccf0171d23a778ee9acba3dcca5eb",
       "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1382,8 +1382,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\governance\\Governance.sol": {
-      "lastModificationDate": 1675222563552,
-      "contentHash": "d0838ffb8c6017e13823aaea160f73bd",
+      "lastModificationDate": 1675240139125,
+      "contentHash": "ad00dff325a19c6c3b8ac7672590d504",
       "sourceName": "contracts/governance/Governance.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1421,8 +1421,7 @@
         "0.8.11"
       ],
       "artifacts": [
-        "MyGovernor",
-        "Staking"
+        "MyGovernor"
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\node_modules\\@openzeppelin\\contracts\\governance\\extensions\\GovernorSettings.sol": {
@@ -1692,8 +1691,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC721\\NFT.sol": {
-      "lastModificationDate": 1675060280231,
-      "contentHash": "92c80644582895211746a5eb26dc9ab2",
+      "lastModificationDate": 1675307489570,
+      "contentHash": "1b872612523c7a439362c65e5edf6791",
       "sourceName": "contracts/ERC721/NFT.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1808,46 +1807,6 @@
         "IERC2981"
       ]
     },
-    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Factories\\NFTFactory.sol": {
-      "lastModificationDate": 1675237098441,
-      "contentHash": "a0414a047b8b6cf8a5ae7e461682e2fa",
-      "sourceName": "contracts/Factories/NFTFactory.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC721/NFT.sol",
-        "@openzeppelin/contracts/proxy/Clones.sol",
-        "@openzeppelin/contracts/utils/Counters.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "NFTFactory"
-      ]
-    },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\node_modules\\@openzeppelin\\contracts\\proxy\\Clones.sol": {
       "lastModificationDate": 1674096229465,
       "contentHash": "11535a839f5494023c396098504f5646",
@@ -1883,49 +1842,9 @@
         "Clones"
       ]
     },
-    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Factories\\EscrowFactory.sol": {
-      "lastModificationDate": 1674107909337,
-      "contentHash": "7616b0870c17574db58652d1d943b4b7",
-      "sourceName": "contracts/Factories/EscrowFactory.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC721/Escrow.sol",
-        "@openzeppelin/contracts/proxy/Clones.sol",
-        "@openzeppelin/contracts/utils/Counters.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "EscrowFactory"
-      ]
-    },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC721\\Escrow.sol": {
-      "lastModificationDate": 1675238525093,
-      "contentHash": "2426e1f7b318b698ee035f12bdbd0376",
+      "lastModificationDate": 1675308539803,
+      "contentHash": "9e3c49691278ef8da29afe7775623f88",
       "sourceName": "contracts/ERC721/Escrow.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2163,86 +2082,6 @@
       ],
       "artifacts": [
         "Talaxeum"
-      ]
-    },
-    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Factories\\WhitelistFactory.sol": {
-      "lastModificationDate": 1674109550892,
-      "contentHash": "d39c468e5cae46d825b48d1c98beef69",
-      "sourceName": "contracts/Factories/WhitelistFactory.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC20/Whitelist.sol",
-        "@openzeppelin/contracts/proxy/Clones.sol",
-        "@openzeppelin/contracts/utils/Counters.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "WhitelistFactory"
-      ]
-    },
-    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\Factories\\VestingFactory.sol": {
-      "lastModificationDate": 1674109010457,
-      "contentHash": "8ebc638c642effad919dfad318126e4e",
-      "sourceName": "contracts/Factories/VestingFactory.sol",
-      "solcConfig": {
-        "version": "0.8.11",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC20/Vesting.sol",
-        "@openzeppelin/contracts/proxy/Clones.sol",
-        "@openzeppelin/contracts/utils/Counters.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "VestingFactory"
       ]
     }
   }

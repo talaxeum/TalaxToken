@@ -13,10 +13,9 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
     Counters.Counter private _tokenIdCounter;
 
     address public artist;
-    uint256 tokenPrice;
+    uint256 public tokenPrice;
     uint96 public royaltyPercentage;
     address private token;
-    address private escrowAddress;
 
     constructor() ERC721("TokenName", "TKN") {}
 
@@ -26,14 +25,12 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
     function init(
         address _artist,
         address _token,
-        address _escrowAddress,
         uint96 _royaltyPercentage,
         uint256 _tokenPrice
     ) external {
         require(token == address(0), "Initiated");
         artist = _artist;
         token = _token;
-        escrowAddress = _escrowAddress;
         tokenPrice = _tokenPrice;
         _setDefaultRoyalty(_artist, _royaltyPercentage);
         transferOwnership(_artist);
