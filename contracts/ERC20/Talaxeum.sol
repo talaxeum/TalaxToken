@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "../governance/ERC20Votes.sol";
 
 contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
@@ -68,12 +67,8 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         require(sent == true, "Failed to send Ether");
     }
 
-    function withdrawFunds(address token) external onlyOwner {
-        SafeERC20.safeTransfer(
-            IERC20(token),
-            owner(),
-            IERC20(token).balanceOf(address(this))
-        );
+    function withdrawTalax() external onlyOwner {
+        _transfer(address(this), owner(), balanceOf(address(this)));
     }
 
     function changeTax(uint256 tax) external onlyOwner {
@@ -90,20 +85,50 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         address to,
         uint256 amount
     ) public override returns (bool) {
-        address owner = _msgSender();
+        address spender = _msgSender();
 
         uint256 tax = (amount * taxRate) / 10_000;
         uint256 taxedAmount = amount - tax;
 
-        _transfer(owner, teamAndProjectCoordinator(), (tax * 2000) / 10_000);
-        _transfer(owner, address(this), (tax * 8000) / 10_000);
-        _transfer(owner, to, taxedAmount);
+        _distributeTax(spender, tax);
+        _transfer(spender, to, taxedAmount);
+        return true;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public virtual override returns (bool) {
+        address spender = _msgSender();
+
+        uint256 tax = (amount * taxRate) / 10_000;
+        _spendAllowance(from, spender, amount + tax);
+
+        _distributeTax(from, tax);
+        _transfer(from, to, amount);
         return true;
     }
 
     // TODO: Possible to add mint functions for [escrowContracts]
 
     // The following functions are overrides required by Solidity.
+
+    // Overridden to accommodate the tax fee
+    function approve(
+        address spender,
+        uint256 amount
+    ) public virtual override returns (bool) {
+        address owner = _msgSender();
+        uint256 tax = (amount * taxRate) / 10_000;
+        _approve(owner, spender, amount + tax);
+        return true;
+    }
+
+    function _distributeTax(address from, uint256 tax) internal {
+        _transfer(from, teamAndProjectCoordinator(), (tax * 2000) / 10_000);
+        _transfer(from, address(this), (tax * 8000) / 10_000);
+    }
 
     function _transfer(
         address from,

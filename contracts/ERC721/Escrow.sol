@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
  * @title Escrow
@@ -35,7 +36,8 @@ interface Token {
     function platform() external returns (address);
 }
 
-contract ProjectEscrow is Ownable {
+contract Escrow is Ownable {
+    using Counters for Counters.Counter;
     using Address for address payable;
 
     event DurationChanged(
@@ -97,10 +99,15 @@ contract ProjectEscrow is Ownable {
     uint256 private _deadline;
     uint256 private _totalDeposit;
     Status private _status;
-    Cap private _capstone;
-    Distribution private _distribution;
+    Cap public capstone;
+    Distribution public distribution;
 
-    address private _token;
+    Counters.Counter internal _totalUserCounter;
+    Counters.Counter internal _totalShardCounter;
+    uint256 public totalUser;
+    uint256 public totalShard;
+
+    address private _tokenAddress;
 
     // Mapping for tracking Status => nft contract => tokenId => user address
     mapping(Status => mapping(address => mapping(uint256 => address)))
@@ -110,20 +117,28 @@ contract ProjectEscrow is Ownable {
 
     // TODO: restructure for single project escrow contract
     // TODO: constructor for initiate the project
-    constructor() {}
-
-    function init(
-        address token,
-        uint256 artistFee,
-        uint256 projectFee,
-        uint256 advisoryFee,
-        uint256 platformFee
-    ) external {
-        _token = token;
-        _distribution.artist = artistFee;
-        _distribution.project = projectFee;
-        _distribution.advisory = advisoryFee;
-        _distribution.platform = platformFee;
+    constructor(
+        address _projectOwner,
+        address _token,
+        uint256 _artistFee,
+        uint256 _projectFee,
+        uint256 _advisoryFee,
+        uint256 _platformFee,
+        uint256 _soft,
+        uint256 _medium,
+        uint256 _hard,
+        uint256 _duration
+    ) {
+        _tokenAddress = _token;
+        distribution.artist = _artistFee;
+        distribution.project = _projectFee;
+        distribution.advisory = _advisoryFee;
+        distribution.platform = _platformFee;
+        capstone.softCap = _soft;
+        capstone.mediumCap = _medium;
+        capstone.hardCap = _hard;
+        _deadline = block.timestamp + _duration;
+        _transferOwnership(_projectOwner);
     }
 
     modifier isRunning() {
@@ -153,28 +168,36 @@ contract ProjectEscrow is Ownable {
 
         uint256 _tokenPrice = NFT(nftContract).tokenPrice();
 
+        _totalShardCounter.increment();
+        if (_userDeposits[_status][msg.sender] == 0) {
+            _totalUserCounter.increment();
+        }
+
         // Deposit for the current status
         _userDeposits[_status][msg.sender] += _tokenPrice;
         _totalDeposit += _tokenPrice;
         // Track selected NFT
         _preservedNft[_status][nftContract][tokenId] = msg.sender;
         SafeERC20.safeTransferFrom(
-            IERC20(_token),
+            IERC20(_tokenAddress),
             msg.sender,
             address(this),
             _tokenPrice
         );
 
         // Check if total surpass any capstone
-        if (_totalDeposit > _capstone.hardCap) {
+        if (_totalDeposit > capstone.hardCap) {
             _status = Status.NonQualified;
-            _capstone.finalCap = _capstone.hardCap;
-        } else if (_totalDeposit > _capstone.mediumCap) {
+            capstone.finalCap = capstone.hardCap;
+            _updateCounter();
+        } else if (_totalDeposit > capstone.mediumCap) {
             _status = Status.Hard;
-            _capstone.finalCap = _capstone.mediumCap;
-        } else if (_totalDeposit > _capstone.softCap) {
+            capstone.finalCap = capstone.mediumCap;
+            _updateCounter();
+        } else if (_totalDeposit > capstone.softCap) {
             _status = Status.Medium;
-            _capstone.finalCap = _capstone.softCap;
+            capstone.finalCap = capstone.softCap;
+            _updateCounter();
         }
         emit Deposited(
             msg.sender,
@@ -186,7 +209,7 @@ contract ProjectEscrow is Ownable {
         );
     }
 
-    // TODO: Create functions to mint NFT
+    // TODO: Create functions to claim NFT
     function claimNft(
         address nftContract,
         uint256 tokenId
@@ -230,7 +253,7 @@ contract ProjectEscrow is Ownable {
         uint256 payment = NFT(nftContract).tokenPrice();
         _userDeposits[_status][msg.sender] -= payment;
         _totalDeposit -= payment;
-        SafeERC20.safeTransfer(IERC20(_token), msg.sender, payment);
+        SafeERC20.safeTransfer(IERC20(_tokenAddress), msg.sender, payment);
         emit Withdrawn(
             msg.sender,
             address(this),
@@ -241,8 +264,8 @@ contract ProjectEscrow is Ownable {
     }
 
     function claimFunding() public onlyOwner isRunning {
-        uint256 payment = (_capstone.finalCap * _distribution.project) / 10_000;
-        SafeERC20.safeTransfer(IERC20(_token), owner(), payment);
+        uint256 payment = (capstone.finalCap * distribution.project) / 10_000;
+        SafeERC20.safeTransfer(IERC20(_tokenAddress), owner(), payment);
         emit FundClaimed(owner(), address(this), payment, block.timestamp);
     }
 
@@ -264,6 +287,19 @@ contract ProjectEscrow is Ownable {
         return _totalDeposit;
     }
 
+    function currentTotalUser() public view returns (uint256) {
+        return _totalUserCounter.current();
+    }
+
+    function currentTotalShard() public view returns (uint256) {
+        return _totalShardCounter.current();
+    }
+
+    function _updateCounter() internal {
+        totalUser = _totalUserCounter.current();
+        totalShard = _totalShardCounter.current();
+    }
+
     function totalDepositsOf(address payee) public view returns (uint256) {
         return (_userDeposits[Status.Soft][payee] +
             _userDeposits[Status.Medium][payee] +
@@ -271,11 +307,11 @@ contract ProjectEscrow is Ownable {
             _userDeposits[Status.NonQualified][payee]);
     }
 
-    function getCapstone() public view returns (uint256) {
-        return _capstone.finalCap;
+    function currentReachedCaps() public view returns (uint256) {
+        return capstone.finalCap;
     }
 
-    function getWithdrawalAble() public view returns (uint256) {
+    function withdrawable() public view returns (uint256) {
         if (_deadline > block.timestamp) {
             return _userDeposits[_status][msg.sender];
         }
@@ -287,23 +323,20 @@ contract ProjectEscrow is Ownable {
     function _distributeToken(address nftContract, address artist) internal {
         uint256 tokenPrice = NFT(nftContract).tokenPrice();
         // distribution
-        SafeERC20.safeTransferFrom(
-            IERC20(_token),
-            msg.sender,
+        SafeERC20.safeTransfer(
+            IERC20(_tokenAddress),
             artist,
-            _count(tokenPrice, _distribution.artist)
+            _count(tokenPrice, distribution.artist)
         );
-        SafeERC20.safeTransferFrom(
-            IERC20(_token),
-            msg.sender,
-            Token(_token).platform(),
-            _count(tokenPrice, _distribution.platform)
+        SafeERC20.safeTransfer(
+            IERC20(_tokenAddress),
+            Token(_tokenAddress).platform(),
+            _count(tokenPrice, distribution.platform)
         );
-        SafeERC20.safeTransferFrom(
-            IERC20(_token),
-            msg.sender,
-            Token(_token).advisory(),
-            _count(tokenPrice, _distribution.advisory)
+        SafeERC20.safeTransfer(
+            IERC20(_tokenAddress),
+            Token(_tokenAddress).advisory(),
+            _count(tokenPrice, distribution.advisory)
         );
     }
 

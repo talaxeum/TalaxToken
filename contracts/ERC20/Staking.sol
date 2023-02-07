@@ -113,11 +113,8 @@ contract Staking is ReentrancyGuard, Ownable {
         // Use the index to push a new Stake
         // push a newly created Stake with the current block timestamp.
 
-        uint256 amountIncludeTax = ((100 - Token(token_address).taxRate()) *
-            amount) / 10_000;
-
         stakeholders[msg.sender] = Stake(
-            amountIncludeTax,
+            amount,
             timestamp,
             _stakingPackage[stakePeriod],
             (stakePeriod + timestamp),
@@ -133,12 +130,7 @@ contract Staking is ReentrancyGuard, Ownable {
             amount
         );
         // Emit an event that the stake has occurred
-        emit Staked(
-            msg.sender,
-            amountIncludeTax,
-            timestamp,
-            (stakePeriod + timestamp)
-        );
+        emit Staked(msg.sender, amount, timestamp, (stakePeriod + timestamp));
     }
 
     /**
