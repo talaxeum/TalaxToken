@@ -81,6 +81,8 @@ contract MultiEscrow is Ownable {
 
     Counters.Counter private projectIds;
     mapping(uint256 => Project) private projects;
+    // USed to track if NFT has been picked
+    bytes32 private globalNftMerkleRoot;
 
     address public talax;
 
@@ -131,17 +133,25 @@ contract MultiEscrow is Ownable {
     }
 
     function deposit(
+        bytes32[] memory proof,
         uint256 projectId,
         address nftContract,
         bytes32 tokenUri,
         uint8 status,
         bytes32 depositMerkleRoot,
-        bytes32 nftMerkleRoot
+        bytes32 nftMerkleRoot,
+        bytes32 newGlobalNftRoot
     ) public {
         Project storage project = projects[projectId];
         require(
             project.status < 3 && block.timestamp < project.deadline,
             "Project has been funded"
+        );
+
+        bytes32 leaf = _generateLeaf(abi.encode(projectId, tokenUri));
+        require(
+            !MerkleProof.verify(proof, globalNftMerkleRoot, leaf),
+            "Invalid proof"
         );
 
         uint256 tokenPrice = NFT(nftContract).tokenPrice();
@@ -154,6 +164,9 @@ contract MultiEscrow is Ownable {
             project.status = status;
             project.finalCap = project.totalDeposit;
             project.nftMerkleRoot = nftMerkleRoot;
+            if (newGlobalNftRoot != "") {
+                globalNftMerkleRoot = newGlobalNftRoot;
+            }
             emit CapstoneReached(projectId, project.status);
         }
 
@@ -169,7 +182,7 @@ contract MultiEscrow is Ownable {
         Project memory project = projects[projectId];
         require(project.deadline < block.timestamp, "Project is running");
 
-        //TODO: deposit merkle proof check
+        // Merkle Proof to check user is a depositor
         bytes32 leaf = _generateLeaf(abi.encode(projectId, msg.sender));
         require(
             MerkleProof.verify(proof, project.depositMerkleRoot, leaf),
@@ -218,6 +231,12 @@ contract MultiEscrow is Ownable {
         IERC20(talax).transfer(msg.sender, amount);
 
         emit FundClaimed(msg.sender, projectId, amount);
+    }
+
+    function terminateProject(uint256 projectId) external onlyOwner {
+        Project storage project = projects[projectId];
+        require(projects[projectId].status == 0, "Project successfully funded");
+        delete project.nftMerkleRoot;
     }
 
     function _distribute(
