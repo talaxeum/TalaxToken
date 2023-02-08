@@ -60,11 +60,10 @@ contract MultiEscrow is Ownable {
     );
 
     struct Project {
-        address owner;
         //Cap
-        uint256 soft;
-        uint256 medium;
-        uint256 hard;
+        // uint256 soft;
+        // uint256 medium;
+        // uint256 hard;
         uint256 finalCap;
         //Fee
         uint256 artist;
@@ -73,10 +72,11 @@ contract MultiEscrow is Ownable {
         uint256 platform;
         //Info
         uint256 totalDeposit;
-        uint8 status;
         uint256 deadline;
         bytes32 nftMerkleRoot;
         bytes32 depositMerkleRoot;
+        uint8 status;
+        address owner;
     }
 
     Counters.Counter private projectIds;
@@ -105,9 +105,9 @@ contract MultiEscrow is Ownable {
         projectIds.increment();
         projects[projectIds.current()] = Project({
             owner: _owner,
-            soft: _soft,
-            medium: _medium,
-            hard: _hard,
+            // soft: _soft,
+            // medium: _medium,
+            // hard: _hard,
             finalCap: 0,
             artist: _artist,
             project: _project,
@@ -133,78 +133,82 @@ contract MultiEscrow is Ownable {
     }
 
     function deposit(
-        bytes32[] memory proof,
-        uint256 projectId,
-        address nftContract,
-        bytes32 tokenUri,
-        uint8 status,
-        bytes32 depositMerkleRoot,
-        bytes32 nftMerkleRoot,
-        bytes32 newGlobalNftRoot
+        bytes32[] memory _proof,
+        uint256 _projectId,
+        address _nftContract,
+        bytes32 _tokenUri,
+        uint8 _status,
+        bytes32 _depositMerkleRoot,
+        bytes32 _nftMerkleRoot,
+        bytes32 _newGlobalNftRoot
     ) public {
-        Project storage project = projects[projectId];
-        require(
-            project.status < 3 && block.timestamp < project.deadline,
-            "Project has been funded"
-        );
+        Project storage project = projects[_projectId];
+        require(project.status < 3, "Project has been funded");
+        require(project.deadline > block.timestamp, "Project is running");
 
-        bytes32 leaf = _generateLeaf(abi.encode(projectId, tokenUri));
+        bytes32 leaf = _generateLeaf(abi.encode(_projectId, _tokenUri));
         require(
-            !MerkleProof.verify(proof, globalNftMerkleRoot, leaf),
+            !MerkleProof.verify(_proof, globalNftMerkleRoot, leaf),
             "Invalid proof"
         );
 
-        uint256 tokenPrice = NFT(nftContract).tokenPrice();
+        uint256 tokenPrice = NFT(_nftContract).tokenPrice();
         project.totalDeposit += tokenPrice;
 
-        if (depositMerkleRoot != "") {
-            project.depositMerkleRoot = depositMerkleRoot;
+        if (_depositMerkleRoot != "") {
+            project.depositMerkleRoot = _depositMerkleRoot;
         }
-        if (project.status < status) {
-            project.status = status;
+        if (project.status < _status) {
+            project.status = _status;
             project.finalCap = project.totalDeposit;
-            project.nftMerkleRoot = nftMerkleRoot;
-            if (newGlobalNftRoot != "") {
-                globalNftMerkleRoot = newGlobalNftRoot;
+            project.nftMerkleRoot = _nftMerkleRoot;
+            if (_newGlobalNftRoot != "") {
+                globalNftMerkleRoot = _newGlobalNftRoot;
             }
-            emit CapstoneReached(projectId, project.status);
+            emit CapstoneReached(_projectId, project.status);
         }
 
         IERC20(talax).transferFrom(msg.sender, address(this), tokenPrice);
-        emit Deposit(msg.sender, projectId, nftContract, tokenUri, tokenPrice);
+        emit Deposit(
+            msg.sender,
+            _projectId,
+            _nftContract,
+            _tokenUri,
+            tokenPrice
+        );
     }
 
     function withdraw(
-        bytes32[] memory proof,
-        uint256 projectId,
-        uint256 amount
+        bytes32[] memory _proof,
+        uint256 _projectId,
+        uint256 _amount
     ) public {
-        Project memory project = projects[projectId];
+        Project memory project = projects[_projectId];
         require(project.deadline < block.timestamp, "Project is running");
 
         // Merkle Proof to check user is a depositor
-        bytes32 leaf = _generateLeaf(abi.encode(projectId, msg.sender));
+        bytes32 leaf = _generateLeaf(abi.encode(_projectId, msg.sender));
         require(
-            MerkleProof.verify(proof, project.depositMerkleRoot, leaf),
+            MerkleProof.verify(_proof, project.depositMerkleRoot, leaf),
             "Invalid proof"
         );
 
-        IERC20(talax).transfer(msg.sender, amount);
+        IERC20(talax).transfer(msg.sender, _amount);
     }
 
     function mintNft(
-        bytes32[] memory proof,
-        uint256 projectId,
-        address nftContract,
-        bytes32 tokenUri
+        bytes32[] memory _proof,
+        uint256 _projectId,
+        address _nftContract,
+        bytes32 _tokenUri
     ) public returns (bool) {
-        Project memory project = projects[projectId];
+        Project memory project = projects[_projectId];
         // Merkle Proof to check user has already been picked this NFT
         bytes32 leaf = _generateLeaf(
-            abi.encode(projectId, nftContract, tokenUri, msg.sender)
+            abi.encode(_projectId, _nftContract, _tokenUri, msg.sender)
         );
         require(
-            MerkleProof.verify(proof, project.depositMerkleRoot, leaf),
+            MerkleProof.verify(_proof, project.depositMerkleRoot, leaf),
             "Invalid proof"
         );
 
@@ -213,16 +217,16 @@ contract MultiEscrow is Ownable {
             project.artist,
             project.advisory,
             project.platform,
-            nftContract,
-            NFT(nftContract).tokenPrice()
+            _nftContract,
+            NFT(_nftContract).tokenPrice()
         );
 
-        emit NftMinted(msg.sender, projectId, nftContract, tokenUri);
+        emit NftMinted(msg.sender, _projectId, _nftContract, _tokenUri);
         return true;
     }
 
-    function claimFunding(uint256 projectId) public isRunning(projectId) {
-        Project memory project = projects[projectId];
+    function claimFunding(uint256 _projectId) public isRunning(_projectId) {
+        Project memory project = projects[_projectId];
         require(project.status > 0, "Project failed");
         require(msg.sender == project.owner, "Not Authorized");
 
@@ -230,7 +234,7 @@ contract MultiEscrow is Ownable {
 
         IERC20(talax).transfer(msg.sender, amount);
 
-        emit FundClaimed(msg.sender, projectId, amount);
+        emit FundClaimed(msg.sender, _projectId, amount);
     }
 
     function terminateProject(uint256 projectId) external onlyOwner {
@@ -239,45 +243,54 @@ contract MultiEscrow is Ownable {
         delete project.nftMerkleRoot;
     }
 
+    function changeDuration(
+        uint256 _projectId,
+        uint256 _additionalTime
+    ) external onlyOwner {
+        projects[_projectId].deadline += _additionalTime;
+
+        emit DurationChanged(_projectId, projects[_projectId].deadline);
+    }
+
     function _distribute(
-        uint256 artistFee,
-        uint256 advisoryFee,
-        uint256 platformFee,
-        address nftContract,
-        uint256 tokenPrice
+        uint256 _artistFee,
+        uint256 _advisoryFee,
+        uint256 _platformFee,
+        address _nftContract,
+        uint256 _tokenPrice
     ) internal {
-        address artist = NFT(nftContract).artist();
+        address artist = NFT(_nftContract).artist();
         address advisory = Token(talax).advisory();
         address platform = Token(talax).platform();
 
-        IERC20(talax).transfer(artist, (artistFee * tokenPrice) / 10_000);
-        IERC20(talax).transfer(advisory, (advisoryFee * tokenPrice) / 10_000);
-        IERC20(talax).transfer(platform, (platformFee * tokenPrice) / 10_000);
+        IERC20(talax).transfer(artist, (_artistFee * _tokenPrice) / 10_000);
+        IERC20(talax).transfer(advisory, (_advisoryFee * _tokenPrice) / 10_000);
+        IERC20(talax).transfer(platform, (_platformFee * _tokenPrice) / 10_000);
     }
 
     function getProject(
-        uint256 projectId
+        uint256 _projectId
     ) external view returns (Project memory) {
-        return projects[projectId];
+        return projects[_projectId];
     }
 
     function _generateLeaf(
-        bytes memory encoded
+        bytes memory _encoded
     ) internal pure returns (bytes32) {
-        return keccak256(bytes.concat(keccak256(encoded)));
+        return keccak256(bytes.concat(keccak256(_encoded)));
     }
 
     /* ------------------------------------------ Modifiers ----------------------------------------- */
 
-    function _isRunning(uint256 projectId) internal view {
+    function _isRunning(uint256 _projectId) internal view {
         require(
-            projects[projectId].deadline < block.timestamp,
+            projects[_projectId].deadline < block.timestamp,
             "Project is still funding"
         );
     }
 
-    modifier isRunning(uint256 projectId) {
-        _isRunning(projectId);
+    modifier isRunning(uint256 _projectId) {
+        _isRunning(_projectId);
         _;
     }
 }

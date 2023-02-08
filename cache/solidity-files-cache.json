@@ -1847,8 +1847,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC721\\Escrow.sol": {
-      "lastModificationDate": 1675664774444,
-      "contentHash": "69482b79a66e2ad1011351ab600a4e61",
+      "lastModificationDate": 1675750077838,
+      "contentHash": "1af7295d4f91d3479c05d979d9139b6e",
       "sourceName": "contracts/ERC721/Escrow.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2009,8 +2009,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC721\\MultiEscrow.sol": {
-      "lastModificationDate": 1675736982946,
-      "contentHash": "d8861fffd8230f607617a6cdff736181",
+      "lastModificationDate": 1675763373465,
+      "contentHash": "bf47f6df46fcc689c297a33affed363e",
       "sourceName": "contracts/ERC721/MultiEscrow.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2037,13 +2037,92 @@
       },
       "imports": [
         "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/Counters.sol"
+        "@openzeppelin/contracts/utils/Counters.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol"
       ],
       "versionPragmas": [
         "^0.8.0"
       ],
       "artifacts": [
-        "MultiEscrow"
+        "MultiEscrow",
+        "NFT",
+        "Token"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\node_modules\\@openzeppelin\\contracts\\utils\\cryptography\\MerkleProof.sol": {
+      "lastModificationDate": 1674096229711,
+      "contentHash": "a75542fc722f3c5c883583228040bbfe",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "MerkleProof"
+      ]
+    },
+    "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\governance\\ProjectVotes.sol": {
+      "lastModificationDate": 1675822541417,
+      "contentHash": "b83986a8cbc97bee4e9acea0b248a657",
+      "sourceName": "contracts/governance/ProjectVotes.sol",
+      "solcConfig": {
+        "version": "0.8.11",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/Counters.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Stake",
+        "Token",
+        "Votes"
       ]
     }
   }

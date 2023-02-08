@@ -215,8 +215,10 @@ contract Staking is ReentrancyGuard, Ownable {
 
     /* ----------------------------------------- Get Summary ---------------------------------------- */
 
-    function hasStake() external view returns (StakingSummary memory) {
-        Stake memory user_stake = stakeholders[msg.sender];
+    function getStake(
+        address _user
+    ) external view returns (StakingSummary memory) {
+        Stake memory user_stake = stakeholders[_user];
         require(user_stake.amount != 0, "Staking not found");
         StakingSummary memory summary = StakingSummary(0, 0, user_stake);
 
@@ -240,6 +242,16 @@ contract Staking is ReentrancyGuard, Ownable {
         summary.total_amount = user_stake.amount;
 
         return summary;
+    }
+
+    function hasStake(address _user) external view returns (bool) {
+        Stake memory user_stake = stakeholders[_user];
+
+        if (user_stake.amount > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /* -------------------------------------- Helpers Function -------------------------------------- */
