@@ -2,7 +2,8 @@
 // OpenZeppelin Contracts (last updated v4.7.0) (finance/VestingWallet.sol)
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -30,161 +31,91 @@ contract Whitelist is Context, Ownable {
         uint256 amount;
     }
 
-    // mapping(address => uint256) private _erc20Released;
+    // mapping(address => uint256) private _released;
     // address private immutable _beneficiary;
-    address private _token;
-    mapping(address => mapping(address => uint256)) private _erc20Released;
+    mapping(address => uint256) private _released;
     mapping(address => uint256) _beneficiary;
-    uint64 private _start;
-    uint64 private _duration;
+    uint256 public start;
+    uint256 public duration;
+    address constant token = address(0); // tbd
+
+    bytes32 private whitelistRoot;
 
     // uint256 private lastMonth;
     mapping(address => uint256) private _lastMonth;
 
     bool private _initStatus;
 
-    /**
-     * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
-     */
-    function init(
-        address token,
-        uint64 startTimestamp,
-        uint64 durationSeconds,
-        uint64 cliff
-    ) external {
-        require(_initStatus == false, "Initiated");
-        _initStatus = true;
-        _token = token;
-        _start = startTimestamp + cliff;
-        _duration = durationSeconds;
+    constructor(uint256 _start, uint256 _duration, uint256 _cliff) {
+        start = _start + _cliff;
+        duration = _duration;
     }
 
-    /**
-     * @dev Getter for the start timestamp.
-     */
-    function start() public view virtual returns (uint256) {
-        return _start;
+    // Used when adding a new user in the backend
+    function updateRoot(bytes32 _root) public onlyOwner {
+        whitelistRoot = _root;
     }
 
-    /**
-     * @dev Getter for the vesting duration.
-     */
-    function duration() public view virtual returns (uint256) {
-        return _duration;
-    }
-
-    /**
-     * @dev Amount of token already released
-     */
-    function released() public view virtual returns (uint256) {
-        return _erc20Released[_token][msg.sender];
-    }
-
-    /**
-     * @dev Getter for the amount of releasable `token` tokens. `token` should be the address of an
-     * IERC20 contract.
-     */
-    function releasable() public view virtual returns (uint256) {
-        return vestedAmount(uint64(block.timestamp)) - released();
-    }
-
-    /**
-     * @dev Getter for the current running month of the vesting process
-     */
-
-    function _currentMonth() internal view returns (uint256) {
-        return (uint64(block.timestamp) - start()) / 30 days;
-    }
-
-    function _unsafeInc(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            return x + 1;
-        }
-    }
-
-    /**
-     * @dev Vest token for a user
-     *
-     */
-    function _vest(address user, uint256 amount) internal {
+    function vest(address user, uint256 amount) public onlyOwner {
         _beneficiary[user] += amount;
     }
 
-    /**
-     * @dev delete Vest token for a user
-     *
-     */
-    function _delete(address user) internal {
-        delete _beneficiary[user];
-    }
+    function release(bytes32[] calldata _proof) public virtual {
+        bytes32 leaf = keccak256(
+            bytes.concat(keccak256(abi.encode(msg.sender)))
+        );
 
-    function addMultiVesting(Beneficiary[] calldata users) external onlyOwner {
-        for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
-            _vest(users[i].user, users[i].amount);
-        }
-    }
+        require(
+            MerkleProof.verify(_proof, whitelistRoot, leaf),
+            "Invalid proof"
+        );
 
-    function deleteMultiVesting(
-        Beneficiary[] calldata users
-    ) external onlyOwner {
-        for (uint256 i = 0; i < users.length; i = _unsafeInc(i)) {
-            _delete(users[i].user);
-        }
-    }
-
-    /**
-     * @dev Release the tokens that have already vested.
-     *
-     * Emits a {ERC20Released} event.
-     */
-    function release() public virtual {
         uint256 amount = releasable();
         if (_currentMonth() > _lastMonth[msg.sender]) {
             _lastMonth[msg.sender] = _currentMonth();
             _beneficiary[msg.sender] -= amount;
-            _erc20Released[_token][msg.sender] += amount;
-            emit ERC20Released(_token, msg.sender, amount);
-            SafeERC20.safeTransfer(IERC20(_token), msg.sender, amount);
+            _released[msg.sender] += amount;
+            IERC20(token).transfer(msg.sender, amount);
+            emit ERC20Released(token, msg.sender, amount);
         }
     }
 
-    // ? Default function
-    // function release(address token) public virtual {
-    //     uint256 amount = releasable(token);
-    //     _erc20Released[token] += amount;
-    //     emit ERC20Released(token, amount);
-    //     SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
-    // }
+    /* --------------------------------------- View Functions --------------------------------------- */
+    function released() public view virtual returns (uint256) {
+        return _released[msg.sender];
+    }
 
-    /**
-     * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
-     */
+    function releasable() public view virtual returns (uint256) {
+        return vestedAmount(block.timestamp) - released();
+    }
+
     function vestedAmount(
-        uint64 timestamp
+        uint256 timestamp
     ) public view virtual returns (uint256) {
-        // return
-        //     _vestingSchedule(
-        //         IERC20(token).balanceOf(address(this)) + released(token),
-        //         timestamp
-        //     );
         return
             _vestingSchedule(_beneficiary[msg.sender] + released(), timestamp);
     }
 
-    /**
-     * @dev Virtual implementation of the vesting formula. This returns the amount vested, as a function of time, for
-     * an asset given its total historical allocation.
-     */
+    /* ------------------------------------- Internal Functions ------------------------------------- */
+
+    function _currentMonth() internal view returns (uint256) {
+        return block.timestamp - start / 30 days;
+    }
+
+    function _delete(address _user) internal {
+        delete _beneficiary[_user];
+    }
+
     function _vestingSchedule(
         uint256 totalAllocation,
-        uint64 timestamp
+        uint256 timestamp
     ) internal view virtual returns (uint256) {
-        if (timestamp < start()) {
+        if (timestamp < start) {
             return 0;
-        } else if (timestamp > start() + duration()) {
+        } else if (timestamp > start + duration) {
             return totalAllocation;
         } else {
-            return (totalAllocation * (timestamp - start())) / duration();
+            return (totalAllocation * (timestamp - start)) / duration;
         }
     }
 }

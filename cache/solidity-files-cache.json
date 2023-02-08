@@ -35,8 +35,8 @@
       "artifacts": []
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC20\\Staking.sol": {
-      "lastModificationDate": 1675328416187,
-      "contentHash": "f57edf856fe027e6c8aaec99c742ec0a",
+      "lastModificationDate": 1675828139060,
+      "contentHash": "82e8737b3ad5829c580ed3889dd5d92e",
       "sourceName": "contracts/ERC20/Staking.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1930,8 +1930,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC20\\Whitelist.sol": {
-      "lastModificationDate": 1674106748377,
-      "contentHash": "7623b397ac34dce78097c9a9709e2d59",
+      "lastModificationDate": 1675836562531,
+      "contentHash": "dd510d5a5ffe89f0331d659037f2de1b",
       "sourceName": "contracts/ERC20/Whitelist.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1957,7 +1957,8 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "@openzeppelin/contracts/utils/Address.sol",
         "@openzeppelin/contracts/utils/Context.sol",
         "@openzeppelin/contracts/access/Ownable.sol"
@@ -1970,8 +1971,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC20\\Vesting.sol": {
-      "lastModificationDate": 1674109105742,
-      "contentHash": "49ebabca0b82e034ea5fd69faf752f8d",
+      "lastModificationDate": 1675837142675,
+      "contentHash": "14119339878ccf5c805f40627d76e470",
       "sourceName": "contracts/ERC20/Vesting.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -1997,7 +1998,7 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "@openzeppelin/contracts/utils/Address.sol",
         "@openzeppelin/contracts/utils/Context.sol"
       ],
@@ -2009,8 +2010,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\ERC721\\MultiEscrow.sol": {
-      "lastModificationDate": 1675763373465,
-      "contentHash": "bf47f6df46fcc689c297a33affed363e",
+      "lastModificationDate": 1675828139062,
+      "contentHash": "12d0866bad18666faaba057ca295d25a",
       "sourceName": "contracts/ERC721/MultiEscrow.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2086,8 +2087,8 @@
       ]
     },
     "D:\\Work\\Projects\\Blockchain\\TalaxToken\\contracts\\governance\\ProjectVotes.sol": {
-      "lastModificationDate": 1675822541417,
-      "contentHash": "b83986a8cbc97bee4e9acea0b248a657",
+      "lastModificationDate": 1675828139063,
+      "contentHash": "541fadaf88f55df75afd1b504f0a0887",
       "sourceName": "contracts/governance/ProjectVotes.sol",
       "solcConfig": {
         "version": "0.8.11",
@@ -2120,7 +2121,7 @@
         "^0.8.0"
       ],
       "artifacts": [
-        "Stake",
+        "Stakes",
         "Token",
         "Votes"
       ]

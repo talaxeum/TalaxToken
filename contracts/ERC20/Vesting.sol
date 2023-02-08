@@ -2,7 +2,7 @@
 // OpenZeppelin Contracts (last updated v4.7.0) (finance/VestingWallet.sol)
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
@@ -21,134 +21,65 @@ contract Vesting is Context {
     event ERC20Released(address indexed token, uint256 amount);
 
     uint256 private _released;
-    mapping(address => uint256) private _erc20Released;
-    address private _token;
-    address private _beneficiary;
-    uint64 private _start;
-    uint64 private _duration;
-
+    uint256 public start;
+    uint256 public duration;
     uint256 private lastMonth;
-
-    bool private _initStatus;
+    address constant token = address(0);
+    address public beneficiary;
 
     /**
      * @dev Set the beneficiary, start timestamp and vesting duration of the vesting wallet.
      */
 
-    function init(
-        address token,
-        address beneficiaryAddress,
-        uint64 startTimestamp,
-        uint64 durationSeconds,
-        uint64 cliff
-    ) external {
-        require(
-            beneficiaryAddress != address(0),
-            "VestingWallet: beneficiary is zero address"
-        );
-
-        require(_initStatus == false, "Initiated");
-        _initStatus = true;
-        _token = token;
-        _beneficiary = beneficiaryAddress;
-        _start = startTimestamp + cliff;
-        _duration = durationSeconds;
+    constructor(
+        address _user,
+        uint256 _start,
+        uint256 _duration,
+        uint256 _cliff
+    ) {
+        beneficiary = _user;
+        start = _start + _cliff;
+        duration = _duration;
     }
 
-    /**
-     * @dev Getter for the beneficiary address.
-     */
-    function beneficiary() public view virtual returns (address) {
-        return _beneficiary;
-    }
-
-    /**
-     * @dev Getter for the start timestamp.
-     */
-    function start() public view virtual returns (uint256) {
-        return _start;
-    }
-
-    /**
-     * @dev Getter for the vesting duration.
-     */
-    function duration() public view virtual returns (uint256) {
-        return _duration;
-    }
-
-    /**
-     * @dev Amount of token already released
-     */
-    function released() public view virtual returns (uint256) {
-        return _erc20Released[_token];
-    }
-
-    /**
-     * @dev Getter for the amount of releasable `token` tokens. `token` should be the address of an
-     * IERC20 contract.
-     */
     function releasable() public view virtual returns (uint256) {
-        return vestedAmount(uint64(block.timestamp)) - released();
+        return vestedAmount(block.timestamp) - _released;
     }
-
-    /**
-     * @dev Getter for the current running month of the vesting process
-     */
 
     function _currentMonth() internal view returns (uint256) {
-        return (uint64(block.timestamp) - start()) / 30 days;
+        return block.timestamp - start / 30 days;
     }
 
-    /**
-     * @dev Release the tokens that have already vested.
-     *
-     * Emits a {ERC20Released} event.
-     */
     function release() public virtual {
         uint256 amount = releasable();
         if (_currentMonth() > lastMonth) {
             lastMonth = _currentMonth();
-            _erc20Released[_token] += amount;
-            emit ERC20Released(_token, amount);
-            SafeERC20.safeTransfer(IERC20(_token), beneficiary(), amount);
+            _released += amount;
+            IERC20(token).transfer(beneficiary, amount);
+            emit ERC20Released(token, amount);
         }
     }
 
-    // ? Default function
-    // function release(address token) public virtual {
-    //     uint256 amount = releasable(token);
-    //     _erc20Released[token] += amount;
-    //     emit ERC20Released(token, amount);
-    //     SafeERC20.safeTransfer(IERC20(token), beneficiary(), amount);
-    // }
-
-    /**
-     * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
-     */
     function vestedAmount(
-        uint64 timestamp
+        uint256 timestamp
     ) public view virtual returns (uint256) {
         return
             _vestingSchedule(
-                IERC20(_token).balanceOf(address(this)) + released(),
+                IERC20(token).balanceOf(address(this)) + _released,
                 timestamp
             );
     }
 
-    /**
-     * @dev Virtual implementation of the vesting formula. This returns the amount vested, as a function of time, for
-     * an asset given its total historical allocation.
-     */
     function _vestingSchedule(
         uint256 totalAllocation,
-        uint64 timestamp
+        uint256 timestamp
     ) internal view virtual returns (uint256) {
-        if (timestamp < start()) {
+        if (timestamp < start) {
             return 0;
-        } else if (timestamp > start() + duration()) {
+        } else if (timestamp > start + duration) {
             return totalAllocation;
         } else {
-            return (totalAllocation * (timestamp - start())) / duration();
+            return (totalAllocation * (timestamp - start)) / duration;
         }
     }
 }
