@@ -36,7 +36,11 @@ interface Token {
     function platform() external returns (address);
 }
 
+<<<<<<< HEAD
 contract Escrow is Ownable {
+=======
+contract OldEscrow is Ownable {
+>>>>>>> 28b02bb35b01dbe36dd4be29a7a2a9b5d7751bef
     using Counters for Counters.Counter;
     using Address for address payable;
 

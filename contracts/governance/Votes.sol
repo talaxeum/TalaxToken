@@ -36,7 +36,6 @@ contract Votes is Ownable {
     address stakeContract;
 
     mapping(uint256 => Proposal) votes;
-    mapping(uint256 => Proposal) daoVotes;
 
     constructor(address _talax, address _stake) {
         talaxContract = _talax;

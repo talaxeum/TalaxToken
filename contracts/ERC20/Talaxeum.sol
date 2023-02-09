@@ -96,7 +96,7 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable {
         address from,
         address to,
         uint256 amount
-    ) public virtual override returns (bool) {
+    ) public override returns (bool) {
         address spender = _msgSender();
 
         uint256 tax = (amount * taxRate) / 10_000;
@@ -106,8 +106,6 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable {
         _transfer(from, to, amount);
         return true;
     }
-
-    // TODO: Possible to add mint functions for [escrowContracts]
 
     // The following functions are overrides required by Solidity.
 
