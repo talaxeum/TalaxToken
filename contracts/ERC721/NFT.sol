@@ -21,7 +21,6 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
         uint96 _royaltyPercentage,
         uint256 _tokenPrice
     ) ERC721("TokenName", "TKN") {
-        require(token == address(0), "Initiated");
         token = _token;
         tokenPrice = _tokenPrice;
         _setDefaultRoyalty(_artist, _royaltyPercentage);

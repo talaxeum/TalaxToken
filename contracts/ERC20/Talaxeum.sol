@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+error FailedToSendEther();
+error TaxLimitError(bytes32 tax);
+
 contract Talaxeum is ERC20, ERC20Burnable, Ownable {
     uint256 public taxRate = 100; // basis points
 
@@ -61,7 +64,7 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable {
     function withdrawFunds() external onlyOwner {
         (bool sent, ) = owner().call{value: address(this).balance}("");
 
-        require(sent == true, "Failed to send Ether");
+        if (sent != true) revert FailedToSendEther();
     }
 
     function withdrawTalax() external onlyOwner {
@@ -69,7 +72,7 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable {
     }
 
     function changeTax(uint256 tax) external onlyOwner {
-        require(taxRate < 5, "Tax Fee maximum is 5%");
+        if (taxRate > 500) revert TaxLimitError("5%");
         taxRate = tax;
         emit ChangeTaxPercentage(tax);
     }

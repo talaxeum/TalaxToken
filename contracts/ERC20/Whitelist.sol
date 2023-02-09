@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+error InvalidProof();
+
 /**
  * @title VestingWallet
  * @dev This contract handles the vesting of Eth and ERC20 tokens for a given beneficiary. Custody of multiple tokens
@@ -64,11 +66,9 @@ contract Whitelist is Context, Ownable {
         bytes32 leaf = keccak256(
             bytes.concat(keccak256(abi.encode(msg.sender)))
         );
-
-        require(
-            MerkleProof.verify(_proof, whitelistRoot, leaf),
-            "Invalid proof"
-        );
+        if (!MerkleProof.verify(_proof, whitelistRoot, leaf)) {
+            revert InvalidProof();
+        }
 
         uint256 amount = releasable();
         if (_currentMonth() > _lastMonth[msg.sender]) {

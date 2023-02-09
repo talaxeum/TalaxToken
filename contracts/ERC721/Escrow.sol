@@ -18,7 +18,18 @@ interface Token {
     function platform() external returns (address);
 }
 
-contract MultiEscrow is Ownable {
+error ProjectFailed();
+error ProjectSuccessfullyFunded();
+
+error ProjectHasEnded();
+error ProjectStillFunding();
+
+error NFTTaken();
+error NFTPending();
+error InvalidProof();
+error NotOwner();
+
+contract Escrow is Ownable {
     using Counters for Counters.Counter;
 
     event DurationChanged(uint256 projectId, uint256 newDeadline);
@@ -73,8 +84,7 @@ contract MultiEscrow is Ownable {
         //Info
         uint256 totalDeposit;
         uint256 deadline;
-        bytes32 nftMerkleRoot;
-        bytes32 depositMerkleRoot;
+        bytes32 projectRoot;
         uint8 status;
         address owner;
     }
@@ -82,7 +92,7 @@ contract MultiEscrow is Ownable {
     Counters.Counter private projectIds;
     mapping(uint256 => Project) private projects;
     // USed to track if NFT has been picked
-    bytes32 private globalNftMerkleRoot;
+    bytes32 public globalNftRoot;
 
     address public talax;
 
@@ -116,8 +126,7 @@ contract MultiEscrow is Ownable {
             totalDeposit: 0,
             status: 0,
             deadline: block.timestamp + _duration,
-            nftMerkleRoot: "",
-            depositMerkleRoot: ""
+            projectRoot: ""
         });
 
         emit ProjectCreated(
@@ -132,45 +141,40 @@ contract MultiEscrow is Ownable {
         );
     }
 
+    // Need to be called every time a project change status
+    function updateProjectRoot(
+        uint256 _projectId,
+        bytes32 _root,
+        bytes32 _globalNftRoot
+    ) public onlyOwner {
+        projects[_projectId].projectRoot = _root;
+        globalNftRoot = _globalNftRoot;
+    }
+
+    // Only called by owner, owner handle the gas fee
     function deposit(
-        bytes32[] memory _proof,
         uint256 _projectId,
         address _nftContract,
+        address _depositor,
         bytes32 _tokenUri,
-        uint8 _status,
-        bytes32 _depositMerkleRoot,
-        bytes32 _nftMerkleRoot,
-        bytes32 _newGlobalNftRoot
-    ) public {
+        uint8 _status
+    ) public onlyOwner {
         Project storage project = projects[_projectId];
-        require(project.status < 3, "Project has been funded");
-        require(project.deadline > block.timestamp, "Project is running");
-
-        bytes32 leaf = _generateLeaf(abi.encode(_projectId, _tokenUri));
-        require(
-            !MerkleProof.verify(_proof, globalNftMerkleRoot, leaf),
-            "Invalid proof"
-        );
+        if (project.status == 3) revert ProjectSuccessfullyFunded();
+        if (project.deadline <= block.timestamp) revert ProjectHasEnded();
 
         uint256 tokenPrice = NFT(_nftContract).tokenPrice();
         project.totalDeposit += tokenPrice;
 
-        if (_depositMerkleRoot != "") {
-            project.depositMerkleRoot = _depositMerkleRoot;
-        }
         if (project.status < _status) {
             project.status = _status;
             project.finalCap = project.totalDeposit;
-            project.nftMerkleRoot = _nftMerkleRoot;
-            if (_newGlobalNftRoot != "") {
-                globalNftMerkleRoot = _newGlobalNftRoot;
-            }
             emit CapstoneReached(_projectId, project.status);
         }
 
-        IERC20(talax).transferFrom(msg.sender, address(this), tokenPrice);
+        IERC20(talax).transferFrom(_depositor, address(this), tokenPrice);
         emit Deposit(
-            msg.sender,
+            _depositor,
             _projectId,
             _nftContract,
             _tokenUri,
@@ -184,14 +188,13 @@ contract MultiEscrow is Ownable {
         uint256 _amount
     ) public {
         Project memory project = projects[_projectId];
-        require(project.deadline < block.timestamp, "Project is running");
+        if (project.deadline > block.timestamp) revert ProjectStillFunding();
 
         // Merkle Proof to check user is a depositor
         bytes32 leaf = _generateLeaf(abi.encode(_projectId, msg.sender));
-        require(
-            MerkleProof.verify(_proof, project.depositMerkleRoot, leaf),
-            "Invalid proof"
-        );
+        if (!MerkleProof.verify(_proof, project.projectRoot, leaf)) {
+            revert InvalidProof();
+        }
 
         IERC20(talax).transfer(msg.sender, _amount);
     }
@@ -201,16 +204,15 @@ contract MultiEscrow is Ownable {
         uint256 _projectId,
         address _nftContract,
         bytes32 _tokenUri
-    ) public returns (bool) {
+    ) public isRunning(_projectId) returns (bool) {
         Project memory project = projects[_projectId];
         // Merkle Proof to check user has already been picked this NFT
         bytes32 leaf = _generateLeaf(
             abi.encode(_projectId, _nftContract, _tokenUri, msg.sender)
         );
-        require(
-            MerkleProof.verify(_proof, project.depositMerkleRoot, leaf),
-            "Invalid proof"
-        );
+        if (!MerkleProof.verify(_proof, project.projectRoot, leaf)) {
+            revert InvalidProof();
+        }
 
         // Distribute Talax
         _distribute(
@@ -226,9 +228,9 @@ contract MultiEscrow is Ownable {
     }
 
     function claimFunding(uint256 _projectId) public isRunning(_projectId) {
+        if (msg.sender != projects[_projectId].owner) revert NotOwner();
         Project memory project = projects[_projectId];
-        require(project.status > 0, "Project failed");
-        require(msg.sender == project.owner, "Not Authorized");
+        if (project.status == 0) revert ProjectFailed();
 
         uint256 amount = (project.project * project.finalCap) / 10_000;
 
@@ -237,20 +239,34 @@ contract MultiEscrow is Ownable {
         emit FundClaimed(msg.sender, _projectId, amount);
     }
 
-    function terminateProject(uint256 projectId) external onlyOwner {
-        Project storage project = projects[projectId];
-        require(projects[projectId].status == 0, "Project successfully funded");
-        delete project.nftMerkleRoot;
+    function terminateProject(
+        uint256 _projectId
+    ) external onlyOwner isRunning(_projectId) {
+        Project storage project = projects[_projectId];
+        if (project.status > 0) revert ProjectSuccessfullyFunded();
+
+        delete project.projectRoot;
     }
 
     function changeDuration(
         uint256 _projectId,
         uint256 _additionalTime
     ) external onlyOwner {
+        if (projects[_projectId].deadline <= block.timestamp) {
+            revert ProjectHasEnded();
+        }
         projects[_projectId].deadline += _additionalTime;
 
         emit DurationChanged(_projectId, projects[_projectId].deadline);
     }
+
+    function getProject(
+        uint256 _projectId
+    ) external view returns (Project memory) {
+        return projects[_projectId];
+    }
+
+    /* ------------------------------------- Internal Functions ------------------------------------- */
 
     function _distribute(
         uint256 _artistFee,
@@ -268,12 +284,6 @@ contract MultiEscrow is Ownable {
         IERC20(talax).transfer(platform, (_platformFee * _tokenPrice) / 10_000);
     }
 
-    function getProject(
-        uint256 _projectId
-    ) external view returns (Project memory) {
-        return projects[_projectId];
-    }
-
     function _generateLeaf(
         bytes memory _encoded
     ) internal pure returns (bytes32) {
@@ -283,10 +293,9 @@ contract MultiEscrow is Ownable {
     /* ------------------------------------------ Modifiers ----------------------------------------- */
 
     function _isRunning(uint256 _projectId) internal view {
-        require(
-            projects[_projectId].deadline < block.timestamp,
-            "Project is still funding"
-        );
+        if (projects[_projectId].deadline >= block.timestamp) {
+            revert ProjectStillFunding();
+        }
     }
 
     modifier isRunning(uint256 _projectId) {
