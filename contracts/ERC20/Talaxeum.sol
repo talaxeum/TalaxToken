@@ -6,16 +6,13 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import "../governance/ERC20Votes.sol";
-
-contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
+contract Talaxeum is ERC20, ERC20Burnable, Ownable {
     uint256 public taxRate = 100; // basis points
 
     address public advisor = address(0);
     address public platform = address(0);
 
-    constructor() ERC20("Talaxeum", "TALAX") ERC20Permit("Talaxeum") {
+    constructor() ERC20("Talaxeum", "TALAX") {
         _mint(_msgSender(), 21 * 1e9 * 10 ** decimals());
     }
 
@@ -136,27 +133,5 @@ contract Talaxeum is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Votes {
         uint256 amount
     ) internal override {
         super._transfer(from, to, amount);
-    }
-
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20, ERC20Votes) {
-        super._afterTokenTransfer(from, to, amount);
-    }
-
-    function _mint(
-        address to,
-        uint256 amount
-    ) internal override(ERC20, ERC20Votes) {
-        super._mint(to, amount);
-    }
-
-    function _burn(
-        address account,
-        uint256 amount
-    ) internal override(ERC20, ERC20Votes) {
-        super._burn(account, amount);
     }
 }
