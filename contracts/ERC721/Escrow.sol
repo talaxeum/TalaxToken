@@ -1,10 +1,27 @@
 // SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts (last updated v4.7.0) (utils/escrow/Escrow.sol)
+
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
+/**
+ * @title Escrow
+ * @dev Base escrow contract, holds funds designated for a payee until they
+ * withdraw them.
+ *
+ * Intended usage: This contract (and derived escrow contracts) should be a
+ * standalone contract, that only interacts with the contract that instantiated
+ * it. That way, it is guaranteed that all Ether will be handled according to
+ * the `Escrow` rules, and there is no need to check for payable functions or
+ * transfers in the inheritance tree. The contract that uses the escrow as its
+ * payment method should be its owner, and provide public methods redirecting
+ * to the escrow's deposit and withdraw.
+ */
 
 interface NFT {
     function tokenPrice() external returns (uint256);
@@ -31,21 +48,13 @@ error NFTPending();
 error InvalidProof();
 error NotOwner();
 
-contract Escrow is Ownable {
-    using Counters for Counters.Counter;
+contract ProjectEscrow is Ownable {
+    using Address for address payable;
 
-    event DurationChanged(uint256 projectId, uint256 newDeadline);
-    event ProjectCreated(
-        address indexed projectOwner,
-        // Capstone
-        uint256 soft,
-        uint256 medium,
-        uint256 hard,
-        // Distribution in bps
-        uint256 artist,
-        uint256 project,
-        uint256 advisory,
-        uint256 platform
+    event DurationChanged(
+        address project,
+        uint256 oldDeadline,
+        uint256 newDealine
     );
     event Deposit(
         address indexed payee,
@@ -54,7 +63,6 @@ contract Escrow is Ownable {
         string tokenUri,
         uint256 price
     );
-    event CapstoneReached(uint256 indexed projectId, uint8 status);
     event NftMinted(
         address indexed minter,
         uint256 projectId,
@@ -66,161 +74,106 @@ contract Escrow is Ownable {
         uint256 projectId,
         uint256 amount
     );
-    event FundClaimed(
-        address indexed claimer,
-        uint256 projectId,
-        uint256 amount
-    );
+    event CapstoneReached(address indexed project, uint256 status);
+    event FundClaimed(address indexed claimer, address project, uint256 amount);
 
-    struct Project {
-        //Cap
-        // uint256 soft;
-        // uint256 medium;
-        // uint256 hard;
-        uint256 finalCap;
-        //Fee
-        uint256 artist;
-        uint256 project;
-        uint256 advisory;
-        uint256 platform;
-        //Info
-        uint256 totalDeposit;
-        uint256 deadline;
-        bytes32 projectRoot;
-        uint8 status;
-        address owner;
+    // Capstones
+    uint256 private softCap;
+    uint256 private mediumCap;
+    uint256 private hardCap;
+    uint256 private finalCap;
+    // Token Distribution Addresses
+    uint256 private artistFee;
+    uint256 private projectFee;
+    uint256 private advisoryFee;
+    uint256 private platformFee;
+
+    uint256 private status;
+    uint256 private deadline;
+    uint256 private totalDeposit;
+
+    bytes32 public nftRoot;
+    bytes32 public depositRoot;
+    address public token;
+    bool private durationChanged;
+
+    constructor(
+        address _token,
+        uint256 _artistFee,
+        uint256 _projectFee,
+        uint256 _advisoryFee,
+        uint256 _platformFee
+    ) {
+        token = _token;
+        artistFee = _artistFee;
+        projectFee = _projectFee;
+        advisoryFee = _advisoryFee;
+        platformFee = _platformFee;
     }
 
-    Counters.Counter private projectIds;
-    mapping(uint256 => Project) private projects;
-    // USed to track if NFT has been picked
-    bytes32 public globalNftRoot;
-
-    address public talax;
-
-    constructor(address _talax) {
-        talax = _talax;
+    function changeDuration(uint256 _additionalTime) external onlyOwner {
+        require(!durationChanged, "Duration has been changed before");
+        uint256 old = deadline;
+        durationChanged = true;
+        deadline += _additionalTime;
+        emit DurationChanged(address(this), old, deadline);
     }
 
-    /* ------------------------------------------ Functions ----------------------------------------- */
-    function createProject(
-        address _owner,
-        uint256 _soft,
-        uint256 _medium,
-        uint256 _hard,
-        uint256 _artist,
-        uint256 _project,
-        uint256 _advisory,
-        uint256 _platform,
-        uint256 _duration
-    ) external onlyOwner {
-        projectIds.increment();
-        projects[projectIds.current()] = Project({
-            owner: _owner,
-            // soft: _soft,
-            // medium: _medium,
-            // hard: _hard,
-            finalCap: 0,
-            artist: _artist,
-            project: _project,
-            advisory: _advisory,
-            platform: _platform,
-            totalDeposit: 0,
-            status: 0,
-            deadline: block.timestamp + _duration,
-            projectRoot: ""
-        });
-
-        emit ProjectCreated(
-            _owner,
-            _soft,
-            _medium,
-            _hard,
-            _artist,
-            _project,
-            _advisory,
-            _platform
-        );
-    }
-
-    // Need to be called every time a project change status
-    function updateProjectRoot(
-        uint256 _projectId,
-        bytes32 _root,
-        bytes32 _globalNftRoot
-    ) public onlyOwner {
-        projects[_projectId].projectRoot = _root;
-        globalNftRoot = _globalNftRoot;
-    }
-
-    // Only called by owner, owner handle the gas fee
     function deposit(
         uint256 _projectId,
         address _nftContract,
         address _depositor,
         string memory _tokenUri,
         uint8 _status
-    ) public onlyOwner {
-        Project storage project = projects[_projectId];
-        if (project.status == 3) revert ProjectSuccessfullyFunded();
-        if (project.deadline <= block.timestamp) revert ProjectHasEnded();
+    ) public payable virtual onlyOwner {
+        require(block.timestamp < deadline, "End of Timeline");
+        require(_status < 3, "Project fully supported");
 
-        uint256 tokenPrice = NFT(_nftContract).tokenPrice();
-        project.totalDeposit += tokenPrice;
+        uint256 _tokenPrice = NFT(_nftContract).tokenPrice();
 
-        if (project.status < _status) {
-            project.status = _status;
-            project.finalCap = project.totalDeposit;
-            emit CapstoneReached(_projectId, project.status);
+        // Deposit for the current status
+        // _userDeposits[msg.sender] += _tokenPrice;
+        totalDeposit += _tokenPrice;
+        // Track selected NFT
+        // _preservedNft[_status][nftContract][tokenId] = msg.sender;
+
+        IERC20(token).transferFrom(msg.sender, address(this), _tokenPrice);
+
+        if (status < _status) {
+            status = _status;
+            finalCap = totalDeposit;
+            emit CapstoneReached(address(this), status);
         }
 
-        IERC20(talax).transferFrom(_depositor, address(this), tokenPrice);
         emit Deposit(
             _depositor,
             _projectId,
             _nftContract,
             _tokenUri,
-            tokenPrice
+            _tokenPrice
         );
     }
 
-    function withdraw(
-        bytes32[] memory _proof,
-        uint256 _projectId,
-        uint256 _amount
-    ) public {
-        Project memory project = projects[_projectId];
-        if (project.deadline > block.timestamp) revert ProjectStillFunding();
-
-        // Merkle Proof to check user is a depositor
-        bytes32 leaf = _generateLeaf(abi.encode(_projectId, msg.sender));
-        if (!MerkleProof.verify(_proof, project.projectRoot, leaf)) {
-            revert InvalidProof();
-        }
-
-        IERC20(talax).transfer(msg.sender, _amount);
-    }
-
+    // TODO: Create functions to mint NFT
     function mintNft(
         bytes32[] memory _proof,
         uint256 _projectId,
         address _nftContract,
         string memory _tokenUri
-    ) public isRunning(_projectId) returns (bool) {
-        Project memory project = projects[_projectId];
+    ) public payable isRunning {
         // Merkle Proof to check user has already been picked this NFT
         bytes32 leaf = _generateLeaf(
             abi.encode(_projectId, _nftContract, _tokenUri, msg.sender)
         );
-        if (!MerkleProof.verify(_proof, project.projectRoot, leaf)) {
+        if (!MerkleProof.verify(_proof, nftRoot, leaf)) {
             revert InvalidProof();
         }
 
         // Distribute Talax
         _distribute(
-            project.artist,
-            project.advisory,
-            project.platform,
+            artistFee,
+            advisoryFee,
+            platformFee,
             _nftContract,
             NFT(_nftContract).tokenPrice()
         );
@@ -228,49 +181,43 @@ contract Escrow is Ownable {
         NFT(_nftContract).safeMint(msg.sender, _tokenUri);
 
         emit NftMinted(msg.sender, _projectId, _nftContract, _tokenUri);
-        return true;
     }
 
-    function claimFunding(uint256 _projectId) public isRunning(_projectId) {
-        if (msg.sender != projects[_projectId].owner) revert NotOwner();
-        Project memory project = projects[_projectId];
-        if (project.status == 0) revert ProjectFailed();
+    function withdraw(bytes32[] memory _proof, uint256 _amount) public virtual {
+        if (deadline > block.timestamp) revert ProjectStillFunding();
 
-        uint256 amount = (project.project * project.finalCap) / 10_000;
-
-        IERC20(talax).transfer(msg.sender, amount);
-
-        emit FundClaimed(msg.sender, _projectId, amount);
-    }
-
-    function terminateProject(
-        uint256 _projectId
-    ) external onlyOwner isRunning(_projectId) {
-        Project storage project = projects[_projectId];
-        if (project.status > 0) revert ProjectSuccessfullyFunded();
-
-        delete project.projectRoot;
-    }
-
-    function changeDuration(
-        uint256 _projectId,
-        uint256 _additionalTime
-    ) external onlyOwner {
-        if (projects[_projectId].deadline <= block.timestamp) {
-            revert ProjectHasEnded();
+        // Merkle Proof to check user is a depositor
+        bytes32 leaf = _generateLeaf(abi.encode(address(this), msg.sender));
+        if (!MerkleProof.verify(_proof, depositRoot, leaf)) {
+            revert InvalidProof();
         }
-        projects[_projectId].deadline += _additionalTime;
 
-        emit DurationChanged(_projectId, projects[_projectId].deadline);
+        IERC20(token).transfer(msg.sender, _amount);
     }
 
-    function getProject(
-        uint256 _projectId
-    ) external view returns (Project memory) {
-        return projects[_projectId];
+    function claimFunding() public onlyOwner isRunning {
+        if (msg.sender != owner()) revert NotOwner();
+        if (status == 0) revert ProjectFailed();
+
+        uint256 amount = (projectFee * finalCap) / 10_000;
+
+        IERC20(token).transfer(msg.sender, amount);
+
+        emit FundClaimed(msg.sender, address(this), amount);
     }
 
-    /* ------------------------------------- Internal Functions ------------------------------------- */
+    /* ------------------------------------------- Helpers ------------------------------------------ */
+
+    modifier isRunning() {
+        _isRunning();
+        _;
+    }
+
+    function _isRunning() internal view {
+        if (deadline >= block.timestamp) {
+            revert ProjectStillFunding();
+        }
+    }
 
     function _distribute(
         uint256 _artistFee,
@@ -280,30 +227,24 @@ contract Escrow is Ownable {
         uint256 _tokenPrice
     ) internal {
         address artist = NFT(_nftContract).artist();
-        address advisory = Token(talax).advisory();
-        address platform = Token(talax).platform();
+        address advisory = Token(token).advisory();
+        address platform = Token(token).platform();
 
-        IERC20(talax).transfer(artist, (_artistFee * _tokenPrice) / 10_000);
-        IERC20(talax).transfer(advisory, (_advisoryFee * _tokenPrice) / 10_000);
-        IERC20(talax).transfer(platform, (_platformFee * _tokenPrice) / 10_000);
+        IERC20(token).transfer(artist, _count(_tokenPrice, _artistFee));
+        IERC20(token).transfer(advisory, _count(_tokenPrice, _advisoryFee));
+        IERC20(token).transfer(platform, _count(_tokenPrice, _platformFee));
+    }
+
+    function _count(
+        uint256 amount,
+        uint256 bps
+    ) internal pure returns (uint256) {
+        return (amount * bps) / 10_000;
     }
 
     function _generateLeaf(
         bytes memory _encoded
     ) internal pure returns (bytes32) {
         return keccak256(bytes.concat(keccak256(_encoded)));
-    }
-
-    /* ------------------------------------------ Modifiers ----------------------------------------- */
-
-    function _isRunning(uint256 _projectId) internal view {
-        if (projects[_projectId].deadline >= block.timestamp) {
-            revert ProjectStillFunding();
-        }
-    }
-
-    modifier isRunning(uint256 _projectId) {
-        _isRunning(_projectId);
-        _;
     }
 }
