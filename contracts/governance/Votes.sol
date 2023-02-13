@@ -61,6 +61,7 @@ contract Votes is Ownable {
 
     function vote(uint256 _voteId) external {
         Proposal storage proposal = votes[_voteId];
+        require(!proposal.executed, "Proposal was executed");
 
         // Check for the voting rights
         // If the proposal is Dao, check if the user has stakes

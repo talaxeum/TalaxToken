@@ -10,6 +10,8 @@ interface NFT {
     function tokenPrice() external returns (uint256);
 
     function artist() external returns (address);
+
+    function safeMint(address to, string memory uri) external;
 }
 
 interface Token {
@@ -49,7 +51,7 @@ contract Escrow is Ownable {
         address indexed payee,
         uint256 projectId,
         address nftContract,
-        bytes32 tokenUri,
+        string tokenUri,
         uint256 price
     );
     event CapstoneReached(uint256 indexed projectId, uint8 status);
@@ -57,7 +59,7 @@ contract Escrow is Ownable {
         address indexed minter,
         uint256 projectId,
         address nftContract,
-        bytes32 tokenUri
+        string tokenUri
     );
     event Withdraw(
         address indexed withdrawer,
@@ -156,7 +158,7 @@ contract Escrow is Ownable {
         uint256 _projectId,
         address _nftContract,
         address _depositor,
-        bytes32 _tokenUri,
+        string memory _tokenUri,
         uint8 _status
     ) public onlyOwner {
         Project storage project = projects[_projectId];
@@ -203,7 +205,7 @@ contract Escrow is Ownable {
         bytes32[] memory _proof,
         uint256 _projectId,
         address _nftContract,
-        bytes32 _tokenUri
+        string memory _tokenUri
     ) public isRunning(_projectId) returns (bool) {
         Project memory project = projects[_projectId];
         // Merkle Proof to check user has already been picked this NFT
@@ -222,6 +224,8 @@ contract Escrow is Ownable {
             _nftContract,
             NFT(_nftContract).tokenPrice()
         );
+
+        NFT(_nftContract).safeMint(msg.sender, _tokenUri);
 
         emit NftMinted(msg.sender, _projectId, _nftContract, _tokenUri);
         return true;

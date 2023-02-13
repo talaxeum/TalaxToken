@@ -13,15 +13,12 @@ contract NFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ERC2981 {
     Counters.Counter private _tokenIdCounter;
 
     uint256 public tokenPrice;
-    address private token;
 
     constructor(
         address _artist,
-        address _token,
         uint96 _royaltyPercentage,
         uint256 _tokenPrice
     ) ERC721("TokenName", "TKN") {
-        token = _token;
         tokenPrice = _tokenPrice;
         _setDefaultRoyalty(_artist, _royaltyPercentage);
         transferOwnership(_artist);
