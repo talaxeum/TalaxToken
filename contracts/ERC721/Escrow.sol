@@ -47,6 +47,7 @@ error NFTTaken();
 error NFTPending();
 error InvalidProof();
 error NotOwner();
+error DurationHasBeenChanged();
 
 contract ProjectEscrow is Ownable {
     using Address for address payable;
@@ -111,8 +112,19 @@ contract ProjectEscrow is Ownable {
         platformFee = _platformFee;
     }
 
+    function updateProjectRoot(
+        bytes32 _nftRoot,
+        bytes32 _depositRoot
+    ) public onlyOwner {
+        nftRoot = _nftRoot;
+        depositRoot = _depositRoot;
+    }
+
     function changeDuration(uint256 _additionalTime) external onlyOwner {
-        require(!durationChanged, "Duration has been changed before");
+        if (durationChanged) revert DurationHasBeenChanged();
+        if (deadline <= block.timestamp) {
+            revert ProjectHasEnded();
+        }
         uint256 old = deadline;
         durationChanged = true;
         deadline += _additionalTime;
@@ -126,8 +138,8 @@ contract ProjectEscrow is Ownable {
         string memory _tokenUri,
         uint8 _status
     ) public payable virtual onlyOwner {
-        require(block.timestamp < deadline, "End of Timeline");
-        require(_status < 3, "Project fully supported");
+        if (deadline <= block.timestamp) revert ProjectHasEnded();
+        if (status == 3) revert ProjectSuccessfullyFunded();
 
         uint256 _tokenPrice = NFT(_nftContract).tokenPrice();
 
@@ -183,9 +195,10 @@ contract ProjectEscrow is Ownable {
         emit NftMinted(msg.sender, _projectId, _nftContract, _tokenUri);
     }
 
-    function withdraw(bytes32[] memory _proof, uint256 _amount) public virtual {
-        if (deadline > block.timestamp) revert ProjectStillFunding();
-
+    function withdraw(
+        bytes32[] memory _proof,
+        uint256 _amount
+    ) public virtual isRunning {
         // Merkle Proof to check user is a depositor
         bytes32 leaf = _generateLeaf(abi.encode(address(this), msg.sender));
         if (!MerkleProof.verify(_proof, depositRoot, leaf)) {
@@ -199,7 +212,7 @@ contract ProjectEscrow is Ownable {
         if (msg.sender != owner()) revert NotOwner();
         if (status == 0) revert ProjectFailed();
 
-        uint256 amount = (projectFee * finalCap) / 10_000;
+        uint256 amount = _count(finalCap, projectFee);
 
         IERC20(token).transfer(msg.sender, amount);
 
