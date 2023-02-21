@@ -52,6 +52,7 @@ error DurationHasBeenChanged();
 contract ProjectEscrow is Ownable {
     using Address for address payable;
 
+    event ProjectReInitiated(address indexed project, uint256 run);
     event DurationChanged(
         address project,
         uint256 oldDeadline,
@@ -78,6 +79,8 @@ contract ProjectEscrow is Ownable {
     event CapstoneReached(address indexed project, uint256 status);
     event FundClaimed(address indexed claimer, address project, uint256 amount);
 
+    // Run
+    uint256 public run;
     // Capstones
     uint256 private softCap;
     uint256 private mediumCap;
@@ -105,6 +108,7 @@ contract ProjectEscrow is Ownable {
         uint256 _advisoryFee,
         uint256 _platformFee
     ) {
+        run++;
         token = _token;
         artistFee = _artistFee;
         projectFee = _projectFee;
@@ -112,10 +116,16 @@ contract ProjectEscrow is Ownable {
         platformFee = _platformFee;
     }
 
-    function updateProjectRoot(
-        bytes32 _nftRoot,
-        bytes32 _depositRoot
-    ) public onlyOwner {
+    function reInitiate(uint256 _duration) public onlyOwner {
+        run++;
+        deadline = block.timestamp + _duration;
+        emit ProjectReInitiated(address(this), run);
+    }
+
+    function updateProjectRoot(bytes32 _nftRoot, bytes32 _depositRoot)
+        public
+        onlyOwner
+    {
         nftRoot = _nftRoot;
         depositRoot = _depositRoot;
     }
@@ -195,10 +205,11 @@ contract ProjectEscrow is Ownable {
         emit NftMinted(msg.sender, _projectId, _nftContract, _tokenUri);
     }
 
-    function withdraw(
-        bytes32[] memory _proof,
-        uint256 _amount
-    ) public virtual isRunning {
+    function withdraw(bytes32[] memory _proof, uint256 _amount)
+        public
+        virtual
+        isRunning
+    {
         // Merkle Proof to check user is a depositor
         bytes32 leaf = _generateLeaf(abi.encode(address(this), msg.sender));
         if (!MerkleProof.verify(_proof, depositRoot, leaf)) {
@@ -248,16 +259,19 @@ contract ProjectEscrow is Ownable {
         IERC20(token).transfer(platform, _count(_tokenPrice, _platformFee));
     }
 
-    function _count(
-        uint256 amount,
-        uint256 bps
-    ) internal pure returns (uint256) {
+    function _count(uint256 amount, uint256 bps)
+        internal
+        pure
+        returns (uint256)
+    {
         return (amount * bps) / 10_000;
     }
 
-    function _generateLeaf(
-        bytes memory _encoded
-    ) internal pure returns (bytes32) {
+    function _generateLeaf(bytes memory _encoded)
+        internal
+        pure
+        returns (bytes32)
+    {
         return keccak256(bytes.concat(keccak256(_encoded)));
     }
 }
